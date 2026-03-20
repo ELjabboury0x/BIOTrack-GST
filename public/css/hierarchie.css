@@ -1,0 +1,487 @@
+.hierarchy-page {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.hierarchy-hero,
+.hierarchy-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.72), rgba(240, 249, 255, 0.66));
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-radius: 1rem;
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+    transition: all 0.3s ease;
+}
+
+.hierarchy-hero {
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.hierarchy-hero-logo-wrap {
+    width: 58px;
+    height: 58px;
+    border-radius: 0.9rem;
+    background: linear-gradient(135deg, #ffffff, #e0f2fe);
+    border: 1px solid rgba(59, 130, 246, 0.22);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.16);
+}
+
+.hierarchy-hero-logo {
+    width: 42px;
+    height: 42px;
+    object-fit: contain;
+}
+
+.hierarchy-hero-logo-fallback {
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    color: #0ea5e9;
+    font-size: 1.1rem;
+}
+
+.hierarchy-title {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.hierarchy-subtitle {
+    margin: 0.2rem 0 0;
+    font-size: 0.9rem;
+    color: #475569;
+}
+
+.hierarchy-card {
+    padding: 1rem;
+    overflow-x: hidden;
+}
+
+.hierarchy-toolbar {
+    margin-bottom: 0.75rem;
+}
+
+.hierarchy-search-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 0.7rem;
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    border-radius: 0.75rem;
+    background: rgba(255, 255, 255, 0.72);
+}
+
+.hierarchy-search-wrap i {
+    color: #64748b;
+    font-size: 0.85rem;
+}
+
+.hierarchy-search-wrap input {
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: #0f172a;
+    font-size: 0.86rem;
+}
+
+.hierarchy-search-wrap button {
+    width: 26px;
+    height: 26px;
+    border: none;
+    border-radius: 0.5rem;
+    background: transparent;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.hierarchy-search-wrap button:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+.hierarchy-empty {
+    min-height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 0.6rem;
+    color: #64748b;
+}
+
+.hierarchy-empty i {
+    font-size: 1.8rem;
+}
+
+.hierarchy-tree,
+.tree-children {
+    list-style: none;
+    margin: 0;
+    padding-left: 0;
+}
+
+.tree-item {
+    position: relative;
+}
+
+.tree-children {
+    margin-left: 1.35rem;
+    padding-left: 0.9rem;
+    border-left: 1px dashed rgba(100, 116, 139, 0.35);
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.3s ease;
+}
+
+.tree-children.is-open {
+    max-height: none;
+    overflow: visible;
+}
+
+.tree-node {
+    margin: 0.35rem 0;
+    border-radius: 0.9rem;
+    padding: 0.65rem 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+    border: 1px solid rgba(203, 213, 225, 0.45);
+    transition: all 0.3s ease;
+}
+
+.tree-node:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+}
+
+.tree-node-main {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    min-width: 0;
+    flex: 1;
+}
+
+.tree-toggle {
+    width: 26px;
+    height: 26px;
+    border: none;
+    border-radius: 0.55rem;
+    background: rgba(255, 255, 255, 0.85);
+    color: #334155;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tree-toggle:hover {
+    background: #e2e8f0;
+}
+
+.tree-toggle i {
+    transition: transform 0.3s ease;
+}
+
+.tree-toggle[aria-expanded='true'] i {
+    transform: rotate(90deg);
+}
+
+.tree-toggle-placeholder {
+    visibility: hidden;
+}
+
+.tree-icon-wrap {
+    width: 30px;
+    height: 30px;
+    border-radius: 0.65rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+}
+
+.tree-icon {
+    font-size: 0.9rem;
+}
+
+.tree-text-wrap {
+    min-width: 0;
+}
+
+.tree-label {
+    margin: 0;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #0f172a;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+
+.tree-meta {
+    margin: 0.18rem 0 0;
+    font-size: 0.78rem;
+    color: #475569;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+}
+
+.tree-badges {
+    margin-top: 0.3rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.tree-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.28rem;
+    padding: 0.2rem 0.45rem;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 700;
+}
+
+.tree-badge-blue {
+    background: rgba(37, 99, 235, 0.14);
+    color: #1d4ed8;
+    border: 1px solid rgba(37, 99, 235, 0.2);
+}
+
+.tree-badge-red {
+    background: rgba(239, 68, 68, 0.16);
+    color: #b91c1c;
+    border: 1px solid rgba(239, 68, 68, 0.28);
+}
+
+.tree-badge-neutral {
+    background: rgba(148, 163, 184, 0.2);
+    color: #334155;
+    border: 1px solid rgba(148, 163, 184, 0.32);
+}
+
+.tree-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.45rem 0.7rem;
+    border-radius: 0.65rem;
+    color: #fff;
+    background: linear-gradient(135deg, #0284c7, #2563eb);
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.tree-action-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px rgba(37, 99, 235, 0.28);
+}
+
+.tree-type-branche {
+    background: rgba(219, 234, 254, 0.5);
+}
+
+.tree-type-direction {
+    background: rgba(224, 242, 254, 0.55);
+}
+
+.tree-type-hopital {
+    background: rgba(220, 252, 231, 0.5);
+}
+
+.tree-type-batiment {
+    background: rgba(254, 249, 195, 0.45);
+}
+
+.tree-type-etage {
+    background: rgba(241, 245, 249, 0.7);
+}
+
+.tree-type-service {
+    background: rgba(254, 226, 226, 0.5);
+}
+
+.tree-type-unite {
+    background: rgba(237, 233, 254, 0.5);
+}
+
+.tree-type-branche .tree-icon-wrap {
+    background: rgba(59, 130, 246, 0.18);
+    color: #1d4ed8;
+}
+
+.tree-type-direction .tree-icon-wrap {
+    background: rgba(14, 165, 233, 0.2);
+    color: #0369a1;
+}
+
+.tree-type-hopital .tree-icon-wrap {
+    background: rgba(34, 197, 94, 0.2);
+    color: #15803d;
+}
+
+.tree-type-batiment .tree-icon-wrap {
+    background: rgba(245, 158, 11, 0.2);
+    color: #b45309;
+}
+
+.tree-type-etage .tree-icon-wrap {
+    background: rgba(148, 163, 184, 0.25);
+    color: #334155;
+}
+
+.tree-type-service .tree-icon-wrap {
+    background: rgba(239, 68, 68, 0.18);
+    color: #b91c1c;
+}
+
+.tree-type-unite .tree-icon-wrap {
+    background: rgba(139, 92, 246, 0.2);
+    color: #6d28d9;
+}
+
+@keyframes floatIcon {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-2px);
+    }
+}
+
+@media (max-width: 1024px) {
+    .tree-node {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .tree-action-btn {
+        align-self: flex-end;
+    }
+}
+
+@media (max-width: 768px) {
+    .hierarchy-page {
+        gap: 0.75rem;
+    }
+
+    .hierarchy-hero {
+        padding: 0.75rem 0.85rem;
+        align-items: flex-start;
+    }
+
+    .hierarchy-hero-logo-wrap {
+        width: 46px;
+        height: 46px;
+        border-radius: 0.75rem;
+    }
+
+    .hierarchy-hero-logo {
+        width: 34px;
+        height: 34px;
+    }
+
+    .hierarchy-title {
+        font-size: 1.05rem;
+        line-height: 1.25;
+    }
+
+    .hierarchy-subtitle {
+        font-size: 0.78rem;
+    }
+
+    .hierarchy-card {
+        padding: 0.65rem;
+        border-radius: 0.85rem;
+    }
+
+    .hierarchy-search-wrap {
+        padding: 0.48rem 0.55rem;
+        gap: 0.38rem;
+    }
+
+    .hierarchy-search-wrap input {
+        font-size: 0.8rem;
+    }
+
+    .tree-children {
+        margin-left: 0.65rem;
+        padding-left: 0.5rem;
+    }
+
+    .tree-node {
+        margin: 0.28rem 0;
+        border-radius: 0.75rem;
+        padding: 0.5rem 0.52rem;
+        gap: 0.45rem;
+    }
+
+    .tree-node-main {
+        width: 100%;
+        gap: 0.45rem;
+    }
+
+    .tree-toggle {
+        width: 24px;
+        height: 24px;
+    }
+
+    .tree-icon-wrap {
+        width: 26px;
+        height: 26px;
+        border-radius: 0.55rem;
+    }
+
+    .tree-icon {
+        font-size: 0.78rem;
+    }
+
+    .tree-label {
+        font-size: 0.81rem;
+        line-height: 1.2;
+    }
+
+    .tree-meta {
+        margin-top: 0.14rem;
+        font-size: 0.68rem;
+        gap: 0.4rem;
+    }
+
+    .tree-badges {
+        margin-top: 0.24rem;
+        gap: 0.26rem;
+    }
+
+    .tree-badge {
+        font-size: 0.62rem;
+        padding: 0.16rem 0.35rem;
+    }
+
+    .tree-action-btn {
+        width: 100%;
+        justify-content: center;
+        align-self: stretch;
+        margin-top: 0.2rem;
+        padding: 0.4rem 0.6rem;
+        font-size: 0.69rem;
+    }
+}

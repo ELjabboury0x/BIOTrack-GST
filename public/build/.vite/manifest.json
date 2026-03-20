@@ -1,0 +1,42 @@
+{
+  "public/css/dashboard.css": {
+    "file": "assets/dashboard-DucxIQYK.css",
+    "src": "public/css/dashboard.css",
+    "isEntry": true
+  },
+  "public/css/modern-ui.css": {
+    "file": "assets/modern-ui-JcmPV_WR.css",
+    "src": "public/css/modern-ui.css",
+    "isEntry": true
+  },
+  "public/js/charts.js": {
+    "file": "assets/charts-xg5ZccXk.js",
+    "name": "charts",
+    "src": "public/js/charts.js",
+    "isEntry": true
+  },
+  "public/js/dashboard.js": {
+    "file": "assets/dashboard-Bjk45A_W.js",
+    "name": "dashboard",
+    "src": "public/js/dashboard.js",
+    "isEntry": true
+  },
+  "public/js/modern-ui.js": {
+    "file": "assets/modern-ui-BiuPQtj2.js",
+    "name": "modern-ui",
+    "src": "public/js/modern-ui.js",
+    "isEntry": true
+  },
+  "public/js/pwa-push.js": {
+    "file": "assets/pwa-push-BZ2hhl31.js",
+    "name": "pwa-push",
+    "src": "public/js/pwa-push.js",
+    "isEntry": true
+  },
+  "public/js/table.js": {
+    "file": "assets/table-l0sNRNKZ.js",
+    "name": "table",
+    "src": "public/js/table.js",
+    "isEntry": true
+  }
+}

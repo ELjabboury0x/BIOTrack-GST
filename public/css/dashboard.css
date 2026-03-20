@@ -1,0 +1,635 @@
+/* ============================================
+   GMAO Dashboard - Custom Styles
+   ============================================ */
+
+:root {
+    --color-primary: #3b82f6;
+    --color-primary-light: #60a5fa;
+    --color-secondary: #0ea5e9;
+    --color-success: #10b981;
+    --color-warning: #f59e0b;
+    --color-danger: #ef4444;
+    --color-light: #f3f4f6;
+    --color-dark: #1f2937;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f9fafb;
+    color: var(--color-dark);
+    line-height: 1.6;
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
+}
+
+.animate-slide-in-left {
+    animation: slideInLeft 0.5s ease-out;
+}
+
+.animate-slide-in-right {
+    animation: slideInRight 0.5s ease-out;
+}
+
+.animate-scale-in {
+    animation: scaleIn 0.3s ease-out;
+}
+
+.animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-modal {
+    animation: scaleIn 0.3s ease-out;
+}
+
+/* ============================================
+   SCROLLBARS
+   ============================================ */
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+
+button {
+    transition: all 0.3s ease;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+}
+
+.btn-primary:hover {
+    box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+    transform: translateY(-2px);
+}
+
+/* ============================================
+   COLLAPSIBLE SIDEBAR
+   ============================================ */
+
+@media (min-width: 1024px) {
+    .gst-sidebar .gst-sidebar-header-text,
+    .gst-sidebar .gst-user-meta,
+    .gst-sidebar .gst-section-label,
+    .gst-sidebar .gst-footer-text,
+    .gst-sidebar .gst-nav-link span {
+        opacity: 1;
+        max-width: 220px;
+        transform: translateX(0);
+        overflow: hidden;
+        white-space: nowrap;
+        transition: opacity 260ms ease, transform 260ms ease, max-width 260ms ease;
+        will-change: opacity, transform, max-width;
+    }
+
+    .gst-sidebar.collapsed .gst-sidebar-header-text,
+    .gst-sidebar.collapsed .gst-user-meta,
+    .gst-sidebar.collapsed .gst-section-label,
+    .gst-sidebar.collapsed .gst-footer-text,
+    .gst-sidebar.collapsed .gst-nav-link span {
+        opacity: 0;
+        max-width: 0;
+        transform: translateX(-6px);
+        pointer-events: none;
+    }
+
+    .gst-sidebar.collapsed .gst-nav-link span {
+        margin-left: 0 !important;
+    }
+
+    .gst-sidebar.collapsed .gst-user-meta {
+        margin-left: 0;
+    }
+
+    .gst-sidebar.collapsed .gst-user-card {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+
+    .gst-sidebar.collapsed .gst-user-card > div {
+        justify-content: center;
+    }
+
+    .gst-sidebar.collapsed .gst-sidebar-nav {
+        margin-top: 0.5rem;
+    }
+
+    .gst-sidebar.collapsed .gst-nav-link {
+        justify-content: center;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+
+    .gst-sidebar.collapsed .gst-logo-icon {
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+@media (max-width: 1023px) {
+    .gst-sidebar.collapsed-mobile .gst-sidebar-header-text,
+    .gst-sidebar.collapsed-mobile .gst-user-meta,
+    .gst-sidebar.collapsed-mobile .gst-section-label,
+    .gst-sidebar.collapsed-mobile .gst-footer-text,
+    .gst-sidebar.collapsed-mobile .gst-nav-link span {
+        display: none;
+    }
+
+    .gst-sidebar.collapsed-mobile .gst-user-card {
+        padding-left: 0.4rem;
+        padding-right: 0.4rem;
+    }
+
+    .gst-sidebar.collapsed-mobile .gst-user-card > div {
+        justify-content: center;
+    }
+
+    .gst-sidebar.collapsed-mobile .gst-nav-link {
+        justify-content: center;
+        padding-left: 0.4rem;
+        padding-right: 0.4rem;
+    }
+
+    .gst-sidebar.collapsed-mobile .gst-logo-icon {
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+/* ============================================
+   INPUTS & FORMS
+   ============================================ */
+
+input, select, textarea {
+    transition: all 0.3s ease;
+}
+
+input:focus, select:focus, textarea:focus {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+input::placeholder {
+    color: #9ca3af;
+}
+
+/* ============================================
+   CARDS
+   ============================================ */
+
+.card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: var(--shadow-md);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-4px);
+}
+
+.card-header {
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 16px;
+    margin-bottom: 16px;
+}
+
+/* ============================================
+   KPI CARDS
+   ============================================ */
+
+.kpi-card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: var(--shadow-md);
+    border-left: 4px solid var(--color-primary);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.kpi-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.05), transparent);
+    pointer-events: none;
+}
+
+.kpi-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-xl);
+}
+
+.kpi-counter {
+    font-weight: 700;
+    color: var(--color-dark);
+}
+
+/* ============================================
+   TABLES
+   ============================================ */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+thead {
+    background-color: #f9fafb;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+th {
+    padding: 16px;
+    text-align: left;
+    font-weight: 600;
+    color: #6b7280;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+td {
+    padding: 16px;
+    border-bottom: 1px solid #e5e7eb;
+    color: #374151;
+}
+
+tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+tbody tr:hover {
+    background-color: #f9fafb;
+}
+
+/* ============================================
+   MODALS
+   ============================================ */
+
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 50;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal.active {
+    display: flex;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    box-shadow: var(--shadow-xl);
+    max-width: 500px;
+    width: 90%;
+    animation: scaleIn 0.3s ease-out;
+}
+
+.modal-header {
+    padding: 24px;
+    border-bottom: 1px solid #e5e7eb;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    gap: 12px;
+}
+
+/* ============================================
+   BADGES & LABELS
+   ============================================ */
+
+.badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.badge-primary {
+    background-color: rgba(59, 130, 246, 0.1);
+    color: var(--color-primary);
+}
+
+.badge-success {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--color-success);
+}
+
+.badge-warning {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: var(--color-warning);
+}
+
+.badge-danger {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--color-danger);
+}
+
+/* ============================================
+   NAVIGATION
+   ============================================ */
+
+.nav-item {
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.nav-item::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: white;
+    transition: width 0.3s ease;
+}
+
+.nav-item:hover::after {
+    width: 100%;
+}
+
+.nav-item.active {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* ============================================
+   GRADIENTS
+   ============================================ */
+
+.gradient-primary {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+}
+
+.gradient-success {
+    background: linear-gradient(135deg, var(--color-success), #059669);
+}
+
+.gradient-warning {
+    background: linear-gradient(135deg, var(--color-warning), #d97706);
+}
+
+.gradient-danger {
+    background: linear-gradient(135deg, var(--color-danger), #dc2626);
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+.rounded-lg {
+    border-radius: 8px;
+}
+
+.rounded-xl {
+    border-radius: 12px;
+}
+
+.shadow-md {
+    box-shadow: var(--shadow-md);
+}
+
+.shadow-lg {
+    box-shadow: var(--shadow-lg);
+}
+
+.shadow-xl {
+    box-shadow: var(--shadow-xl);
+}
+
+.transition-all {
+    transition: all 0.3s ease;
+}
+
+.hover-scale:hover {
+    transform: scale(1.05);
+}
+
+.hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+/* ============================================
+   PAGINATION
+   ============================================ */
+
+.pagination {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.pagination button {
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: white;
+    color: #374151;
+    transition: all 0.2s ease;
+}
+
+.pagination button:hover:not(:disabled) {
+    background: #f3f4f6;
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.pagination button.active {
+    background: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+}
+
+.pagination button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+@media (max-width: 768px) {
+    .kpi-card {
+        padding: 16px;
+    }
+
+    table {
+        font-size: 13px;
+    }
+
+    th, td {
+        padding: 12px;
+    }
+
+    .modal-content {
+        width: 95%;
+        max-width: none;
+    }
+
+    .grid-col-auto {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .card, .kpi-card {
+        padding: 12px;
+    }
+
+    .modal-header {
+        padding: 16px;
+    }
+
+    .modal-body {
+        padding: 16px;
+    }
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+
+@media print {
+    .no-print {
+        display: none !important;
+    }
+
+    .card, .kpi-card {
+        page-break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #d1d5db;
+    }
+}

@@ -1,0 +1,13 @@
+node_modules/
+vendor/
+.env
+.env.local
+storage/
+bootstrap/cache/
+.DS_Store
+.vscode
+*.log
+npm-debug.log
+.idea/
+dist/
+*.zip

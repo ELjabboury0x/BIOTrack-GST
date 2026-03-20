@@ -1,0 +1,26 @@
+{
+  "name": "gst-gmao-landing",
+  "version": "1.0.0",
+  "description": "Modern landing page for GMAO system - GST Tanger PFE Project",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "watch": "vite build --watch",
+    "realtime": "node ../realtime/server.js"
+  },
+  "dependencies": {
+    "aos": "^2.3.1",
+    "ws": "^8.18.0",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.20",
+    "laravel-vite-plugin": "^0.8.1",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.3.0",
+    "vite": "^4.5.14"
+  },
+  "author": "GST Tanger",
+  "license": "MIT"
+}
