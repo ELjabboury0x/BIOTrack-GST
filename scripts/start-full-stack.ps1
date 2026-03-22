@@ -94,22 +94,7 @@ if (-not $mysqlProc) {
     if (Test-Path "C:\xampp\mysql_start.bat") {
         Start-Process -FilePath "C:\xampp\mysql_start.bat" -WindowStyle Minimized
         Write-Output "MySQL starting..."
-
-        $mysqlReady = $false
-        for ($i = 0; $i -lt 20; $i++) {
-            Start-Sleep -Seconds 1
-            $listener = Get-NetTCPConnection -LocalPort 3306 -State Listen -ErrorAction SilentlyContinue
-            if ($listener) {
-                $mysqlReady = $true
-                break
-            }
-        }
-
-        if ($mysqlReady) {
-            Write-Output "MySQL is listening on port 3306."
-        } else {
-            Write-Warning "MySQL did not become ready within 20 seconds. Laravel may return DB connection errors until MySQL is up."
-        }
+        Start-Sleep -Seconds 3
     } else {
         Write-Warning "MySQL not running and start script not found."
     }

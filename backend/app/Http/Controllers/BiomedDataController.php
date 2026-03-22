@@ -10,9 +10,11 @@ use App\Models\Intervention;
 use App\Models\MaintenanceReport;
 use App\Models\Market;
 use App\Models\MarketEquipmentImportLine;
+use App\Models\Service;
 use App\Models\Store;
 use App\Models\User;
 use App\Services\DashboardMetricsService;
+use App\Services\CriticalAlertService;
 use App\Services\RealtimeMetricsBroadcaster;
 use App\Support\ServiceAccess;
 use Carbon\Carbon;
@@ -27,6 +29,7 @@ class BiomedDataController extends Controller
 {
     public function __construct(
         private DashboardMetricsService $dashboardMetricsService,
+        private CriticalAlertService $criticalAlertService,
         private RealtimeMetricsBroadcaster $realtimeMetricsBroadcaster
     ) {}
 
@@ -45,6 +48,7 @@ class BiomedDataController extends Controller
             $periodYear > 0 ? $periodYear : null,
             $serviceId > 0 ? $serviceId : null
         );
+        $problematicServices = $this->buildProblematicServicesData($request->user());
 
         return view('pages.dashboard', [
             'kpi' => $metrics['kpi'],
@@ -52,7 +56,59 @@ class BiomedDataController extends Controller
             'hasData' => $metrics['hasData'],
             'downtimeFilterDays' => $downtimeFilterDays,
             'selectedDesignation' => $designation,
+            'criticalAlerts' => $this->criticalAlertService->build(auth()->user()),
+            'problematicServices' => $problematicServices,
         ]);
+    }
+
+    private function buildProblematicServicesData(?User $user): array
+    {
+        $servicesQuery = Service::query()
+            ->excludeHiddenForUi()
+            ->select(['id', 'name'])
+            ->withCount([
+                'equipments as breakdowns_count' => function ($query) {
+                    $query->where('operational_status', 'panne');
+                },
+            ])
+            ->having('breakdowns_count', '>', 0)
+            ->orderByDesc('breakdowns_count')
+            ->orderBy('name');
+
+        if ($user && !$user->hasGlobalAccess()) {
+            $allowedServiceIds = $user->isUnitRestricted()
+                ? ($user->service_id ? [(int) $user->service_id] : [])
+                : $user->allowedServiceIds();
+
+            if ($allowedServiceIds === []) {
+                return [
+                    'all' => [],
+                    'top5' => [],
+                    'max' => 0,
+                ];
+            }
+
+            $servicesQuery->whereIn('id', $allowedServiceIds);
+        }
+
+        $allServices = $servicesQuery
+            ->get()
+            ->map(fn (Service $service) => [
+                'id' => (int) $service->id,
+                'name' => (string) $service->name,
+                'breakdowns_count' => (int) ($service->breakdowns_count ?? 0),
+            ])
+            ->values()
+            ->all();
+
+        $top5 = array_slice($allServices, 0, 5);
+        $max = empty($top5) ? 0 : max(array_column($top5, 'breakdowns_count'));
+
+        return [
+            'all' => $allServices,
+            'top5' => $top5,
+            'max' => (int) $max,
+        ];
     }
 
     public function liveMetrics(Request $request): JsonResponse

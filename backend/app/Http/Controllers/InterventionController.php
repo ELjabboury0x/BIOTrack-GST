@@ -150,9 +150,7 @@ class InterventionController extends Controller
             return $createdIntervention;
         });
 
-        $this->realtimeMetricsBroadcaster->broadcastDashboardMetrics(
-            $this->dashboardMetricsService->build()
-        );
+        $this->broadcastOtRealtimeUpdate('created');
 
         return redirect()
             ->route('interventions')
@@ -243,9 +241,7 @@ class InterventionController extends Controller
             }
         });
 
-        $this->realtimeMetricsBroadcaster->broadcastDashboardMetrics(
-            $this->dashboardMetricsService->build()
-        );
+        $this->broadcastOtRealtimeUpdate('updated');
 
         return redirect()
             ->route('interventions')
@@ -318,9 +314,7 @@ class InterventionController extends Controller
             $prefilledReport = $this->createPrefilledReportFromComplaint($intervention, $linkedComplaint, $request);
         }
 
-        $this->realtimeMetricsBroadcaster->broadcastDashboardMetrics(
-            $this->dashboardMetricsService->build()
-        );
+        $this->broadcastOtRealtimeUpdate('closed');
 
         if ($prefilledReport) {
             return redirect()
@@ -520,5 +514,15 @@ class InterventionController extends Controller
 
             return sprintf('INT-%s-%04d', $year, $sequence);
         });
+    }
+
+    private function broadcastOtRealtimeUpdate(string $action): void
+    {
+        $this->realtimeMetricsBroadcaster->broadcastDashboardMetrics(
+            $this->dashboardMetricsService->build()
+        );
+
+        // Explicit OT signal helps major read-only views refresh immediately.
+        $this->realtimeMetricsBroadcaster->broadcastGlobalChange('Intervention', $action);
     }
 }

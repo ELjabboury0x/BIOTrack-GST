@@ -14,6 +14,7 @@ use App\Models\SparePart;
 use App\Models\User;
 use App\Support\ServiceAccess;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -164,6 +165,15 @@ class DashboardMetricsService
 
         $totalEquipments = (clone $equipmentQuery)->count();
         $functionalEquipments = (clone $equipmentQuery)->where('operational_status', 'fonctionnel')->count();
+        $equipementsPanneTotal = (clone $equipmentQuery)->where('operational_status', 'panne')->count();
+        $equipementsPanneCritique = (clone $equipmentQuery)
+            ->where('operational_status', 'panne')
+            ->where(function (Builder $inner): void {
+                $inner
+                    ->whereRaw('LOWER(COALESCE(lifecycle_status, "")) LIKE ?', ['%crit%'])
+                    ->orWhereRaw('LOWER(COALESCE(category_name, "")) LIKE ?', ['%crit%']);
+            })
+            ->count();
         $interventionsEnCours = (clone $interventionQuery)->whereIn('status', ['en_attente', 'en_cours'])->count();
         $lateThresholdDays = 2;
         $interventionsEnRetard = (clone $interventionQuery)->where('status', 'en_attente')
@@ -181,6 +191,8 @@ class DashboardMetricsService
             'total_equipements' => $totalEquipments,
             'interventions_en_cours' => $interventionsEnCours,
             'interventions_en_retard' => $interventionsEnRetard,
+            'equipements_panne_total' => $equipementsPanneTotal,
+            'equipements_panne_critique' => $equipementsPanneCritique,
             'disponibilite' => $availabilityRate,
             'reclamations_ouvertes' => $reclamationsOuvertes,
             'maintenances_preventives_a_venir' => 0,

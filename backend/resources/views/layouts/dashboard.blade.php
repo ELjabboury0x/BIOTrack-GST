@@ -59,6 +59,80 @@
     @yield('styles')
 </head>
 <body x-data="{ mobileSidebarOpen: false, sidebarHovered: false, sidebarCollapsed: true }" class="antialiased" style="font-family: 'Inter', system-ui, sans-serif;">
+        @if(auth()->user()?->role === 'major')
+        <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const wsUrl = @json((request()->isSecure() ? 'wss' : 'ws') . '://' . request()->getHost() . ':' . (int) env('REALTIME_PORT', 6001) . '/ws');
+            if (!wsUrl) {
+                return;
+            }
+
+            let socket = null;
+            let socketConnected = false;
+            let reconnectDelay = 3000;
+            let lastRefreshAt = 0;
+
+            const isDashboardPage = !!document.getElementById('dashboard-live-config');
+
+            const refreshMajorView = function () {
+                if (isDashboardPage || document.hidden) {
+                    return;
+                }
+
+                const now = Date.now();
+                if (now - lastRefreshAt < 3000) {
+                    return;
+                }
+
+                lastRefreshAt = now;
+                window.location.reload();
+            };
+
+            const startRealtime = function () {
+                try {
+                    socket = new WebSocket(wsUrl);
+
+                    socket.onopen = function () {
+                        socketConnected = true;
+                    };
+
+                    socket.onmessage = function (event) {
+                        try {
+                            const message = JSON.parse(event.data || '{}');
+                            const channel = String(message.channel || '');
+
+                            if (channel === 'gmao.changed' || channel === 'complaint.created' || channel === 'dashboard.metrics') {
+                                refreshMajorView();
+                            }
+                        } catch (error) {
+                            console.error('Major realtime listener error:', error);
+                        }
+                    };
+
+                    socket.onclose = function () {
+                        socketConnected = false;
+                        setTimeout(startRealtime, reconnectDelay);
+                    };
+
+                    socket.onerror = function () {
+                        socketConnected = false;
+                    };
+                } catch (error) {
+                    socketConnected = false;
+                }
+            };
+
+            startRealtime();
+
+            // Fallback polling when websocket is unavailable.
+            setInterval(function () {
+                if (!socketConnected) {
+                    refreshMajorView();
+                }
+            }, 30000);
+        });
+        </script>
+        @endif
 
     <!-- Page Loader -->
     <div id="gst-page-loader">

@@ -295,7 +295,7 @@
       'chroot' => 
       array (
         0 => 'C:\\xampp\\htdocs\\PFE\\PFE\\PFE\\backend',
-        1 => 'C:\\xampp\\htdocs\\PFE\\PFE\\PFE\\backend\\public',
+        1 => 'C:\\xampp\\htdocs\\PFE\\PFE\\PFE\\public',
         2 => 'C:\\xampp\\htdocs\\PFE\\PFE\\PFE\\backend\\storage',
       ),
     ),

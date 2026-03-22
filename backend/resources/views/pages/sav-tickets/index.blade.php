@@ -57,6 +57,7 @@
 ])
 
 @php
+    $isMajor = auth()->user()?->role === 'major';
     $totalTickets = (int) ($kpi['total'] ?? 0);
     $openTickets = (int) ($kpi['ouverts'] ?? 0);
     $activeTickets = (int) ($kpi['en_cours'] ?? 0);
@@ -80,11 +81,13 @@
             <p class="text-lg font-bold text-slate-900">Centre de supervision SAV</p>
         </div>
         <div class="flex flex-col items-end gap-2">
+            @if(!$isMajor)
             <a href="{{ route('sav-tickets.create') }}"
                class="sav-action-btn inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 shadow-md hover:shadow-lg">
                 <i class="fas fa-plus-circle"></i>
                 + Nouveau ticket SAV
             </a>
+            @endif
         </div>
     </div>
 </div>
@@ -254,7 +257,9 @@
                     <th class="px-3 py-3 text-left text-xs font-semibold text-gray-600">Timeline intervention</th>
                     <th class="px-3 py-3 text-left text-xs font-semibold text-gray-600">Durée</th>
                     <th class="px-3 py-3 text-left text-xs font-semibold text-gray-600">Statut</th>
+                    @if(!$isMajor)
                     <th class="px-3 py-3 text-left text-xs font-semibold text-gray-600">Actions</th>
+                    @endif
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
@@ -359,6 +364,7 @@
                             {{ $statusDisplay['label'] }}
                         </span>
                     </td>
+                    @if(!$isMajor)
                     <td class="px-3 py-2.5">
                         <div class="flex items-center gap-2">
                             <a href="{{ route('sav-tickets.edit', $ticket) }}"
@@ -375,10 +381,11 @@
                             </form>
                         </div>
                     </td>
+                    @endif
                 </tr>
                 @empty
                     <tr>
-                        <td colspan="8" class="px-4 py-10 text-center text-gray-400">
+                        <td colspan="{{ $isMajor ? 7 : 8 }}" class="px-4 py-10 text-center text-gray-400">
                             <i class="fas fa-ticket-alt text-3xl mb-3 block"></i>
                             Aucun ticket SAV trouvé. Créez-en un ou attendez la détection automatique de pannes sur équipements sous contrat.
                         </td>

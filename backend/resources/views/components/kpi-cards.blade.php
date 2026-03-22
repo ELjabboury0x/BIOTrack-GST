@@ -4,6 +4,8 @@
         'total_equipements' => 0,
         'interventions_en_cours' => 0,
         'interventions_en_retard' => 0,
+        'equipements_panne_total' => 0,
+        'equipements_panne_critique' => 0,
         'disponibilite' => 0,
         'temps_arret_moyen_heures' => 0,
         'planning_societes_a_venir' => 0,
@@ -31,6 +33,7 @@
     $equipementsUrl = route('equipements');
     $interventionsOpenUrl = route('interventions', ['status' => 'en_cours']);
     $interventionsLateUrl = route('interventions', ['status' => 'en_attente', 'retard' => 1]);
+    $equipementsPanneUrl = route('equipements', ['status' => 'panne']);
     $availabilityUrl = route('equipements', ['status' => 'fonctionnel']);
     $reclamationsUrl = route('reclamations.index');
     $preventivesUrl = route('maintenance-preventive');
@@ -321,6 +324,33 @@
         </div>
     </a>
 
+    {{-- Card 3 bis: Equipements en panne (critique + total) --}}
+    <a href="{{ $equipementsPanneUrl }}" class="kpi-card-v2 kpi-red animate-fade-in block" style="animation-delay: 0.2s" data-kpi-card="equipements-panne" title="Ouvrir équipements en panne">
+        <div class="flex items-center justify-between mb-3">
+            <p class="kpi-title text-gray-500 text-xs font-bold uppercase tracking-wider">Équipements en panne</p>
+            <span class="kpi-live-dot" title="Temps réel"></span>
+        </div>
+        <div class="flex items-start justify-between">
+            <div>
+                <h3 class="kpi-value text-3xl font-extrabold text-gray-900 tabular-nums">
+                    <span id="kpi-equipements-panne-total" class="kpi-counter" data-target="{{ (int) $kpiValues['equipements_panne_total'] }}">0</span>
+                </h3>
+                <p class="kpi-sub text-xs text-gray-400 mt-1 font-medium">
+                    Critiques: <span id="kpi-equipements-panne-critique" class="font-bold text-red-600 tabular-nums">{{ (int) $kpiValues['equipements_panne_critique'] }}</span>
+                    · Total: <span class="font-bold text-gray-700" id="kpi-equipements-panne-total-inline">{{ (int) $kpiValues['equipements_panne_total'] }}</span>
+                </p>
+            </div>
+            <div class="kpi-icon-box" style="background: linear-gradient(135deg, #fee2e2, #fecaca); color: #dc2626;">
+                <div class="kpi-icon-pulse" style="color: #dc2626;"></div>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+            </div>
+        </div>
+    </a>
+
     {{-- Card 4: Disponibilité — ECG heartbeat --}}
     <a href="{{ $availabilityUrl }}" class="kpi-card-v2 kpi-green animate-fade-in block" style="animation-delay: 0.24s" data-kpi-card="disponibilite" title="Ouvrir disponibilité équipements">
         <div class="flex items-center justify-between mb-3">
@@ -472,6 +502,8 @@
         total_equipements: {{ (int) $kpiValues['total_equipements'] }},
         interventions_en_cours: {{ (int) $kpiValues['interventions_en_cours'] }},
         interventions_en_retard: {{ (int) $kpiValues['interventions_en_retard'] }},
+        equipements_panne_total: {{ (int) $kpiValues['equipements_panne_total'] }},
+        equipements_panne_critique: {{ (int) $kpiValues['equipements_panne_critique'] }},
         disponibilite: {{ (int) $kpiValues['disponibilite'] }},
         planning_societes_a_venir: {{ (int) $kpiValues['planning_societes_a_venir'] }},
         planning_prochaine_info: @json($nextCompanyInfo),
@@ -547,6 +579,8 @@
             total_equipements: parseInt(kpi.total_equipements ?? 0, 10),
             interventions_en_cours: parseInt(kpi.interventions_en_cours ?? 0, 10),
             interventions_en_retard: parseInt(kpi.interventions_en_retard ?? 0, 10),
+            equipements_panne_total: parseInt(kpi.equipements_panne_total ?? 0, 10),
+            equipements_panne_critique: parseInt(kpi.equipements_panne_critique ?? 0, 10),
             disponibilite: parseInt(kpi.disponibilite ?? 0, 10),
             planning_societes_a_venir: parseInt(kpi.planning_societes_a_venir ?? 0, 10),
             planning_prochaine_societe: String(kpi.planning_prochaine_societe ?? 'Aucune société planifiée'),
@@ -563,6 +597,7 @@
             { key: 'total_equipements',      elId: 'kpi-total-equipements',      card: 'equipements',         color: 'blue' },
             { key: 'interventions_en_cours',  elId: 'kpi-interventions-cours',    card: 'interventions-cours', color: 'cyan' },
             { key: 'interventions_en_retard', elId: 'kpi-interventions-retard',   card: 'interventions-retard',color: 'red' },
+            { key: 'equipements_panne_total', elId: 'kpi-equipements-panne-total', card: 'equipements-panne', color: 'red' },
             { key: 'disponibilite',           elId: 'kpi-disponibilite',          card: 'disponibilite',       color: 'green' },
             { key: 'planning_societes_a_venir', elId: 'kpi-planning-societes-count', card: 'planning-societes', color: 'amber' },
             { key: 'reclamations_ouvertes',   elId: 'kpi-reclamations-ouvertes',  card: 'reclamations',        color: 'violet' },
@@ -607,6 +642,21 @@
 
         if (_prevKpi.planning_prochaine_info !== planningNextInfo) {
             flashCard('planning-societes', 'amber');
+        }
+
+        const criticalNode = document.getElementById('kpi-equipements-panne-critique');
+        if (criticalNode) {
+            criticalNode.textContent = Number(values.equipements_panne_critique).toLocaleString('fr-FR');
+        }
+
+        const totalInlineNode = document.getElementById('kpi-equipements-panne-total-inline');
+        if (totalInlineNode) {
+            totalInlineNode.textContent = Number(values.equipements_panne_total).toLocaleString('fr-FR');
+        }
+
+        if (_prevKpi.equipements_panne_critique !== values.equipements_panne_critique) {
+            flashCard('equipements-panne', 'red');
+            bumpValue('kpi-equipements-panne-critique');
         }
 
         // Update previous values

@@ -1,13 +1,17 @@
 # ✅ GST GMAO — Résumé d'Achèvement
 
-> **Version 3.1** | 2026-03-19  
+> **Version 3.2** | 2026-03-22  
 > **Statut global** : ✅ Complet — Production-ready
 
-## 🔄 Mise à jour d'état (2026-03-19)
+## 🔄 Mise à jour d'état (2026-03-22)
 
 - Le périmètre fonctionnel reste complet et opérationnel
 - Lancement/arrêt validés via les tâches VS Code (`Start Full Stack`, `Stop Full Stack`)
 - Référentiel technique actuel : **31 contrôleurs**, **12 middlewares**, **69 migrations**, **11 seeders**
+- Rôle `major` renforcé en lecture seule stricte (blocage actions + écrans create/edit)
+- Synchronisation temps réel major activée sur les vues de consultation (OT/SAV/Réclamations)
+- Module OT renforcé avec signal realtime explicite après `create` / `update` / `close`
+- Correctif appliqué sur le layout dashboard (résolution d'un 500 Blade)
 
 ---
 

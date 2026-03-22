@@ -11,16 +11,8 @@ class AuthController extends Controller
 {
     public function showLogin()
     {
-        $hmeServiceNames = [
-            'Hôpital Universitaire Mère-Enfant Mohammed VI-Tanger',
-            'Hôpital Universitaire Mère-Enfant Mohammed VI - Tanger',
-        ];
-
         $services = Service::query()
-            ->where(function ($query) use ($hmeServiceNames) {
-                $query->excludeHiddenForUi()
-                    ->orWhereIn('name', $hmeServiceNames);
-            })
+            ->excludeHiddenForUi()
             ->orderBy('name')
             ->get(['id', 'name']);
 

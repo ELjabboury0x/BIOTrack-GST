@@ -130,7 +130,7 @@
             <!-- Notifications -->
             @php
                 $role = $authUser?->role;
-                $canSeeComplaintNotifications = in_array($role, ['admin', 'ingenieur', 'major', 'technicien', 'technician'], true);
+                $canSeeComplaintNotifications = in_array($role, ['admin', 'ingenieur', 'technicien', 'technician'], true);
             @endphp
             @if($canSeeComplaintNotifications)
             <div x-data="complaintNotifications()" x-init="init()" class="relative">

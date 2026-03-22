@@ -1,8 +1,8 @@
 # GMAO Dashboard - Guide Technique (État Actuel)
 
 ## Version
-- Date: 2026-02-15
-- Statut: Backend connecté + KPI temps réel
+- Date: 2026-03-22
+- Statut: Backend connecté + KPI temps réel + vue major synchronisée
 
 ## Fonctionnalités actives
 - Auth Laravel (accès dashboard protégé)
@@ -14,6 +14,8 @@
 - Clôture PM-BIO (SAP-PM): `TECO` / `CLSD`
 - KPI + Charts alimentés depuis la base
 - Mise à jour temps réel WebSocket + fallback HTTP
+- Rôle major en lecture seule stricte (actions métiers bloquées)
+- Rafraîchissement automatique des vues major sur changements OT/SAV/Réclamations
 
 ## Routes clés
 - `GET /dashboard`
@@ -37,6 +39,7 @@
 - Controller OT/DM: `app/Http/Controllers/InterventionController.php`
 - Service KPI: `app/Services/DashboardMetricsService.php`
 - Broadcast KPI: `app/Services/RealtimeMetricsBroadcaster.php`
+- Middleware major: `app/Http/Middleware/MajorReadOnly.php`
 
 ## Realtime (WebSocket)
 - Serveur local: `realtime/server.js`

@@ -102,7 +102,7 @@ class User extends Authenticatable
      */
     public function hasGlobalAccess(): bool
     {
-        return in_array($this->role, [self::ROLE_ADMIN, self::ROLE_INGENIEUR], true);
+        return $this->role === self::ROLE_ADMIN;
     }
 
     /**
@@ -118,7 +118,7 @@ class User extends Authenticatable
      */
     public function isServiceRestricted(): bool
     {
-        return in_array($this->role, [self::ROLE_MANAGER, self::ROLE_MAJOR], true);
+        return in_array($this->role, [self::ROLE_INGENIEUR, self::ROLE_MANAGER, self::ROLE_MAJOR], true);
     }
 
     public function isAdmin(): bool

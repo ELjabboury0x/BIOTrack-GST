@@ -39,6 +39,19 @@ class RealtimeMetricsBroadcaster
         ]);
     }
 
+    public function broadcastGlobalChange(string $entity, string $action): void
+    {
+        if (!Cache::add('gmao_global_change:broadcast:throttle', 1, now()->addSeconds(1))) {
+            return;
+        }
+
+        $this->broadcast('gmao.changed', [
+            'entity' => $entity,
+            'action' => $action,
+            'updated_at' => now()->toDateTimeString(),
+        ]);
+    }
+
     private function broadcast(string $channel, array $payload): void
     {
         try {
