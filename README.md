@@ -7,7 +7,7 @@
 
 ## 📋 Description
 
-Application web complète de **Gestion de Maintenance Assistée par Ordinateur (GMAO)** développée pour **GST Tanger** (Groupe Sterilisation Tanger). Le système couvre la gestion des équipements biomédicaux, interventions, réclamations, rapports de maintenance, marchés, planification et bien plus.
+Application web complète de **Gestion de Maintenance Assistée par Ordinateur (GMAO)** développée pour **GST Tanger** (**Groupement Sanitaire Territorial**), établissement hospitalier public doté d'une autonomie financière et administrative. Le système couvre la gestion des équipements biomédicaux, interventions, réclamations, rapports de maintenance, marchés, planification et bien plus.
 
 ### État actuel (2026-03-22)
 

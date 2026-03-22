@@ -30,7 +30,7 @@
 
 ## 🎯 Vue d'ensemble
 
-Le système **GST GMAO** est une application web Laravel complète dédiée à la gestion de maintenance assistée par ordinateur pour le **Groupe Sterilisation Tanger**. L'application gère l'intégralité du cycle de vie de la maintenance biomédicale hospitalière.
+Le système **GST GMAO** est une application web Laravel complète dédiée à la gestion de maintenance assistée par ordinateur pour le **Groupement Sanitaire Territorial (GST)**, établissement hospitalier public doté d'une autonomie financière et administrative. L'application gère l'intégralité du cycle de vie de la maintenance biomédicale hospitalière.
 
 ---
 
