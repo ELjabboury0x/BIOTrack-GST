@@ -1,14 +1,30 @@
 # 📊 GST GMAO — Résumé du Projet
 
-> **Version 3.1** | Mise à jour : 2026-03-19  
+> **Version 3.2** | Mise à jour : 2026-03-22  
 > **Statut** : ✅ Production-ready
 
-## 🔄 État actuel consolidé (2026-03-19)
+## 🔄 État actuel consolidé (2026-03-22)
 
 - Architecture confirmée : Laravel + Blade + MySQL + WebSocket Node.js
 - Démarrage normalisé via scripts `scripts/start-full-stack.ps1` et VS Code Tasks
 - Base projet actuelle : **31 contrôleurs**, **12 middlewares**, **69 migrations**, **11 seeders**
 - Documentation alignée sur les fichiers réellement présents dans le dépôt
+
+## 📝 Release Note (2026-03-22)
+
+- **Rôle major renforcé (lecture seule stricte)**
+	- Blocage global des opérations d'écriture côté middleware
+	- Blocage des écrans d'action (`create`, `edit`) pour éviter les accès non autorisés
+- **Interface major alignée avec les permissions**
+	- Masquage de la cloche de notifications réclamations
+	- Masquage des actions SAV (`Nouveau`, `Éditer`, `Supprimer`)
+	- Suppression des CTA de création non autorisés
+- **Temps réel étendu à la vue major**
+	- Ajout d'un flux global de changement GMAO (`gmao.changed`)
+	- Rafraîchissement automatique des vues de consultation major hors dashboard
+	- Renforcement OT: diffusion explicite après `create`, `update`, `close`
+- **Stabilité**
+	- Correctif d'une erreur 500 Blade (`Undefined variable`) sur le layout dashboard
 
 ---
 
