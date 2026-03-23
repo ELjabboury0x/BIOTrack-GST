@@ -1,9 +1,9 @@
 # ✅ GST GMAO — Résumé d'Achèvement
 
-> **Version 3.2** | 2026-03-22  
+> **Version 3.3** | 2026-03-23  
 > **Statut global** : ✅ Complet — Production-ready
 
-## 🔄 Mise à jour d'état (2026-03-22)
+## 🔄 Mise à jour d'état (2026-03-23)
 
 - Le périmètre fonctionnel reste complet et opérationnel
 - Lancement/arrêt validés via les tâches VS Code (`Start Full Stack`, `Stop Full Stack`)
@@ -12,6 +12,12 @@
 - Synchronisation temps réel major activée sur les vues de consultation (OT/SAV/Réclamations)
 - Module OT renforcé avec signal realtime explicite après `create` / `update` / `close`
 - Correctif appliqué sur le layout dashboard (résolution d'un 500 Blade)
+- Module `Pièces de rechange` refactorisé en workflow `Décharge` / `Réception-Retour`
+- Validation conditionnelle ajoutée: mode `PDF` vs mode `Formulaire`
+- Upload PDF pièces activé en stockage public
+- Champ `prix unitaire` retiré du module Pièces (formulaire + liste)
+- Correctif login: service HME visible uniquement à la connexion
+- Nettoyage des services: suppression de la redondance `Pédiatrie`
 
 ---
 
@@ -29,7 +35,7 @@ Le système GST GMAO v3.0 est une application Laravel complète pour la gestion 
 | Projet Laravel 9.52 configuré | ✅ |
 | PHP 8.2 (WinGet) avec extensions | ✅ |
 | MySQL via pdo_mysql | ✅ |
-| 69 migrations créées et exécutées | ✅ |
+| 70 migrations créées et exécutées | ✅ |
 | 11 seeders (12 utilisateurs, structure hospitalière, zones, entreprises, liaison équipements) | ✅ |
 | Serveur WebSocket Node.js (port 6001) | ✅ |
 | Tasks VS Code (Start/Stop Full Stack) | ✅ |

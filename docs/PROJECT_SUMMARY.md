@@ -1,14 +1,29 @@
 # 📊 GST GMAO — Résumé du Projet
 
-> **Version 3.2** | Mise à jour : 2026-03-22  
+> **Version 3.3** | Mise à jour : 2026-03-23  
 > **Statut** : ✅ Production-ready
 
-## 🔄 État actuel consolidé (2026-03-22)
+## 🔄 État actuel consolidé (2026-03-23)
 
 - Architecture confirmée : Laravel + Blade + MySQL + WebSocket Node.js
 - Démarrage normalisé via scripts `scripts/start-full-stack.ps1` et VS Code Tasks
 - Base projet actuelle : **31 contrôleurs**, **12 middlewares**, **69 migrations**, **11 seeders**
 - Documentation alignée sur les fichiers réellement présents dans le dépôt
+
+## 📝 Release Note (2026-03-23)
+
+- **Module Pièces de Rechange refactorisé (workflow 2 phases)**
+	- Nouveau flux: `Décharge` / `Réception-Retour`
+	- Nouveau mode de saisie: `Importer un PDF` ou `Remplir le formulaire`
+	- Validation dynamique: champs requis seulement en mode formulaire, PDF requis en mode import
+	- Upload des justificatifs PDF en stockage public (`storage/app/public/spare-parts/documents`)
+	- UI modernisée: tabs de phase, cartes, sections métier et styles de champs renforcés
+- **Stock / Pièces: simplification métier**
+	- Suppression du champ `prix unitaire` dans la saisie et l'affichage du module
+- **Authentification et service de connexion**
+	- Correction `APP_KEY` manquante
+	- Service `Hôpital Universitaire Mère-Enfant Mohammed VI-Tanger` visible uniquement à la connexion
+	- Suppression de la redondance `Pédiatrie` dans les services
 
 ## 📝 Release Note (2026-03-22)
 
@@ -134,7 +149,7 @@ Le système **GST GMAO** est une application web Laravel complète dédiée à l
 ### Modèles (15)
 `User`, `Company`, `Complaint`, `Equipment`, `EquipmentVerification`, `EquipmentVerificationLog`, `Hospital`, `Intervention`, `InventoryNumberRectification`, `MaintenanceReport`, `Market`, `Room`, `Service`, `Store`, `Zone`
 
-### Migrations (29)
+### Migrations (30)
 De la création des tables utilisateurs jusqu'aux unités et politique de mots de passe.
 
 ### Seeders (7)

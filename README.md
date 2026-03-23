@@ -1,7 +1,7 @@
 # 🏥 GST GMAO — Système de Gestion de Maintenance Assistée par Ordinateur
 
 > **Projet de Fin d'Études** | GST Tanger | 2026  
-> **Version 3.2** — Mise à jour 2026-03-22
+> **Version 3.3** — Mise à jour 2026-03-23
 
 ---
 
@@ -9,21 +9,25 @@
 
 Application web complète de **Gestion de Maintenance Assistée par Ordinateur (GMAO)** développée pour **GST Tanger** (**Groupement Sanitaire Territorial**), établissement hospitalier public doté d'une autonomie financière et administrative. Le système couvre la gestion des équipements biomédicaux, interventions, réclamations, rapports de maintenance, marchés, planification et bien plus.
 
-### État actuel (2026-03-22)
+### État actuel (2026-03-23)
 
 - **Statut** : En service interne, maintenance évolutive active
 - **Backend** : Laravel 9 + PHP 8.x
 - **Temps réel** : WebSocket Node.js (`npm run realtime`)
-- **Métriques codebase** : 31 contrôleurs, 12 middlewares, 69 migrations, 11 seeders
+- **Métriques codebase** : 31 contrôleurs, 12 middlewares, 70 migrations, 11 seeders
 - **Exécution recommandée** : VS Code Tasks `Start Full Stack` / `Stop Full Stack` (+ `Start Tunnel` pour partage externe)
 
-### Dernières mises à jour (2026-03-22)
+### Dernières mises à jour (2026-03-23)
 
 - **Rôle major durci en lecture seule** : blocage global des actions d'écriture et des écrans d'action (`create` / `edit`)
 - **UI major alignée** : suppression des boutons/actions non autorisés (cloche réclamations, actions SAV, CTA de création)
 - **Temps réel étendu à la vue major** : rafraîchissement automatique des vues de consultation lors des changements OT/SAV/Réclamations
 - **OT renforcé** : diffusion explicite d'événements de changement après création, modification et clôture
 - **Correctif stabilité** : résolution d'une erreur 500 liée au layout Blade (`Undefined variable`)
+- **Pièces de rechange refactorisé** : workflow 2 phases (Décharge / Réception-Retour), mode PDF vs formulaire, validation conditionnelle, upload PDF
+- **Pièces de rechange simplifié** : suppression du prix unitaire dans la saisie et la liste
+- **Authentification stabilisée** : APP_KEY régénérée, service HME affiché uniquement à la connexion
+- **Services nettoyés** : suppression de la redondance Pédiatrie
 
 ### Fonctionnalités principales
 
