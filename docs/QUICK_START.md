@@ -85,7 +85,7 @@ Le menu est organisé par sections :
 - ⚙️ Maintenance préventive
 - ⚙️ Paramètres
 
-**Administration (admin uniquement) :**
+**Administration :**
 - 👥 Gestion utilisateurs
 - 🔒 Sécurité
 
@@ -99,13 +99,11 @@ Le menu est organisé par sections :
 
 | Identifiant | Mot de passe | Rôle (code) | Ce que vous verrez |
 |-------|-------------|------|---------------------|
-| `admin` | `123456` | admin | Accès complet + administration |
-| `MESRAR.ASMAE` | `123456` | manager | Tous les modules |
 | `KHANTOUR.MOHAMED` | `123456` | major | Lecture seule |
-| `AHADDOUT.HANAE` | `123456` | ingenieur | Données filtrées par service |
-| `BENADDI.FATIMA` | `123456` | technicien | Données filtrées par unité |
-| `KHALIL.HAMZA` | `123456` | technician | PLC + déclaration pannes |
-| `ZOUIN.MAROUANE` | `123456` | operator | Déclaration de défauts |
+| `AHADDOUT.HANAE` | `123456` | ingenieur | Accès global aux données métier |
+| `BENADDI.FATIMA` | `123456` | technicien | Même données que ingénieur, avec restrictions d'actions |
+| `KHALIL.HAMZA` | `123456` | ingenieur | Accès global aux données métier |
+| `ZOUIN.MAROUANE` | `123456` | technicien | Même données que ingénieur, avec restrictions d'actions |
 
 ---
 
@@ -130,8 +128,8 @@ Le menu est organisé par sections :
 | `/dashboard/techniciens` | Techniciens | Oui |
 | `/dashboard/pieces` | Pièces de rechange | Oui |
 | `/dashboard/notifications/complaints` | Notifications | Oui |
-| `/dashboard/admin/users` | Gestion utilisateurs | Admin |
-| `/dashboard/admin/security` | Sécurité | Admin |
+| `/dashboard/admin/users` | Gestion utilisateurs | Ingénieur |
+| `/dashboard/admin/security` | Sécurité | Ingénieur |
 | `/dashboard/profile` | Profil | Oui |
 | `/dashboard/change-password` | Mot de passe | Oui |
 | `/reclamation/{service_code}` | Réclamation publique | Non |

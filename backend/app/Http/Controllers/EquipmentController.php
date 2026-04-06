@@ -59,7 +59,7 @@ class EquipmentController extends Controller
         $hospitalsQuery = Hospital::query()->select('id', 'code', 'name')->orderBy('name');
         if ($user && !$user->hasGlobalAccess()) {
             $allowedServiceIds = $user->isUnitRestricted()
-                ? ($user->service_id ? [(int) $user->service_id] : [])
+                ? $user->unitScopedServiceIds()
                 : $user->allowedServiceIds();
 
             $hospitalsQuery->whereHas('services', function (Builder $query) use ($allowedServiceIds): void {
@@ -213,7 +213,7 @@ class EquipmentController extends Controller
             ->orderBy('name');
         if ($user && !$user->hasGlobalAccess()) {
             $serviceIds = $user->isUnitRestricted()
-                ? ($user->service_id ? [(int) $user->service_id] : [])
+                ? $user->unitScopedServiceIds()
                 : $user->allowedServiceIds();
             $servicesQuery->whereIn('id', $serviceIds);
         }
@@ -351,7 +351,7 @@ class EquipmentController extends Controller
         $servicesQuery = Service::query()->excludeHiddenForUi()->select('id', 'zone_id', 'name')->orderBy('name');
         if ($user && !$user->hasGlobalAccess()) {
             $serviceIds = $user->isUnitRestricted()
-                ? ($user->service_id ? [(int) $user->service_id] : [])
+                ? $user->unitScopedServiceIds()
                 : $user->allowedServiceIds();
             $servicesQuery->whereIn('id', $serviceIds);
         }
@@ -775,7 +775,7 @@ class EquipmentController extends Controller
 
         if ($user && !$user->hasGlobalAccess()) {
             $serviceIds = $user->isUnitRestricted()
-                ? ($user->service_id ? [(int) $user->service_id] : [])
+                ? $user->unitScopedServiceIds()
                 : $user->allowedServiceIds();
             $servicesQuery->whereIn('id', $serviceIds);
         }

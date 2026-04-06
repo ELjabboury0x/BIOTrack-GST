@@ -40,7 +40,7 @@ Application web complète de **Gestion de Maintenance Assistée par Ordinateur (
 - **Zones & Services** — Gestion hiérarchique de la structure hospitalière
 - **Planning sociétés externes** — Planification des interventions externes
 - **Stock & pièces de rechange** — Mouvements de stock, inventaire
-- **Système de rôles avancé** — 7 rôles avec filtrage par service et accès lecture seule pour le major
+- **Système de rôles** — 3 rôles actifs (`ingenieur`, `technicien`, `major`) avec accès différenciés
 - **Interface moderne** — Dark mode, glassmorphism, animations, toast notifications, SweetAlert2
 - **Temps réel** — Serveur Node.js WebSocket pour les notifications instantanées
 
@@ -64,13 +64,9 @@ Application web complète de **Gestion de Maintenance Assistée par Ordinateur (
 
 | Rôle        | Accès                                                            |
 |-------------|------------------------------------------------------------------|
-| `admin`     | Accès complet + gestion utilisateurs + sécurité                  |
-| `manager`   | Accès complet aux modules métier                                 |
-| `major`     | Lecture seule (middleware `MajorReadOnly`)                        |
-| `ingenieur` | Filtrage par service rattaché                                    |
-| `technicien`| Filtrage par unité rattachée                                     |
-| `technician`| Interface PLC (état/journaux) + déclaration de pannes           |
-| `operator`  | Déclaration de défauts uniquement                                |
+| `major`     | Lecture seule (middleware `MajorReadOnly`)                       |
+| `ingenieur` | Accès global aux données métier                                  |
+| `technicien`| Même visibilité de données que l'ingénieur, actions limitées par rôle |
 
 ---
 
@@ -127,18 +123,16 @@ Tous les mots de passe sont : `123456`
 
 | Identifiant         | Rôle (code applicatif) |
 |---------------------|-------------------------|
-| admin               | admin                   |
 | AHADDOUT.HANAE      | ingenieur               |
 | BENADDI.FATIMA      | technicien              |
 | IHADJITANE.MALAK    | technicien              |
 | JABRANE.LATIFA      | ingenieur               |
-| KHALIL.HAMZA        | technician              |
+| KHALIL.HAMZA        | ingenieur               |
 | KHANTOUR.MOHAMED    | major                   |
-| MESRAR.ASMAE        | manager                 |
 | NAWAL               | ingenieur               |
 | SAKROUHI.SAID       | technicien              |
 | ZERKOUNI.HOUDA      | ingenieur               |
-| ZOUIN.MAROUANE      | operator                |
+| ZOUIN.MAROUANE      | technicien              |
 
 ---
 

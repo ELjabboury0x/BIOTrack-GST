@@ -54,7 +54,7 @@ class ComplaintController extends Controller
         $servicesQuery = Service::query()->excludeHiddenForUi()->select('id', 'name')->orderBy('name');
         if ($user && !$user->hasGlobalAccess()) {
             $serviceIds = $user->isUnitRestricted()
-                ? ($user->service_id ? [(int) $user->service_id] : [])
+                ? $user->unitScopedServiceIds()
                 : $user->allowedServiceIds();
             $servicesQuery->whereIn('id', $serviceIds);
         }

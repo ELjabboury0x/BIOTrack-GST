@@ -168,13 +168,30 @@ class Equipment extends Model
 
         $role = $user->role;
 
-        if (in_array($role, ['admin', 'ingenieur'])) {
+        if (in_array($role, ['admin', 'ingenieur', 'technicien', 'technician'])) {
             return $query; // no filter
         }
 
         // technicien and major see only their service
         if (in_array($role, ['technicien', 'technician', 'major'])) {
-            return $query->where('service_id', $user->service_id);
+            $effectiveServiceId = (int) ($user->service_id ?? 0);
+
+            if ($effectiveServiceId <= 0) {
+                $allowedServiceIds = $user->allowedServiceIds();
+                $selectedServiceId = (int) session('selected_service_id', 0);
+
+                if ($selectedServiceId > 0 && in_array($selectedServiceId, $allowedServiceIds, true)) {
+                    $effectiveServiceId = $selectedServiceId;
+                } elseif ($allowedServiceIds !== []) {
+                    $effectiveServiceId = (int) $allowedServiceIds[0];
+                }
+            }
+
+            if ($effectiveServiceId <= 0) {
+                return $query->whereRaw('1 = 0');
+            }
+
+            return $query->where('service_id', $effectiveServiceId);
         }
 
         // default deny

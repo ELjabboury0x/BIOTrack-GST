@@ -25,12 +25,12 @@ class EquipmentPolicy
 
     public function view(User $user, Equipment $equipment)
     {
-        if (in_array($user->role, ['ingenieur'])) {
+        if (in_array($user->role, ['ingenieur', 'technicien', 'technician'])) {
             return true;
         }
 
-        if (in_array($user->role, ['technicien', 'technician', 'major'])) {
-            return $equipment->service_id === $user->service_id;
+        if (in_array($user->role, ['major'])) {
+            return in_array((int) $equipment->service_id, $user->unitScopedServiceIds(), true);
         }
 
         return false;

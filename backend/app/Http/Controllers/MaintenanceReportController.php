@@ -904,7 +904,7 @@ class MaintenanceReportController extends Controller
 
         if ($user && !$user->hasGlobalAccess()) {
             $serviceIds = $user->isUnitRestricted()
-                ? ($user->service_id ? [(int) $user->service_id] : [])
+                ? $user->unitScopedServiceIds()
                 : $user->allowedServiceIds();
             $servicesQuery->whereIn('id', $serviceIds);
         }

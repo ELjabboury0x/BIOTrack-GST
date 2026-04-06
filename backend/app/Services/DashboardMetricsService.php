@@ -885,7 +885,7 @@ class DashboardMetricsService
         $serviceScopeIds = null;
         if ($user) {
             if (in_array($user->role, ['major', 'technicien', 'technician'], true)) {
-                $serviceScopeIds = $user->service_id ? [(int) $user->service_id] : [];
+                $serviceScopeIds = $user->unitScopedServiceIds();
             }
         }
 

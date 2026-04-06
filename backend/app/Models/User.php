@@ -98,11 +98,40 @@ class User extends Authenticatable
     }
 
     /**
+     * Resolve effective service scope for unit-restricted users (techniciens).
+     * Falls back to selected login service or first mapped service when service_id is empty.
+     */
+    public function unitScopedServiceIds(): array
+    {
+        if ((int) $this->service_id > 0) {
+            return [(int) $this->service_id];
+        }
+
+        $allowedServiceIds = $this->allowedServiceIds();
+        $selectedServiceId = (int) session('selected_service_id', 0);
+
+        if ($selectedServiceId > 0 && in_array($selectedServiceId, $allowedServiceIds, true)) {
+            return [$selectedServiceId];
+        }
+
+        if ($allowedServiceIds !== []) {
+            return [(int) $allowedServiceIds[0]];
+        }
+
+        return [];
+    }
+
+    /**
      * Whether this user has unrestricted global data access.
      */
     public function hasGlobalAccess(): bool
     {
-        return $this->role === self::ROLE_ADMIN;
+        return in_array($this->role, [
+            self::ROLE_ADMIN,
+            self::ROLE_INGENIEUR,
+            self::ROLE_TECHNICIEN,
+            self::ROLE_TECHNICIAN,
+        ], true);
     }
 
     /**
@@ -114,11 +143,11 @@ class User extends Authenticatable
     }
 
     /**
-     * Whether this user's access is scoped to their service (ingénieur, manager, major).
+     * Whether this user's access is scoped to their service (manager, major).
      */
     public function isServiceRestricted(): bool
     {
-        return in_array($this->role, [self::ROLE_INGENIEUR, self::ROLE_MANAGER, self::ROLE_MAJOR], true);
+        return in_array($this->role, [self::ROLE_MANAGER, self::ROLE_MAJOR], true);
     }
 
     public function isAdmin(): bool

@@ -11,8 +11,8 @@ use Illuminate\Database\Eloquent\Builder;
  * Centralized service/unit-based data scoping.
  *
  * Role hierarchy:
- *   admin          → global access, no filter
- *   ingénieur/manager/major → filtered by allowed service IDs
+ *   admin/ingénieur → global access, no filter
+ *   manager/major   → filtered by allowed service IDs
  *   technicien     → filtered by service ID + unit ID
  */
 class ServiceAccess
@@ -150,7 +150,7 @@ class ServiceAccess
      */
     private static function scopeByUnit($query, User $user, string $serviceColumn = 'service_id')
     {
-        $serviceId = $user->service_id;
+        $serviceId = static::resolveScopedServiceId($user);
 
         if (!$serviceId) {
             return $query->whereRaw('1=0');
@@ -164,7 +164,7 @@ class ServiceAccess
      */
     private static function scopeInterventionByUnit(Builder $query, User $user): Builder
     {
-        $serviceId = $user->service_id;
+        $serviceId = static::resolveScopedServiceId($user);
 
         if (!$serviceId) {
             return $query->whereRaw('1=0');
@@ -180,7 +180,7 @@ class ServiceAccess
      */
     private static function scopeReportByUnit(Builder $query, User $user): Builder
     {
-        $serviceId = $user->service_id;
+        $serviceId = static::resolveScopedServiceId($user);
 
         if (!$serviceId) {
             return $query->whereRaw('1=0');
@@ -196,7 +196,7 @@ class ServiceAccess
      */
     private static function scopePreventiveByUnit(Builder $query, User $user): Builder
     {
-        $serviceId = $user->service_id;
+        $serviceId = static::resolveScopedServiceId($user);
 
         if (!$serviceId) {
             return $query->whereRaw('1=0');
@@ -205,5 +205,32 @@ class ServiceAccess
         return $query->whereHas('equipment', function (Builder $eq) use ($serviceId) {
             $eq->where('service_id', $serviceId);
         });
+    }
+
+    /**
+     * Resolve effective scoped service for restricted users.
+     * Priority:
+     * 1) direct user.service_id
+     * 2) selected_service_id from session (validated at login)
+     * 3) first allowed service from user-service mappings
+     */
+    private static function resolveScopedServiceId(User $user): ?int
+    {
+        if ((int) $user->service_id > 0) {
+            return (int) $user->service_id;
+        }
+
+        $allowedServiceIds = $user->allowedServiceIds();
+        $selectedServiceId = (int) session('selected_service_id', 0);
+
+        if ($selectedServiceId > 0 && in_array($selectedServiceId, $allowedServiceIds, true)) {
+            return $selectedServiceId;
+        }
+
+        if ($allowedServiceIds !== []) {
+            return (int) $allowedServiceIds[0];
+        }
+
+        return null;
     }
 }

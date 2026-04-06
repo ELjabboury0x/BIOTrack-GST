@@ -45,7 +45,7 @@ Le système GST GMAO v3.0 est une application Laravel complète pour la gestion 
 | Tâche | Statut |
 |-------|--------|
 | Login personnalisé avec sélection du service | ✅ |
-| 7 rôles utilisateur configurés | ✅ |
+| 3 rôles utilisateur actifs (`ingenieur`, `technicien`, `major`) | ✅ |
 | Middleware `EnsureUserRole` — Contrôle d'accès par rôle | ✅ |
 | Middleware `MajorReadOnly` — Lecture seule pour le rôle major | ✅ |
 | Middleware `ForcePasswordChange` — Changement obligatoire | ✅ |
@@ -54,7 +54,7 @@ Le système GST GMAO v3.0 est une application Laravel complète pour la gestion 
 | Filtrage par service via `ServiceAccess` (3 niveaux) | ✅ |
 | `ServiceVisibilityPolicy` — Gates de visibilité | ✅ |
 | Administration des utilisateurs (CRUD, activation, reset) | ✅ |
-| Tableau de bord de sécurité admin | ✅ |
+| Tableau de bord de sécurité (ingénieur) | ✅ |
 | Profil & changement de mot de passe | ✅ |
 
 ### Phase 3 — Modules Métier
@@ -75,8 +75,8 @@ Le système GST GMAO v3.0 est une application Laravel complète pour la gestion 
 | Maintenance préventive | `/dashboard/maintenance-preventive` | `PreventiveMaintenanceController` | ✅ |
 | Paramètres | `/dashboard/parametres` | `SettingsController` | ✅ |
 | Notifications | `/dashboard/notifications/complaints` | `DashboardNotificationController` | ✅ |
-| Déclaration pannes (opérateur) | `/dashboard/operator/defects` | `OperatorDefectController` | ✅ |
-| PLC Status/Logs (technician) | `/dashboard/technician/plc-*` | `TechnicianPlcController` | ✅ |
+| Déclaration pannes (technicien) | `/dashboard/operator/defects` | `OperatorDefectController` | ✅ |
+| PLC Status/Logs (technicien) | `/dashboard/technician/plc-*` | `TechnicianPlcController` | ✅ |
 
 ### Phase 4 — Interface Utilisateur Moderne (v3.0)
 | Composant | Fichier | Statut |
