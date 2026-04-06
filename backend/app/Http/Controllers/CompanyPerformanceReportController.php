@@ -245,9 +245,15 @@ class CompanyPerformanceReportController extends Controller
 
     private function buildKpis(array $filters): \Illuminate\Support\Collection
     {
-        $statusExpression = Schema::hasColumn('external_interventions', 'status')
-            ? 'COALESCE(NULLIF(ei.status, ""), NULLIF(ei.intervention_status, ""), i.status)'
-            : 'COALESCE(NULLIF(ei.intervention_status, ""), i.status)';
+        $statusCandidates = [];
+        if (Schema::hasColumn('external_interventions', 'status')) {
+            $statusCandidates[] = 'NULLIF(ei.status, "")';
+        }
+        if (Schema::hasColumn('external_interventions', 'intervention_status')) {
+            $statusCandidates[] = 'NULLIF(ei.intervention_status, "")';
+        }
+        $statusCandidates[] = 'i.status';
+        $statusExpression = 'COALESCE(' . implode(', ', $statusCandidates) . ')';
 
         $query = DB::table('external_interventions as ei')
             ->join('interventions as i', 'i.id', '=', 'ei.intervention_id')

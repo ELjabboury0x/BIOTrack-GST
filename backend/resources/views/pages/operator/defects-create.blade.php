@@ -70,8 +70,8 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <input name="room_number" value="{{ old('room_number') }}" placeholder="Salle (optionnel)" class="px-4 py-2 border border-gray-300 rounded-lg">
                     <select name="priority" class="px-4 py-2 border border-gray-300 rounded-lg" required>
-                        <option value="normal" {{ old('priority', 'normal') === 'normal' ? 'selected' : '' }}>Normal</option>
-                        <option value="urgent" {{ old('priority') === 'urgent' ? 'selected' : '' }}>Urgent</option>
+                            <option value="normal" {{ old('priority', 'normal') === 'normal' ? 'selected' : '' }}>Normale</option>
+                            <option value="urgent" {{ old('priority') === 'urgent' ? 'selected' : '' }}>Urgente</option>
                     </select>
                 </div>
 

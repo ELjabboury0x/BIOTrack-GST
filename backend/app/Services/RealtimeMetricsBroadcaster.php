@@ -33,7 +33,7 @@ class RealtimeMetricsBroadcaster
             'service_name' => $complaint->service?->name,
             'equipment_id' => $complaint->equipment_id,
             'equipment_label' => trim((string) (($complaint->equipment?->inventory_number_current ?: '') . ' - ' . ($complaint->equipment?->designation ?: ''))),
-            'priority' => $complaint->priority,
+            'priority' => $complaint->priority_key,
             'status' => $complaint->status,
             'created_at' => optional($complaint->created_at)->toDateTimeString(),
         ]);

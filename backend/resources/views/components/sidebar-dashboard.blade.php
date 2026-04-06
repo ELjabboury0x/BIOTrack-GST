@@ -98,7 +98,7 @@
                 @if($canAccessComplaints)
                 <a href="{{ route('reclamations.index') }}" @click="if (window.innerWidth < 1024) { mobileSidebarOpen = false }" class="gst-nav-link {{ request()->routeIs('reclamations.*') || request()->routeIs('dashboard.notifications.complaints.*') ? 'active' : '' }} flex items-center px-4 py-2.5 rounded-xl transition-all duration-200"><i class="fas fa-clipboard-list w-5 text-center"></i><span class="ml-3 text-sm">Historique Réclamations</span></a>
                 @endif
-                <a href="{{ route('markets.equipments') }}" @click="if (window.innerWidth < 1024) { mobileSidebarOpen = false }" class="gst-nav-link {{ request()->routeIs('markets.equipments') ? 'active' : '' }} flex items-center px-4 py-2.5 rounded-xl transition-all duration-200"><i class="fas fa-file-signature w-5 text-center"></i><span class="ml-3 text-sm">Marchés & Équipements</span></a>
+                <a href="{{ route('markets.equipments') }}" @click="if (window.innerWidth < 1024) { mobileSidebarOpen = false }" class="gst-nav-link {{ request()->routeIs('markets.equipments') ? 'active' : '' }} flex items-center px-4 py-2.5 rounded-xl transition-all duration-200"><i class="fas fa-file-signature w-5 text-center"></i><span class="ml-3 text-sm">Marchés et contrats de maintenance</span></a>
                 <a href="{{ route('maintenance-preventive') }}" @click="if (window.innerWidth < 1024) { mobileSidebarOpen = false }" class="gst-nav-link {{ request()->routeIs('maintenance-preventive*') ? 'active' : '' }} flex items-center px-4 py-2.5 rounded-xl transition-all duration-200"><i class="fas fa-calendar-alt w-5 text-center"></i><span class="ml-3 text-sm">Maintenance Préventive</span></a>
                 <a href="{{ route('maintenance-reports.index', ['type' => 'curative']) }}" @click="if (window.innerWidth < 1024) { mobileSidebarOpen = false }" class="gst-nav-link {{ request()->routeIs('maintenance-reports.index') && request()->query('type') === 'curative' ? 'active' : '' }} flex items-center px-4 py-2.5 rounded-xl transition-all duration-200"><i class="fas fa-calendar-alt w-5 text-center"></i><span class="ml-3 text-sm">Maintenance corrective</span></a>
                 @if(!$isMajor)
@@ -119,7 +119,7 @@
             @endif
 
             @if($canAccessMarkets && !$isAdminLike)
-                <a href="{{ route('markets.equipments') }}" @click="if (window.innerWidth < 1024) { mobileSidebarOpen = false }" class="gst-nav-link {{ request()->routeIs('markets.equipments') ? 'active' : '' }} flex items-center px-4 py-2.5 rounded-xl transition-all duration-200"><i class="fas fa-file-signature w-5 text-center"></i><span class="ml-3 text-sm">Marchés & Équipements</span></a>
+                <a href="{{ route('markets.equipments') }}" @click="if (window.innerWidth < 1024) { mobileSidebarOpen = false }" class="gst-nav-link {{ request()->routeIs('markets.equipments') ? 'active' : '' }} flex items-center px-4 py-2.5 rounded-xl transition-all duration-200"><i class="fas fa-file-signature w-5 text-center"></i><span class="ml-3 text-sm">Marchés et contrats de maintenance</span></a>
             @endif
 
 

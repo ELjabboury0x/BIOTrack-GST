@@ -21,6 +21,7 @@
 @endphp
 <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-md p-8">
     <h2 class="text-xl font-bold text-gray-800 mb-6">Formulaire Intervention</h2>
+
     @if ($errors->any())
         <div class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700">
             <ul class="list-disc list-inside">

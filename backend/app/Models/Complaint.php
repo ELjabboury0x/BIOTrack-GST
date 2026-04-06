@@ -132,15 +132,36 @@ class Complaint extends Model
 
     public function setPriorityAttribute($value): void
     {
+        $priorityKey = self::normalizePriorityKey($value);
+
+        // Keep DB enum compatibility (medium|urgent) while exposing only normal|urgent in UI.
+        $this->attributes['priority'] = $priorityKey === 'urgent' ? 'urgent' : 'medium';
+    }
+
+    public function getPriorityKeyAttribute(): string
+    {
+        return self::normalizePriorityKey($this->attributes['priority'] ?? null);
+    }
+
+    public function getPriorityLabelAttribute(): string
+    {
+        return self::priorityLabel($this->attributes['priority'] ?? null);
+    }
+
+    public static function normalizePriorityKey(mixed $value): string
+    {
         $raw = strtolower(trim((string) $value));
 
-        $this->attributes['priority'] = match ($raw) {
-            'normal', 'medium', 'moyenne' => 'medium',
-            'urgent' => 'urgent',
-            'high', 'haute' => 'high',
-            'low', 'basse' => 'low',
-            default => 'medium',
-        };
+        return in_array($raw, ['urgent', 'high', 'haute'], true)
+            ? 'urgent'
+            : 'normal';
+    }
+
+    public static function priorityLabel(mixed $value): string
+    {
+        return self::normalizePriorityKey($value) === 'urgent'
+            ? 'Urgente'
+            : 'Normale';
     }
 
     /**

@@ -3,6 +3,9 @@
 return [
     'show_warnings' => false,
 
+    // DomPDF resolves this path via realpath(); point it to workspace-level public/.
+    'public_path' => dirname(base_path()) . DIRECTORY_SEPARATOR . 'public',
+
     'options' => [
         'defaultFont' => 'DejaVu Serif',
         'isHtml5ParserEnabled' => true,

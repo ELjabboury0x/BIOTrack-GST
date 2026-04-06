@@ -28,7 +28,7 @@ class ComplaintCreatedNotification extends Notification
             'service_name' => (string) ($this->complaint->service?->name ?? '-'),
             'equipment_id' => $this->complaint->equipment_id,
             'equipment_label' => trim((string) ($this->complaint->equipment?->inventory_number_current ?? '') . ' ' . (string) ($this->complaint->equipment?->designation ?? '')),
-            'priority' => $this->complaint->priority,
+            'priority' => $this->complaint->priority_key,
             'status' => $this->complaint->status,
             'reported_by_name' => $this->complaint->reported_by_name,
             'description' => mb_substr((string) $this->complaint->description, 0, 180),

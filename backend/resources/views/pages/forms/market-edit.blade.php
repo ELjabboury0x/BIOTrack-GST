@@ -4,7 +4,7 @@
 
 @section('content')
 @include('components.module-page-header', [
-    'breadcrumb' => 'Modèle / Marchés & Équipements / Modifier',
+    'breadcrumb' => 'Modèle / Marchés et contrats de maintenance / Modifier',
     'addRoute' => null,
     'addLabel' => null,
     'addIcon' => null,

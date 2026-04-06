@@ -43,7 +43,7 @@ npm run realtime
 
 ### 4. Se connecter
 - URL : `http://localhost/login` (ou `http://localhost:8001/login` en accès direct Laravel)
-- Login : `ADMIN` / Mot de passe : `123456`
+- Identifiant : `admin` / Mot de passe : `123456`
 
 ---
 
@@ -51,10 +51,10 @@ npm run realtime
 
 ### Page de Connexion
 - **Design** : Carte glassmorphique avec animation heartbeat SVG
-- **Champs** : Login + Mot de passe + Sélection du service
+- **Champs** : Identifiant + Mot de passe + Sélection du service
 - **Dark mode** : Automatiquement supporté
 
-### Dashboard Principal (`/dashboard`)
+### Tableau de bord principal (`/dashboard`)
 Après connexion, 6 cartes KPI sont affichées :
 1. **Équipements** — Nombre total d'équipements
 2. **Interventions** — Interventions en cours
@@ -65,11 +65,11 @@ Après connexion, 6 cartes KPI sont affichées :
 
 Plus des graphiques Chart.js (barres, lignes, doughnut).
 
-### Sidebar (Menu Latéral)
+### Barre latérale (menu)
 Le menu est organisé par sections :
 
 **Navigation :**
-- 📊 Dashboard
+- 📊 Tableau de bord
 - 🔧 Équipements
 - 🛠️ Interventions
 - 📋 Réclamations
@@ -89,7 +89,7 @@ Le menu est organisé par sections :
 - 👥 Gestion utilisateurs
 - 🔒 Sécurité
 
-### Dark Mode
+### Mode sombre
 - Cliquer sur l'icône 🌙/☀️ dans la navbar
 - La préférence est sauvegardée automatiquement (localStorage)
 
@@ -97,9 +97,9 @@ Le menu est organisé par sections :
 
 ## 🔐 Comptes Disponibles
 
-| Login | Mot de passe | Rôle | Ce que vous verrez |
+| Identifiant | Mot de passe | Rôle (code) | Ce que vous verrez |
 |-------|-------------|------|---------------------|
-| `ADMIN` | `123456` | admin | Accès complet + admin |
+| `admin` | `123456` | admin | Accès complet + administration |
 | `MESRAR.ASMAE` | `123456` | manager | Tous les modules |
 | `KHANTOUR.MOHAMED` | `123456` | major | Lecture seule |
 | `AHADDOUT.HANAE` | `123456` | ingenieur | Données filtrées par service |
@@ -115,7 +115,7 @@ Le menu est organisé par sections :
 |-----|-------------|--------------|
 | `/` | Page d'accueil | Non |
 | `/login` | Connexion | Non |
-| `/dashboard` | Dashboard principal | Oui |
+| `/dashboard` | Tableau de bord principal | Oui |
 | `/dashboard/equipements` | Équipements | Oui |
 | `/dashboard/interventions` | Interventions | Oui |
 | `/dashboard/reclamations` | Réclamations | Oui |
@@ -140,12 +140,12 @@ Le menu est organisé par sections :
 
 ## 🎨 Fonctionnalités UI
 
-- **Dark mode** — Toggle dans la navbar, persistance automatique
+- **Mode sombre** — Bascule dans la barre de navigation, persistance automatique
 - **Toast notifications** — Messages temporaires en haut à droite
 - **SweetAlert2** — Confirmations de suppression stylisées
 - **Animations** — Entrée des cartes, hover scale, shimmer boutons
 - **Glassmorphism** — Sidebar semi-transparente avec blur
-- **Frosted glass navbar** — Effet verre givré
+- **Barre de navigation effet verre givré** — Effet visuel glassmorphism
 - **Confetti** — Effet de célébration sur certaines actions
 - **Page loader** — Animation de chargement avec heartbeat
 - **Ripple** — Effet ripple sur les boutons principaux

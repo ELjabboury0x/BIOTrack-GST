@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\EquipmentsExport;
 use App\Imports\EquipmentsHierarchyImport;
 use App\Models\Category;
 use App\Http\Requests\StoreEquipmentRequest;
@@ -21,12 +22,11 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Throwable;
 
 class EquipmentController extends Controller
@@ -366,11 +366,20 @@ class EquipmentController extends Controller
             'designationAssetImageUrl' => $designationAsset && $designationAsset->image_path
                 ? route('equipements.assets.file', ['asset' => $designationAsset->id, 'type' => 'image'])
                 : null,
+            'designationAssetImageDeleteUrl' => $designationAsset && $designationAsset->image_path
+                ? route('equipements.assets.delete', ['asset' => $designationAsset->id, 'type' => 'image'])
+                : null,
             'designationUserManualUrl' => $designationAsset && $designationAsset->user_manual_path
                 ? route('equipements.assets.file', ['asset' => $designationAsset->id, 'type' => 'user-manual'])
                 : null,
+            'designationUserManualDeleteUrl' => $designationAsset && $designationAsset->user_manual_path
+                ? route('equipements.assets.delete', ['asset' => $designationAsset->id, 'type' => 'user-manual'])
+                : null,
             'designationTechnicalManualUrl' => $designationAsset && $designationAsset->technical_manual_path
                 ? route('equipements.assets.file', ['asset' => $designationAsset->id, 'type' => 'technical-manual'])
+                : null,
+            'designationTechnicalManualDeleteUrl' => $designationAsset && $designationAsset->technical_manual_path
+                ? route('equipements.assets.delete', ['asset' => $designationAsset->id, 'type' => 'technical-manual'])
                 : null,
         ]);
     }
@@ -558,6 +567,7 @@ class EquipmentController extends Controller
 
     public function importExcelFile(Request $request)
     {
+        @ini_set('memory_limit', '1024M');
         @ini_set('max_execution_time', '0');
         @set_time_limit(0);
 
@@ -591,22 +601,27 @@ class EquipmentController extends Controller
         }
 
         try {
-            $hierarchyImport = new EquipmentsHierarchyImport(
-                $targetServiceId > 0 ? $targetServiceId : null,
-                $targetHospitalId > 0 ? $targetHospitalId : null
-            );
-            Excel::import($hierarchyImport, $validated['excel_file']);
-            $summary = $hierarchyImport->summary();
-
-            if (($summary['created'] + $summary['updated']) > 0) {
-                $this->realtimeMetricsBroadcaster->broadcastDashboardMetrics(
-                    $this->dashboardMetricsService->build()
+            $hierarchyImportError = null;
+            try {
+                $hierarchyImport = new EquipmentsHierarchyImport(
+                    $targetServiceId > 0 ? $targetServiceId : null,
+                    $targetHospitalId > 0 ? $targetHospitalId : null
                 );
+                Excel::import($hierarchyImport, $validated['excel_file']);
+                $summary = $hierarchyImport->summary();
 
-                return redirect()->route('equipements', $redirectQuery)->with(
-                    'success',
-                    "Import hiérarchique terminé. {$summary['created']} créés, {$summary['updated']} mis à jour, {$summary['skipped']} ignorés."
-                );
+                if (($summary['created'] + $summary['updated']) > 0) {
+                    $this->realtimeMetricsBroadcaster->broadcastDashboardMetrics(
+                        $this->dashboardMetricsService->build()
+                    );
+
+                    return redirect()->route('equipements', $redirectQuery)->with(
+                        'success',
+                        "Import hiérarchique terminé. {$summary['created']} créés, {$summary['updated']} mis à jour, {$summary['skipped']} ignorés."
+                    );
+                }
+            } catch (Throwable $e) {
+                $hierarchyImportError = $e->getMessage();
             }
 
             \Illuminate\Support\Facades\DB::connection()->disableQueryLog();
@@ -632,6 +647,10 @@ class EquipmentController extends Controller
                     $errorMessage = $output;
                 }
 
+                if ($hierarchyImportError !== null && trim($hierarchyImportError) !== '') {
+                    $errorMessage = ($errorMessage ?: 'échec de la commande d\'import') . ' | Erreur import hiérarchique: ' . $hierarchyImportError;
+                }
+
                 return redirect()->route('equipements', $redirectQuery)->with('error', 'Erreur import Excel: ' . ($errorMessage ?: 'échec de la commande d\'import'));
             }
 
@@ -648,7 +667,12 @@ class EquipmentController extends Controller
             $updated = (int) ($result['updated'] ?? 0);
             $skipped = (int) ($result['skipped'] ?? 0);
 
-            return redirect()->route('equipements', $redirectQuery)->with('success', "Import terminé. {$deleted} supprimés, {$created} créés, {$updated} mis à jour, {$skipped} ignorés.");
+            $successMessage = "Import terminé. {$deleted} supprimés, {$created} créés, {$updated} mis à jour, {$skipped} ignorés.";
+            if ($hierarchyImportError !== null && trim($hierarchyImportError) !== '') {
+                $successMessage .= ' (Mode fallback activé: import hiérarchique indisponible sur ce fichier.)';
+            }
+
+            return redirect()->route('equipements', $redirectQuery)->with('success', $successMessage);
         } catch (Throwable $e) {
             return redirect()->route('equipements', $redirectQuery)->with('error', 'Erreur import Excel: ' . $e->getMessage());
         }
@@ -656,6 +680,10 @@ class EquipmentController extends Controller
 
     public function exportExcel(Request $request)
     {
+        @ini_set('memory_limit', '1024M');
+        @ini_set('max_execution_time', '0');
+        @set_time_limit(0);
+
         $selectedHospitalId = $request->integer('hospital_id');
         $selectedServiceId = $request->integer('service_id');
         $selectedCategoryId = $request->integer('category_id');
@@ -666,60 +694,50 @@ class EquipmentController extends Controller
             Hospital::query()->select('id', 'code', 'name')->get()
         );
 
-        $equipments = $this->buildFilteredEquipmentQuery($selectedHospitalId, $selectedServiceId, $selectedCategoryId, $search, $sortDirection, $request->user(), $selectedHospitalIds)->get();
-        $rows = $this->formatEquipmentsForExport($equipments);
+        $exportQuery = $this->buildFilteredEquipmentQuery(
+            $selectedHospitalId,
+            $selectedServiceId,
+            $selectedCategoryId,
+            $search,
+            $sortDirection,
+            $request->user(),
+            $selectedHospitalIds
+        );
 
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        $headers = [
-            'N° inventaire',
-            'Désignation',
-            'N° de série',
-            'Unité',
-            'Secteur',
-            'Description secteur',
-            'Marque',
-            'Modèle',
-            'Marché',
-            'Lot',
-            'Article',
-            'Date réception provisoire',
-            'Durée garantie',
-            'Date réception définitive',
-            'Statut',
-        ];
-
-        $sheet->fromArray($headers, null, 'A1');
-
-        foreach ($rows as $index => $row) {
-            $sheet->fromArray([
-                $row['barcode'],
-                $row['designation'],
-                $row['serial_number'],
-                $row['unit_name'],
-                $row['sector_name'],
-                $row['sector_description'],
-                $row['brand_name'],
-                $row['model_name'],
-                $row['market_label'],
-                $row['lot_number'],
-                $row['article'],
-                $row['date_reception_provisoire'],
-                $row['duree_garantie'],
-                $row['date_reception_definitive'],
-                $row['operational_status'],
-            ], null, 'A' . ($index + 2));
-        }
-
-        foreach (range('A', 'O') as $column) {
-            $sheet->getColumnDimension($column)->setAutoSize(true);
-        }
-
+        // Export does not need eager-loaded relations; keep query lightweight to avoid timeout.
+        $exportQuery->setEagerLoads([]);
+        $exportQuery->select([
+            'id',
+            'inventory_number_current',
+            'designation',
+            'serial_number',
+            'unit_name',
+            'service_name',
+            'sector_name',
+            'sector_description',
+            'exact_location',
+            'brand_name',
+            'model_name',
+            'market_label',
+            'lot_number',
+            'article',
+            'date_reception_provisoire',
+            'duree_garantie',
+            'date_reception_definitive',
+            'operational_status',
+        ]);
         $fileName = 'equipements-complet-' . now()->format('Y-m-d-His') . '.xlsx';
-        $tempFile = storage_path('app/' . uniqid('equipements_export_', true) . '.xlsx');
-        (new Xlsx($spreadsheet))->save($tempFile);
+        $tempRelativePath = 'exports/' . uniqid('equipements_export_', true) . '.xlsx';
+        $tempAbsolutePath = storage_path('app/' . $tempRelativePath);
 
-        return response()->download($tempFile, $fileName)->deleteFileAfterSend(true);
+        Excel::store(
+            new EquipmentsExport($exportQuery),
+            $tempRelativePath,
+            null,
+            \Maatwebsite\Excel\Excel::XLSX
+        );
+
+        return response()->download($tempAbsolutePath, $fileName)->deleteFileAfterSend(true);
     }
 
     public function exportPdf(Request $request)
@@ -794,87 +812,79 @@ class EquipmentController extends Controller
     {
         $search = trim((string) $request->query('q', ''));
 
-        $assetsQuery = EquipmentDesignationAsset::query()
-            ->select(['id', 'designation', 'user_manual_path', 'technical_manual_path', 'updated_at'])
-            ->where(function ($query) {
-                $query
-                    ->whereNotNull('user_manual_path')
-                    ->orWhereNotNull('technical_manual_path');
+        $documents = collect($this->loadFormationScans())
+            ->filter(function (array $item): bool {
+                $path = trim((string) ($item['path'] ?? ''));
+
+                return $path !== '' && Storage::disk('public')->exists($path);
+            })
+            ->when($search !== '', function ($collection) use ($search) {
+                $needle = mb_strtolower($search);
+
+                return $collection->filter(function (array $item) use ($needle): bool {
+                    $title = mb_strtolower((string) ($item['title'] ?? ''));
+                    $fileName = mb_strtolower((string) ($item['file_name'] ?? ''));
+
+                    return str_contains($title, $needle) || str_contains($fileName, $needle);
+                });
+            })
+            ->sortByDesc(fn (array $item) => (string) ($item['uploaded_at'] ?? ''))
+            ->values()
+            ->map(function (array $item): array {
+                $uploadedAt = trim((string) ($item['uploaded_at'] ?? ''));
+                $formattedUploadedAt = '-';
+
+                if ($uploadedAt !== '') {
+                    try {
+                        $formattedUploadedAt = \Illuminate\Support\Carbon::parse($uploadedAt)->format('d/m/Y H:i');
+                    } catch (Throwable $e) {
+                        $formattedUploadedAt = $uploadedAt;
+                    }
+                }
+
+                return [
+                    'id' => (string) ($item['id'] ?? ''),
+                    'title' => trim((string) ($item['title'] ?? '')) !== '' ? (string) $item['title'] : 'Document scanné',
+                    'file_name' => trim((string) ($item['file_name'] ?? '')) !== ''
+                        ? (string) $item['file_name']
+                        : basename((string) ($item['path'] ?? '')),
+                    'uploaded_at' => $formattedUploadedAt,
+                    'view_url' => route('formations.scan.file', ['scan' => (string) ($item['id'] ?? '')]),
+                    'delete_url' => route('formations.scan.delete', ['scan' => (string) ($item['id'] ?? '')]),
+                ];
             });
-
-        if ($search !== '') {
-            $assetsQuery->where('designation', 'like', '%' . $search . '%');
-        }
-
-        $assets = $assetsQuery
-            ->orderBy('designation')
-            ->get();
-
-        $normalizeFileName = static function (?string $path): string {
-            if (!$path) {
-                return '-';
-            }
-
-            return basename(str_replace('\\', '/', $path));
-        };
-
-        $technicalDocuments = $assets
-            ->filter(fn (EquipmentDesignationAsset $asset) => (string) $asset->technical_manual_path !== '')
-            ->map(function (EquipmentDesignationAsset $asset) use ($normalizeFileName) {
-                return [
-                    'designation' => $asset->designation,
-                    'file_name' => $normalizeFileName($asset->technical_manual_path),
-                    'updated_at' => optional($asset->updated_at)->format('d/m/Y H:i') ?: '-',
-                    'view_url' => route('equipements.assets.file', ['asset' => $asset->id, 'type' => 'technical-manual']),
-                ];
-            })
-            ->values();
-
-        $userDocuments = $assets
-            ->filter(fn (EquipmentDesignationAsset $asset) => (string) $asset->user_manual_path !== '')
-            ->map(function (EquipmentDesignationAsset $asset) use ($normalizeFileName) {
-                return [
-                    'designation' => $asset->designation,
-                    'file_name' => $normalizeFileName($asset->user_manual_path),
-                    'updated_at' => optional($asset->updated_at)->format('d/m/Y H:i') ?: '-',
-                    'view_url' => route('equipements.assets.file', ['asset' => $asset->id, 'type' => 'user-manual']),
-                ];
-            })
-            ->values();
 
         return view('pages.formations.index', [
             'search' => $search,
-            'technicalDocuments' => $technicalDocuments,
-            'userDocuments' => $userDocuments,
+            'documents' => $documents,
         ]);
     }
 
     public function importFormationPdf(Request $request)
     {
         $validated = $request->validate([
-            'designation' => 'required|string|max:500',
-            'document_kind' => 'required|in:user_manual,technical_manual',
-            'formation_pdf' => 'required|file|mimes:pdf|max:15360',
+            'scan_title' => 'nullable|string|max:500',
+            'scanned_pdf' => 'required|file|mimes:pdf|max:51200',
         ]);
 
-        $designation = trim((string) $validated['designation']);
-        $documentKind = (string) $validated['document_kind'];
-        $uploadedPdf = $request->file('formation_pdf');
+        $scanTitle = trim((string) ($validated['scan_title'] ?? ''));
+        $uploadedPdf = $request->file('scanned_pdf');
 
-        $asset = EquipmentDesignationAsset::query()->firstOrCreate([
-            'designation' => $designation,
-        ]);
+        if (!$uploadedPdf) {
+            return redirect()
+                ->route('formations.index')
+                ->with('error', 'Aucun PDF valide n\'a été fourni.');
+        }
 
-        $storageDirectory = $documentKind === 'technical_manual'
-            ? 'equipments/designation-assets/technical-manuals'
-            : 'equipments/designation-assets/user-manuals';
+        $storageDirectory = 'formations/scanned';
+        $scanId = (string) Str::uuid();
 
         $originalName = (string) $uploadedPdf->getClientOriginalName();
         $originalBaseName = (string) pathinfo($originalName, PATHINFO_FILENAME);
         $safeBaseName = preg_replace('/[^A-Za-z0-9._-]+/', '-', $originalBaseName);
         $safeBaseName = trim((string) $safeBaseName, '.-_');
         if ($safeBaseName === '') {
-            $safeBaseName = $documentKind === 'technical_manual' ? 'formation-technique' : 'formation-utilisateur';
+            $safeBaseName = 'scan-formation';
         }
 
         $extension = strtolower((string) $uploadedPdf->getClientOriginalExtension());
@@ -882,60 +892,57 @@ class EquipmentController extends Controller
             $extension = 'pdf';
         }
 
-        $fileName = $safeBaseName . '.' . $extension;
-        $counter = 1;
-        while (Storage::disk('public')->exists($storageDirectory . '/' . $fileName)) {
-            $counter++;
-            $fileName = $safeBaseName . '-' . $counter . '.' . $extension;
-        }
-
+        $fileName = $scanId . '-' . $safeBaseName . '.' . $extension;
         $storedPath = $uploadedPdf->storeAs($storageDirectory, $fileName, 'public');
 
-        if ($documentKind === 'technical_manual') {
-            if ($asset->technical_manual_path) {
-                Storage::disk('public')->delete($asset->technical_manual_path);
-            }
-            $asset->technical_manual_path = $storedPath;
-        } else {
-            if ($asset->user_manual_path) {
-                Storage::disk('public')->delete($asset->user_manual_path);
-            }
-            $asset->user_manual_path = $storedPath;
-        }
+        $rows = $this->loadFormationScans();
+        $rows[] = [
+            'id' => $scanId,
+            'title' => $scanTitle,
+            'file_name' => $fileName,
+            'path' => $storedPath,
+            'uploaded_at' => now()->toDateTimeString(),
+        ];
 
-        $asset->save();
+        $this->saveFormationScans($rows);
 
         return redirect()
             ->route('formations.index')
-            ->with('success', 'PDF importé avec succès pour la désignation: ' . $designation . '.');
+            ->with('success', 'PDF scanné importé avec succès.');
     }
 
     public function exportFormationsPdf(Request $request)
     {
         $search = trim((string) $request->query('q', ''));
 
-        $assetsQuery = EquipmentDesignationAsset::query()
-            ->select(['designation', 'user_manual_path', 'technical_manual_path', 'updated_at'])
-            ->where(function ($query) {
-                $query
-                    ->whereNotNull('user_manual_path')
-                    ->orWhereNotNull('technical_manual_path');
-            });
+        $rows = collect($this->loadFormationScans())
+            ->filter(function (array $item): bool {
+                $path = trim((string) ($item['path'] ?? ''));
 
-        if ($search !== '') {
-            $assetsQuery->where('designation', 'like', '%' . $search . '%');
-        }
+                return $path !== '' && Storage::disk('public')->exists($path);
+            })
+            ->when($search !== '', function ($collection) use ($search) {
+                $needle = mb_strtolower($search);
 
-        $assets = $assetsQuery->orderBy('designation')->get();
+                return $collection->filter(function (array $item) use ($needle): bool {
+                    $title = mb_strtolower((string) ($item['title'] ?? ''));
+                    $fileName = mb_strtolower((string) ($item['file_name'] ?? ''));
 
-        $rows = $assets->map(function (EquipmentDesignationAsset $asset) {
-            return [
-                'designation' => $asset->designation ?: '-',
-                'technical_file' => $asset->technical_manual_path ? basename(str_replace('\\', '/', $asset->technical_manual_path)) : '-',
-                'user_file' => $asset->user_manual_path ? basename(str_replace('\\', '/', $asset->user_manual_path)) : '-',
-                'updated_at' => optional($asset->updated_at)->format('d/m/Y H:i') ?: '-',
-            ];
-        })->values();
+                    return str_contains($title, $needle) || str_contains($fileName, $needle);
+                });
+            })
+            ->sortByDesc(fn (array $item) => (string) ($item['uploaded_at'] ?? ''))
+            ->values()
+            ->map(function (array $item): array {
+                return [
+                    'title' => trim((string) ($item['title'] ?? '')) !== '' ? (string) $item['title'] : 'Document scanné',
+                    'file_name' => trim((string) ($item['file_name'] ?? '')) !== ''
+                        ? (string) $item['file_name']
+                        : basename((string) ($item['path'] ?? '')),
+                    'uploaded_at' => trim((string) ($item['uploaded_at'] ?? '')) !== '' ? (string) $item['uploaded_at'] : '-',
+                ];
+            })
+            ->all();
 
         $pdf = Pdf::loadView('pdf.formations', [
             'rows' => $rows,
@@ -944,6 +951,54 @@ class EquipmentController extends Controller
         ])->setPaper('a4', 'landscape');
 
         return $pdf->download('formations-' . now()->format('Y-m-d-His') . '.pdf');
+    }
+
+    public function formationScanFile(string $scan)
+    {
+        $record = collect($this->loadFormationScans())
+            ->first(fn (array $item): bool => (string) ($item['id'] ?? '') === $scan);
+
+        if (!$record) {
+            abort(404);
+        }
+
+        $path = trim((string) ($record['path'] ?? ''));
+        if ($path === '' || !Storage::disk('public')->exists($path)) {
+            abort(404);
+        }
+
+        return response()->file(Storage::disk('public')->path($path), [
+            'Content-Disposition' => 'inline; filename="' . basename($path) . '"',
+            'Content-Type' => 'application/pdf',
+        ]);
+    }
+
+    public function deleteFormationScan(string $scan)
+    {
+        $rows = collect($this->loadFormationScans());
+        $record = $rows->first(fn (array $item): bool => (string) ($item['id'] ?? '') === $scan);
+
+        if (!$record) {
+            return redirect()
+                ->route('formations.index')
+                ->with('error', 'Document introuvable.');
+        }
+
+        $path = trim((string) ($record['path'] ?? ''));
+        if ($path !== '' && Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
+        }
+
+        $remaining = $rows
+            ->reject(fn (array $item): bool => (string) ($item['id'] ?? '') === $scan)
+            ->values()
+            ->all();
+
+        $this->saveFormationScans($remaining);
+
+        return redirect()
+            ->route('formations.index')
+            ->with('success', 'Document scanné supprimé.');
     }
 
     public function designationAssetFile(EquipmentDesignationAsset $asset, string $type)
@@ -977,6 +1032,48 @@ class EquipmentController extends Controller
         return response()->file($fullPath, [
             'Content-Disposition' => 'inline; filename="' . basename($fullPath) . '"',
             'Content-Type' => 'application/pdf',
+        ]);
+    }
+
+    public function deleteDesignationAssetFile(Request $request, EquipmentDesignationAsset $asset, string $type)
+    {
+        $type = strtolower(trim($type));
+
+        $column = match ($type) {
+            'image' => 'image_path',
+            'user-manual' => 'user_manual_path',
+            'technical-manual' => 'technical_manual_path',
+            default => null,
+        };
+
+        if ($column === null) {
+            return response()->json([
+                'ok' => false,
+                'message' => 'Type de fichier invalide.',
+            ], 422);
+        }
+
+        $existingPath = (string) ($asset->{$column} ?? '');
+        if ($existingPath !== '') {
+            Storage::disk('public')->delete($existingPath);
+        }
+
+        $asset->{$column} = null;
+
+        $noFilesLeft =
+            (string) ($asset->image_path ?? '') === ''
+            && (string) ($asset->user_manual_path ?? '') === ''
+            && (string) ($asset->technical_manual_path ?? '') === '';
+
+        if ($noFilesLeft) {
+            $asset->delete();
+        } else {
+            $asset->save();
+        }
+
+        return response()->json([
+            'ok' => true,
+            'message' => 'Fichier supprimé avec succès pour cette désignation.',
         ]);
     }
 
@@ -1220,10 +1317,7 @@ class EquipmentController extends Controller
             ];
         }
 
-        $service = Service::query()
-            ->whereRaw('LOWER(name) = LOWER(?)', [$unitName])
-            ->orWhereRaw('LOWER(code) = LOWER(?)', [$unitName])
-            ->first();
+        $service = $this->resolveServiceFromUnitName($unitName);
 
         if (!$service) {
             return [
@@ -1268,6 +1362,110 @@ class EquipmentController extends Controller
             'hospital_id' => $service->hospital_id,
             'room_id' => $roomId,
         ];
+    }
+
+    private function loadFormationScans(): array
+    {
+        $indexPath = 'formations/scanned-index.json';
+
+        if (!Storage::disk('local')->exists($indexPath)) {
+            return [];
+        }
+
+        $decoded = json_decode((string) Storage::disk('local')->get($indexPath), true);
+
+        return is_array($decoded) ? array_values($decoded) : [];
+    }
+
+    private function saveFormationScans(array $rows): void
+    {
+        Storage::disk('local')->put(
+            'formations/scanned-index.json',
+            json_encode(array_values($rows), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+        );
+    }
+
+    private function resolveServiceFromUnitName(string $unitName): ?Service
+    {
+        $unitName = trim($unitName);
+        if ($unitName === '') {
+            return null;
+        }
+
+        $exact = Service::query()
+            ->whereRaw('LOWER(name) = LOWER(?)', [$unitName])
+            ->orWhereRaw('LOWER(code) = LOWER(?)', [$unitName])
+            ->first();
+
+        if ($exact) {
+            return $exact;
+        }
+
+        $searchTokens = $this->buildServiceLookupTokens($unitName);
+        if ($searchTokens === []) {
+            return null;
+        }
+
+        $services = Service::query()->get(['id', 'zone_id', 'hospital_id', 'name', 'code']);
+
+        $bestService = null;
+        $bestScore = 0;
+
+        foreach ($services as $service) {
+            $serviceTokens = $this->buildServiceLookupTokens(
+                trim((string) ($service->name ?? '')) . ' ' . trim((string) ($service->code ?? ''))
+            );
+
+            if ($serviceTokens === []) {
+                continue;
+            }
+
+            $score = 0;
+            foreach ($searchTokens as $searchToken) {
+                foreach ($serviceTokens as $serviceToken) {
+                    if ($searchToken === $serviceToken) {
+                        $score += 10;
+                    } elseif (strlen($searchToken) >= 4 && str_contains($serviceToken, $searchToken)) {
+                        $score += 4;
+                    } elseif (strlen($serviceToken) >= 4 && str_contains($searchToken, $serviceToken)) {
+                        $score += 3;
+                    }
+                }
+            }
+
+            if ($score > $bestScore) {
+                $bestScore = $score;
+                $bestService = $service;
+            }
+        }
+
+        return $bestScore >= 8 ? $bestService : null;
+    }
+
+    private function buildServiceLookupTokens(string $value): array
+    {
+        $normalized = trim((string) Str::lower(Str::ascii($value)));
+        if ($normalized === '') {
+            return [];
+        }
+
+        $normalized = preg_replace('/[^a-z0-9\s]+/u', ' ', $normalized) ?? $normalized;
+        $normalized = preg_replace('/\s+/u', ' ', $normalized) ?? $normalized;
+        $normalized = trim($normalized);
+
+        if ($normalized === '') {
+            return [];
+        }
+
+        $tokens = [$normalized, str_replace(' ', '', $normalized)];
+
+        foreach (preg_split('/\s+/', $normalized) ?: [] as $part) {
+            if (strlen($part) >= 4) {
+                $tokens[] = $part;
+            }
+        }
+
+        return array_values(array_unique(array_filter($tokens)));
     }
 
     private function deduplicateHospitals($hospitals)

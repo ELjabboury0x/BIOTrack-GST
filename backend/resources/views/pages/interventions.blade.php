@@ -7,14 +7,9 @@
     'breadcrumb' => 'Modèle / OT/DM (PM-BIO)',
     'addRoute' => 'interventions.create',
     'addLabel' => 'Ajouter une intervention',
-    'addIcon' => 'fa-user-doctor'
+    'addIcon' => 'fa-user-doctor',
+    'buttonStyle' => 'equipments',
 ])
-
-<div class="mb-4 flex justify-end">
-    <a href="{{ route('interventions.codes') }}" class="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-200 font-semibold flex items-center">
-        <i class="fas fa-notes-medical mr-2"></i> IW38-BM (OT/DM)
-    </a>
-</div>
 
 @if (session('success'))
     <div class="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-green-700">
@@ -35,6 +30,7 @@
 @include('components.table', [
     'data' => $interventionsData ?? [],
     'showAddButton' => false,
+    'buttonStyle' => 'equipments',
     'columns' => [
         ['key' => 'code', 'label' => 'Code Intervention', 'visible' => true, 'type' => 'text'],
         ['key' => 'reclamation', 'label' => 'N° Réclamation', 'visible' => true, 'type' => 'text'],
@@ -45,4 +41,21 @@
     ]
 ])
 
+@endsection
+
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const headerActions = document.querySelector('.module-page-header-actions');
+    const toolbarActions = document.querySelector('.table-toolbar-actions');
+
+    if (!headerActions || !toolbarActions) {
+        return;
+    }
+
+    toolbarActions.classList.remove('justify-center');
+    toolbarActions.classList.add('items-center');
+    headerActions.prepend(toolbarActions);
+});
+</script>
 @endsection

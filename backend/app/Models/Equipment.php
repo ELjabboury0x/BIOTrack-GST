@@ -142,6 +142,16 @@ class Equipment extends Model
         return $this->hasMany(MaintenanceReport::class);
     }
 
+    public function getDesignationAttribute($value): ?string
+    {
+        return self::normalizeEquipmentText($value);
+    }
+
+    public function setDesignationAttribute($value): void
+    {
+        $this->attributes['designation'] = self::normalizeEquipmentText($value);
+    }
+
     /**
      * Scope: filter equipments visible to given user according to role.
      * - admin / ingenieur => all
@@ -169,5 +179,55 @@ class Equipment extends Model
 
         // default deny
         return $query->whereRaw('1 = 0');
+    }
+
+    private static function normalizeEquipmentText($value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $text = trim((string) $value);
+        if ($text === '') {
+            return '';
+        }
+
+        // Recover text when bytes were saved with a non-UTF8 encoding.
+        if (!mb_check_encoding($text, 'UTF-8')) {
+            $converted = @mb_convert_encoding($text, 'UTF-8', 'Windows-1252,ISO-8859-1');
+            if (is_string($converted) && $converted !== '') {
+                $text = $converted;
+            }
+        }
+
+        // Fix classic mojibake patterns such as "Ã©" => "é".
+        if (str_contains($text, 'Ã') || str_contains($text, 'Â') || str_contains($text, 'â')) {
+            $candidate = @mb_convert_encoding($text, 'UTF-8', 'ISO-8859-1');
+            if (is_string($candidate) && $candidate !== '' && self::encodingNoiseScore($candidate) < self::encodingNoiseScore($text)) {
+                $text = $candidate;
+            }
+        }
+
+        // Repair known replacement artifacts seen in imported equipment labels.
+        $text = str_ireplace(
+            ['??quipement', '?quipement', 'biom??dical', 'biom?dical', 'p??diatrique', 'p?diatrique', 'r??animation', 'r?animation'],
+            ['équipement', 'équipement', 'biomédical', 'biomédical', 'pédiatrique', 'pédiatrique', 'réanimation', 'réanimation'],
+            $text
+        );
+
+        // Remove non-printable control characters and normalize spaces.
+        $text = preg_replace('/[\x00-\x1F\x7F]/u', '', $text) ?? $text;
+        $text = preg_replace('/\s+/u', ' ', $text) ?? $text;
+
+        return trim($text);
+    }
+
+    private static function encodingNoiseScore(string $value): int
+    {
+        return substr_count($value, 'Ã')
+            + substr_count($value, 'Â')
+            + substr_count($value, 'â')
+            + substr_count($value, '�')
+            + (substr_count($value, '??') * 2);
     }
 }

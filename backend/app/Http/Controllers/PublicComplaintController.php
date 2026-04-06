@@ -197,10 +197,12 @@ class PublicComplaintController extends Controller
         $serviceCode = mb_strtoupper(trim((string) ($service->code ?? '')));
         $serviceNameToken = $this->normalizeServiceToken($serviceName);
         $serviceCodeToken = $this->normalizeServiceToken($serviceCode);
+        $serviceNameExpr = $this->normalizedEquipmentTokenExpression('service_name');
+        $unitNameExpr = $this->normalizedEquipmentTokenExpression('unit_name');
 
         $query = Equipment::query()
             ->select(['id', 'service_id', 'inventory_number_current', 'designation'])
-            ->where(function ($query) use ($service, $serviceName, $serviceCode, $serviceNameToken, $serviceCodeToken) {
+            ->where(function ($query) use ($service, $serviceName, $serviceCode, $serviceNameToken, $serviceCodeToken, $serviceNameExpr, $unitNameExpr) {
                 $query->where('service_id', $service->id);
 
                 if ($serviceName !== '') {
@@ -218,13 +220,13 @@ class PublicComplaintController extends Controller
                 }
 
                 if ($serviceNameToken !== '') {
-                    $query->orWhereRaw("REPLACE(REPLACE(REPLACE(REPLACE(UPPER(TRIM(service_name)), ' ', ''), '-', ''), '_', ''), '/', '') like ?", ['%' . $serviceNameToken . '%'])
-                        ->orWhereRaw("REPLACE(REPLACE(REPLACE(REPLACE(UPPER(TRIM(unit_name)), ' ', ''), '-', ''), '_', ''), '/', '') like ?", ['%' . $serviceNameToken . '%']);
+                    $query->orWhereRaw($serviceNameExpr . ' like ?', ['%' . $serviceNameToken . '%'])
+                        ->orWhereRaw($unitNameExpr . ' like ?', ['%' . $serviceNameToken . '%']);
                 }
 
                 if ($serviceCodeToken !== '') {
-                    $query->orWhereRaw("REPLACE(REPLACE(REPLACE(REPLACE(UPPER(TRIM(service_name)), ' ', ''), '-', ''), '_', ''), '/', '') like ?", ['%' . $serviceCodeToken . '%'])
-                        ->orWhereRaw("REPLACE(REPLACE(REPLACE(REPLACE(UPPER(TRIM(unit_name)), ' ', ''), '-', ''), '_', ''), '/', '') like ?", ['%' . $serviceCodeToken . '%']);
+                    $query->orWhereRaw($serviceNameExpr . ' like ?', ['%' . $serviceCodeToken . '%'])
+                        ->orWhereRaw($unitNameExpr . ' like ?', ['%' . $serviceCodeToken . '%']);
                 }
             });
 
@@ -241,7 +243,12 @@ class PublicComplaintController extends Controller
     {
         $ascii = Str::upper(Str::ascii(trim($value)));
 
-        return str_replace([' ', '-', '_', '/'], '', $ascii);
+        return preg_replace('/[^A-Z0-9]+/', '', $ascii) ?? '';
+    }
+
+    private function normalizedEquipmentTokenExpression(string $column): string
+    {
+        return "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(UPPER(TRIM($column)), ' ', ''), '-', ''), '_', ''), '/', ''), '\'', ''), '’', ''), '.', ''), ',', '')";
     }
 
     private function isAllowedService(Service $service): bool

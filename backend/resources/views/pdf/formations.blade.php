@@ -14,34 +14,32 @@
     </style>
 </head>
 <body>
-    <h1>Catalogue des formations PDF</h1>
+    <h1>Bibliotheque des scans PDF</h1>
     <div class="meta">
         Généré le: {{ $generatedAt ?? '-' }}
         @if (($search ?? '') !== '')
-            | Filtre désignation: {{ $search }}
+            | Filtre: {{ $search }}
         @endif
     </div>
 
     <table>
         <thead>
             <tr>
-                <th style="width: 30%;">Désignation</th>
-                <th style="width: 28%;">Formation technique</th>
-                <th style="width: 28%;">Formation utilisateur</th>
-                <th style="width: 14%;">Mise à jour</th>
+                <th style="width: 42%;">Titre</th>
+                <th style="width: 38%;">Fichier PDF</th>
+                <th style="width: 20%;">Date import</th>
             </tr>
         </thead>
         <tbody>
             @forelse(($rows ?? []) as $row)
                 <tr>
-                    <td>{{ $row['designation'] ?? '-' }}</td>
-                    <td>{{ $row['technical_file'] ?? '-' }}</td>
-                    <td>{{ $row['user_file'] ?? '-' }}</td>
-                    <td>{{ $row['updated_at'] ?? '-' }}</td>
+                    <td>{{ $row['title'] ?? '-' }}</td>
+                    <td>{{ $row['file_name'] ?? '-' }}</td>
+                    <td>{{ $row['uploaded_at'] ?? '-' }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="4" class="muted">Aucune formation PDF disponible.</td>
+                    <td colspan="3" class="muted">Aucun scan PDF disponible.</td>
                 </tr>
             @endforelse
         </tbody>

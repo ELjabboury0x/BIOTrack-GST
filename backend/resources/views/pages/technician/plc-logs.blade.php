@@ -11,7 +11,7 @@
         @forelse($lines as $line)
             <div>{{ $line }}</div>
         @empty
-            <div>Aucun log disponible.</div>
+            <div>Aucun journal disponible.</div>
         @endforelse
     </div>
 </div>

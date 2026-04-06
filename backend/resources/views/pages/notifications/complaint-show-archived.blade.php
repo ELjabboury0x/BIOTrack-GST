@@ -38,7 +38,7 @@
         </div>
         <div class="p-4 rounded-lg bg-gray-50 border border-gray-200">
             <p class="text-gray-500">Statut / Priorité</p>
-            <p class="font-semibold text-gray-800 mt-1 uppercase">{{ $notificationData['status'] ?? '-' }} / {{ $notificationData['priority'] ?? '-' }}</p>
+            <p class="font-semibold text-gray-800 mt-1 uppercase">{{ $notificationData['status'] ?? '-' }} / {{ $priorityLabel ?? '-' }}</p>
         </div>
     </div>
 

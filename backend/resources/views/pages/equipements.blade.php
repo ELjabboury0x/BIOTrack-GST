@@ -9,44 +9,73 @@
 
 <div class="mb-4 flex flex-wrap justify-end gap-3">
     @if(auth()->user()?->role !== 'major')
-    <form method="POST" action="{{ route('equipements.import-excel') }}" enctype="multipart/form-data" class="flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-3 py-2 shadow-sm">
+    <form id="equipments-import-form" method="POST" action="{{ route('equipements.import-excel') }}" enctype="multipart/form-data" class="inline-flex">
         @csrf
         <input type="hidden" name="replace_existing" value="0">
-        <input type="file" name="excel_file" accept=".xlsx,.xls" required class="text-sm text-gray-700 max-w-[220px]">
-        <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-200 font-semibold flex items-center text-sm">
-            <i class="fas fa-file-excel mr-2"></i> Importer Excel
+        <input id="equipments-import-file" type="file" name="excel_file" accept=".xlsx,.xls" required class="hidden">
+        <button id="equipments-import-trigger" type="button" class="inline-flex h-10 items-center gap-2 rounded-lg bg-emerald-600 px-4 text-sm font-semibold text-white transition-all duration-200 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-300">
+            <i class="fas fa-file-excel"></i>
+            <span>Importer</span>
         </button>
     </form>
 
     <a href="{{ route('equipments.create') }}"
-       class="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 font-semibold flex items-center">
-        <i class="fas fa-plus mr-2"></i> Ajouter manuellement
+       class="inline-flex h-10 items-center gap-2 rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white transition-all duration-200 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300">
+        <i class="fas fa-plus"></i>
+        <span>Ajouter manuellement</span>
     </a>
     @endif
 
     <div x-data="{ open: false }" class="relative">
         <button type="button"
                 @click="open = !open"
-                class="px-5 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-200 font-semibold flex items-center">
-            <i class="fas fa-file-export mr-2"></i> Exporter
+                class="inline-flex h-10 items-center gap-2 rounded-lg bg-slate-700 px-4 text-sm font-semibold text-white transition-all duration-200 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-300">
+            <i class="fas fa-file-export"></i>
+            <span>Exporter</span>
         </button>
         <div x-show="open"
              @click.away="open = false"
              x-transition
-             class="absolute right-0 mt-2 w-44 bg-white rounded-lg shadow-xl border border-gray-100 z-50 overflow-hidden">
+             class="absolute right-0 mt-2 w-44 overflow-hidden rounded-lg border border-gray-100 bg-white shadow-xl z-50">
             <button type="button"
                     @click="open = false; exportTableToExcel()"
-                    class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                    class="w-full px-4 py-2 text-left text-sm text-gray-700 transition-colors hover:bg-gray-50">
                 Excel
             </button>
             <button type="button"
                     @click="open = false; exportTableToPdf()"
-                    class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 border-t border-gray-100">
+                    class="w-full border-t border-gray-100 px-4 py-2 text-left text-sm text-gray-700 transition-colors hover:bg-gray-50">
                 PDF
             </button>
         </div>
     </div>
 </div>
+
+@if(auth()->user()?->role !== 'major')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('equipments-import-form');
+    const fileInput = document.getElementById('equipments-import-file');
+    const triggerBtn = document.getElementById('equipments-import-trigger');
+
+    if (!form || !fileInput || !triggerBtn) {
+        return;
+    }
+
+    triggerBtn.addEventListener('click', function () {
+        fileInput.click();
+    });
+
+    fileInput.addEventListener('change', function () {
+        if (!fileInput.files || fileInput.files.length === 0) {
+            return;
+        }
+
+        form.submit();
+    });
+});
+</script>
+@endif
 
 <div class="mb-4 bg-white rounded-xl shadow-md p-4">
     <form method="GET" action="{{ route('equipements') }}" class="flex flex-col md:flex-row md:items-end gap-4" id="equipments-filter-form">
@@ -86,66 +115,6 @@
             <a href="{{ route('equipements') }}" class="px-5 py-2 border border-gray-300 rounded-lg text-gray-700">Réinitialiser</a>
         </div>
     </form>
-</div>
-
-<div class="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-    <div class="bg-white rounded-xl shadow-md border border-gray-100 p-4">
-        <div class="text-xs uppercase tracking-wide text-gray-500 mb-2">Étape 1</div>
-        <h4 class="text-sm font-semibold text-gray-800 mb-3">Hôpital</h4>
-        <div class="space-y-2 max-h-48 overflow-y-auto pr-1">
-            @foreach (collect($hospitals ?? [])->filter() as $hospital)
-                <div class="rounded-lg border px-3 py-2 transition {{ (int) ($selectedHospitalId ?? 0) === (int) data_get($hospital, 'id') ? 'bg-blue-50 border-blue-200' : 'bg-white border-gray-200 hover:border-blue-200 hover:bg-blue-50/40' }}">
-                    <a href="{{ route('equipements', array_merge(request()->query(), ['hospital_id' => data_get($hospital, 'id'), 'service_id' => null])) }}"
-                       class="block text-sm font-medium {{ (int) ($selectedHospitalId ?? 0) === (int) data_get($hospital, 'id') ? 'text-blue-700' : 'text-gray-700' }}">
-                        {{ data_get($hospital, 'name') }}
-                    </a>
-
-                    @if(auth()->user()?->role !== 'major')
-                        <form method="POST" action="{{ route('equipements.import-excel') }}" enctype="multipart/form-data" class="mt-2 flex items-center gap-2">
-                            @csrf
-                            <input type="hidden" name="replace_existing" value="0">
-                            <input type="hidden" name="hospital_id" value="{{ (int) data_get($hospital, 'id') }}">
-                            <input type="file" name="excel_file" accept=".xlsx,.xls" required class="text-[11px] text-gray-700 max-w-[170px]">
-                            <button type="submit" class="px-2.5 py-1.5 bg-green-600 text-white rounded-md hover:bg-green-700 transition-all duration-200 text-[11px] font-semibold">
-                                Importer
-                            </button>
-                        </form>
-                    @endif
-                </div>
-            @endforeach
-        </div>
-    </div>
-    <div class="bg-white rounded-xl shadow-md border border-gray-100 p-4">
-        <div class="text-xs uppercase tracking-wide text-gray-500 mb-2">Étape 2</div>
-        <h4 class="text-sm font-semibold text-gray-800 mb-3">Service</h4>
-        <div class="space-y-2 max-h-48 overflow-y-auto pr-1">
-            @foreach (collect($services ?? [])->filter() as $service)
-                <div class="rounded-lg border px-3 py-2 transition {{ (int) ($selectedServiceId ?? 0) === (int) data_get($service, 'id') ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-gray-200 hover:border-emerald-200 hover:bg-emerald-50/40' }}">
-                    <a href="{{ route('equipements', array_merge(request()->query(), ['hospital_id' => $selectedHospitalId, 'service_id' => data_get($service, 'id')])) }}"
-                       class="block text-sm font-medium {{ (int) ($selectedServiceId ?? 0) === (int) data_get($service, 'id') ? 'text-emerald-700' : 'text-gray-700' }}">
-                        {{ data_get($service, 'name') }}
-                    </a>
-
-                    @if(auth()->user()?->role !== 'major')
-                        <form method="POST" action="{{ route('equipements.import-excel') }}" enctype="multipart/form-data" class="mt-2 flex items-center gap-2">
-                            @csrf
-                            <input type="hidden" name="replace_existing" value="0">
-                            <input type="hidden" name="service_id" value="{{ (int) data_get($service, 'id') }}">
-                            <input type="file" name="excel_file" accept=".xlsx,.xls" required class="text-[11px] text-gray-700 max-w-[170px]">
-                            <button type="submit" class="px-2.5 py-1.5 bg-green-600 text-white rounded-md hover:bg-green-700 transition-all duration-200 text-[11px] font-semibold">
-                                Importer
-                            </button>
-                        </form>
-                    @endif
-                </div>
-            @endforeach
-            @if (collect($services ?? [])->isEmpty())
-                <div class="rounded-lg border border-dashed border-gray-300 px-3 py-2 text-sm text-gray-500">
-                    Sélectionnez un hôpital pour afficher ses services.
-                </div>
-            @endif
-        </div>
-    </div>
 </div>
 
 @if (session('success'))
@@ -276,7 +245,7 @@
                                         Inventaire: <span id="detail-pill-inv" class="ml-1">-</span>
                                     </span>
                                     <span id="detail-pill-status-badge" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
-                                        Status: <span id="detail-pill-status" class="ml-1">-</span>
+                                        Statut : <span id="detail-pill-status" class="ml-1">-</span>
                                     </span>
                                     <span id="detail-pill-state-badge" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-violet-50 text-violet-700 border border-violet-200">
                                         État: <span id="detail-pill-state" class="ml-1">-</span>
@@ -307,7 +276,7 @@
                                             <div><span class="font-semibold text-gray-700">Date de réception provisoire:</span> <span id="detail-reception-provisoire" class="text-gray-800">-</span></div>
                                             <div><span class="font-semibold text-gray-700">Durée de garantie:</span> <span id="detail-duree-garantie" class="text-gray-800">-</span></div>
                                             <div><span class="font-semibold text-gray-700">Date de réception définitive:</span> <span id="detail-reception-definitive" class="text-gray-800">-</span></div>
-                                            <div><span class="font-semibold text-gray-700">Status:</span> <span id="detail-status" class="text-gray-800">-</span></div>
+                                            <div><span class="font-semibold text-gray-700">Statut :</span> <span id="detail-status" class="text-gray-800">-</span></div>
                                             <div><span class="font-semibold text-gray-700">Statut / État:</span> <span id="detail-statut-etat" class="text-gray-800">-</span></div>
                                         </div>
                                     </div>
@@ -853,6 +822,11 @@
         const dropdown = document.getElementById('status-dropdown');
         const button = event.currentTarget;
         const rect = button.getBoundingClientRect();
+
+        // Ensure dropdown is rendered at body level to avoid transformed/scroll container offsets.
+        if (dropdown.parentElement !== document.body) {
+            document.body.appendChild(dropdown);
+        }
         
         // Toggle close if same button
         if (currentStatusDropdownId === equipmentId && !dropdown.classList.contains('hidden')) {
@@ -862,29 +836,46 @@
         
         currentStatusDropdownId = equipmentId;
         currentStatusButton = button;
-        
-        // Position below button - always inside viewport
-        const dropdownWidth = 220;
-        
-        // This calculates the horizontal center of the screen
-        const screenCenterX = window.scrollX + (window.innerWidth / 2);
-        
-        // This calculates the vertical center of the screen
-        const screenCenterY = window.scrollY + (window.innerHeight / 2);
 
-        // Center on screen horizontally
-        let left = screenCenterX - (dropdownWidth / 2);
-        
-        // Center on screen vertically (assuming dropdown is roughly 160px tall)
-        let top = screenCenterY - 80;
+        const viewportPadding = 8;
+        const preferredGap = 8;
+        const minWidth = 220;
+        const pageScrollX = window.scrollX || window.pageXOffset || 0;
+        const pageScrollY = window.scrollY || window.pageYOffset || 0;
 
-        dropdown.style.top = top + 'px';
-        dropdown.style.left = left + 'px';
-        dropdown.style.minWidth = dropdownWidth + 'px';
-        
-        // Add a backdrop shadow effect when opened essentially turning it into a pure modal
-        dropdown.style.boxShadow = '0 0 0 9999px rgba(0,0,0,0.5), 0 25px 50px -12px rgba(0, 0, 0, 0.25)';
+        dropdown.style.position = 'absolute';
+        dropdown.style.minWidth = minWidth + 'px';
         dropdown.classList.remove('hidden');
+        dropdown.style.visibility = 'hidden';
+
+        const dropdownWidth = Math.max(minWidth, dropdown.offsetWidth || minWidth);
+        const dropdownHeight = dropdown.offsetHeight || 180;
+
+        // Anchor under the clicked status button.
+        let left = pageScrollX + rect.left;
+        let top = pageScrollY + rect.bottom + preferredGap;
+
+        const viewportRight = pageScrollX + window.innerWidth;
+        const viewportBottom = pageScrollY + window.innerHeight;
+
+        if (left + dropdownWidth > viewportRight - viewportPadding) {
+            left = viewportRight - dropdownWidth - viewportPadding;
+        }
+        if (left < pageScrollX + viewportPadding) {
+            left = pageScrollX + viewportPadding;
+        }
+
+        if (top + dropdownHeight > viewportBottom - viewportPadding) {
+            top = pageScrollY + rect.top - dropdownHeight - preferredGap;
+        }
+        if (top < pageScrollY + viewportPadding) {
+            top = pageScrollY + viewportPadding;
+        }
+
+        dropdown.style.top = Math.round(top) + 'px';
+        dropdown.style.left = Math.round(left) + 'px';
+        dropdown.style.visibility = 'visible';
+        dropdown.style.boxShadow = '';
         
         // Animate in
         dropdown.style.opacity = '0';
@@ -901,6 +892,7 @@
     function closeStatusDropdown() {
         const dropdown = document.getElementById('status-dropdown');
         dropdown.classList.add('hidden');
+        dropdown.style.visibility = '';
         currentStatusDropdownId = null;
         currentStatusButton = null;
     }

@@ -57,13 +57,28 @@ class EquipmentsHierarchyImport implements ToCollection, WithHeadingRow, SkipsEm
                 continue;
             }
 
-            $hospital = $forcedHospital ?: $this->resolveHospital($hospitalName);
+            $hospital = $forcedHospital;
+            $service = $forcedService;
+
+            if (!$hospital && $hospitalName !== '') {
+                $hospital = $this->resolveHospital($hospitalName);
+            }
+
+            if (!$hospital && $serviceName !== '') {
+                $service = Service::query()
+                    ->with('hospital:id,code,name')
+                    ->whereRaw('LOWER(TRIM(name)) = ?', [mb_strtolower($serviceName)])
+                    ->orWhereRaw('LOWER(TRIM(code)) = ?', [mb_strtolower($serviceName)])
+                    ->first();
+
+                $hospital = $service?->hospital;
+            }
+
             if (!$hospital) {
                 $this->skipped++;
                 continue;
             }
 
-            $service = $forcedService;
             if (!$service && $serviceName !== '') {
                 $service = Service::query()
                     ->where('hospital_id', (int) $hospital->id)
@@ -127,7 +142,11 @@ class EquipmentsHierarchyImport implements ToCollection, WithHeadingRow, SkipsEm
     {
         $value = mb_strtolower(trim($hospitalName));
 
-        if ($value === '' || str_contains($value, 'mere') || str_contains($value, 'enfant')) {
+        if ($value === '') {
+            return null;
+        }
+
+        if (str_contains($value, 'mere') || str_contains($value, 'enfant')) {
             return Hospital::query()->firstOrCreate(
                 ['code' => 'HME'],
                 ['name' => 'Hopital Mere-Enfants']

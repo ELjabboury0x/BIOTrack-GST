@@ -80,7 +80,7 @@
 						<td class="px-4 py-3 text-sm text-gray-700">{{ $complaint->equipment?->inventory_number_current }} - {{ $complaint->equipment?->designation }}</td>
 						<td class="px-4 py-3 text-sm text-gray-700">{{ $complaint->reported_by_name }}</td>
 						<td class="px-4 py-3 text-sm text-gray-700">{{ $complaint->room_number ?: '-' }}</td>
-						<td class="px-4 py-3 text-sm text-gray-700 uppercase">{{ $complaint->priority }}</td>
+						<td class="px-4 py-3 text-sm text-gray-700">{{ $complaint->priority_label }}</td>
 						<td class="px-4 py-3 text-sm text-gray-700">{{ \Illuminate\Support\Str::limit($complaint->description, 90) }}</td>
 						<td class="px-4 py-3 text-center text-sm text-gray-700">
 							@if ($attachments->isEmpty())

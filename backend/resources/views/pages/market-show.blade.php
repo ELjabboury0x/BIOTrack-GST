@@ -4,7 +4,7 @@
 
 @section('content')
 @include('components.module-page-header', [
-    'breadcrumb' => 'Modèle / Marchés & Équipements / Marché ' . $marketData['market_number'],
+    'breadcrumb' => 'Modèle / Marchés et contrats de maintenance / Marché ' . $marketData['market_number'],
     'addRoute' => null,
     'addLabel' => null,
     'addIcon' => null,

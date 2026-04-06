@@ -72,13 +72,15 @@ class DashboardNotificationController extends Controller
                 $complaint = $complaintsById->get($complaintId);
 
                 if (!$complaint) {
+                    $priority = Complaint::normalizePriorityKey((string) data_get($notification->data, 'priority', 'normal'));
+
                     return [
                         'id' => $notification->id,
                         'title' => 'Ancienne réclamation',
                         'complaint_id' => $complaintId,
                         'service_name' => data_get($notification->data, 'service_name', '-'),
                         'equipment_label' => data_get($notification->data, 'equipment_label', '-'),
-                        'priority' => data_get($notification->data, 'priority', 'normal'),
+                        'priority' => $priority,
                         'reported_by_name' => data_get($notification->data, 'reported_by_name', '-'),
                         'status' => (string) data_get($notification->data, 'status', 'open'),
                         'attachment_image_url' => null,
@@ -99,13 +101,15 @@ class DashboardNotificationController extends Controller
                     ]);
                 }
 
+                $priority = Complaint::normalizePriorityKey((string) data_get($notification->data, 'priority', 'normal'));
+
                 return [
                     'id' => $notification->id,
                     'title' => 'Nouvelle réclamation',
                     'complaint_id' => $complaintId,
                     'service_name' => data_get($notification->data, 'service_name', '-'),
                     'equipment_label' => data_get($notification->data, 'equipment_label', '-'),
-                    'priority' => data_get($notification->data, 'priority', 'normal'),
+                    'priority' => $priority,
                     'reported_by_name' => data_get($notification->data, 'reported_by_name', '-'),
                     'status' => (string) ($complaint?->status ?? data_get($notification->data, 'status', 'open')),
                     'attachment_image_url' => $attachmentImageUrl,
@@ -241,11 +245,12 @@ class DashboardNotificationController extends Controller
         }
 
         return view('pages.notifications.complaint-show-archived', [
+            'priorityLabel' => Complaint::priorityLabel((string) data_get($notification->data, 'priority', 'normal')),
             'notificationData' => [
                 'complaint_id' => (int) data_get($notification->data, 'complaint_id', 0),
                 'service_name' => (string) data_get($notification->data, 'service_name', '-'),
                 'equipment_label' => (string) data_get($notification->data, 'equipment_label', '-'),
-                'priority' => (string) data_get($notification->data, 'priority', 'normal'),
+                'priority' => Complaint::normalizePriorityKey((string) data_get($notification->data, 'priority', 'normal')),
                 'status' => (string) data_get($notification->data, 'status', 'open'),
                 'reported_by_name' => (string) data_get($notification->data, 'reported_by_name', '-'),
                 'description' => (string) data_get($notification->data, 'description', ''),

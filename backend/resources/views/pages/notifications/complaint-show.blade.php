@@ -58,7 +58,7 @@
         </div>
         <div class="p-4 rounded-lg bg-gray-50 border border-gray-200">
             <p class="text-gray-500">Priorité</p>
-            <p class="font-semibold text-gray-800 mt-1 uppercase">{{ $complaint->priority }}</p>
+            <p class="font-semibold text-gray-800 mt-1">{{ $complaint->priority_label }}</p>
         </div>
         <div class="p-4 rounded-lg bg-gray-50 border border-gray-200">
             <p class="text-gray-500">Statut</p>

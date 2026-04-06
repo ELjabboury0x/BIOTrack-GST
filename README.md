@@ -24,14 +24,14 @@ Application web complète de **Gestion de Maintenance Assistée par Ordinateur (
 - **Temps réel étendu à la vue major** : rafraîchissement automatique des vues de consultation lors des changements OT/SAV/Réclamations
 - **OT renforcé** : diffusion explicite d'événements de changement après création, modification et clôture
 - **Correctif stabilité** : résolution d'une erreur 500 liée au layout Blade (`Undefined variable`)
-- **Pièces de rechange refactorisé** : workflow 2 phases (Décharge / Réception-Retour), mode PDF vs formulaire, validation conditionnelle, upload PDF
+- **Pièces de rechange refactorisées** : workflow 2 phases (Décharge / Réception-Retour), mode PDF vs formulaire, validation conditionnelle, upload PDF
 - **Pièces de rechange simplifié** : suppression du prix unitaire dans la saisie et la liste
 - **Authentification stabilisée** : APP_KEY régénérée, service HME affiché uniquement à la connexion
 - **Services nettoyés** : suppression de la redondance Pédiatrie
 
 ### Fonctionnalités principales
 
-- **Dashboard interactif** — 6 KPI cards, graphiques Chart.js, métriques en temps réel
+- **Tableau de bord interactif** — 6 cartes KPI, graphiques Chart.js, métriques en temps réel
 - **Gestion des équipements** — CRUD complet, import Excel, filtrage par service/zone/salle
 - **Interventions** — Création OT/DM, workflow de clôture, liaison avec réclamations
 - **Réclamations** — Formulaire public par service, notifications temps réel (WebSocket)
@@ -69,7 +69,7 @@ Application web complète de **Gestion de Maintenance Assistée par Ordinateur (
 | `major`     | Lecture seule (middleware `MajorReadOnly`)                        |
 | `ingenieur` | Filtrage par service rattaché                                    |
 | `technicien`| Filtrage par unité rattachée                                     |
-| `technician`| Interface PLC status/logs + déclaration de pannes                |
+| `technician`| Interface PLC (état/journaux) + déclaration de pannes           |
 | `operator`  | Déclaration de défauts uniquement                                |
 
 ---
@@ -107,7 +107,7 @@ npm --prefix backend install
 
 ### Lancement
 
-**Via VS Code Task (recommandé) :**
+**Via une tâche VS Code (recommandé) :**
 - `Ctrl+Shift+P` → "Tasks: Run Task" → "Start Full Stack"
 
 **Manuellement :**
@@ -125,20 +125,20 @@ Accès : `http://localhost` (Nginx:80) ou `http://localhost:8001` (Laravel direc
 
 Tous les mots de passe sont : `123456`
 
-| Login               | Rôle       |
-|---------------------|------------|
-| ADMIN               | admin      |
-| AHADDOUT.HANAE      | ingenieur  |
-| BENADDI.FATIMA      | technicien |
-| IHADJITANE.MALAK    | technicien |
-| JABRANE.LATIFA      | ingenieur  |
-| KHALIL.HAMZA        | technician |
-| KHANTOUR.MOHAMED    | major      |
-| MESRAR.ASMAE        | manager    |
-| NAWAL               | ingenieur  |
-| SAKROUHI.SAID       | technicien |
-| ZERKOUNI.HOUDA      | ingenieur  |
-| ZOUIN.MAROUANE      | operator   |
+| Identifiant         | Rôle (code applicatif) |
+|---------------------|-------------------------|
+| admin               | admin                   |
+| AHADDOUT.HANAE      | ingenieur               |
+| BENADDI.FATIMA      | technicien              |
+| IHADJITANE.MALAK    | technicien              |
+| JABRANE.LATIFA      | ingenieur               |
+| KHALIL.HAMZA        | technician              |
+| KHANTOUR.MOHAMED    | major                   |
+| MESRAR.ASMAE        | manager                 |
+| NAWAL               | ingenieur               |
+| SAKROUHI.SAID       | technicien              |
+| ZERKOUNI.HOUDA      | ingenieur               |
+| ZOUIN.MAROUANE      | operator                |
 
 ---
 

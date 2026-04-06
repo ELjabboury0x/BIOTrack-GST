@@ -20,7 +20,7 @@
                         <i class="fas fa-arrow-right mr-2"></i> Découvrir le projet
                     </a>
                     <a href="#contact" class="btn btn-secondary px-8 py-4 rounded-full font-semibold transition-all duration-300 hover:scale-105">
-                        <i class="fas fa-envelope mr-2"></i> Nous Contacter
+                        <i class="fas fa-envelope mr-2"></i> Nous contacter
                     </a>
                 </div>
             </div>
@@ -48,7 +48,7 @@
                         Ce projet représente une <strong>solution complète et professionnelle</strong> pour la gestion de maintenance. Développé comme Projet de Fin d'Études (PFE) pour <strong>GST Tanger</strong>, il incarne l'excellence académique et l'innovation technologique.
                     </p>
                     <p class="text-gray-700 text-lg leading-relaxed">
-                        Le système GMAO offre une plateforme intuitive et puissante permettant aux entreprises d'optimiser leurs processus de maintenance, réduire les temps d'arrêt et améliorer la productivité globale.
+                        Le système GMAO offre une plateforme intuitive et puissante permettant aux entreprises d'optimiser leurs processus de maintenance, de réduire les temps d'arrêt et d'améliorer la productivité globale.
                     </p>
                 </div>
 
@@ -59,7 +59,7 @@
                             ['icon' => 'fa-wrench', 'title' => 'Équipements', 'desc' => 'Gestion centralisée des équipements'],
                             ['icon' => 'fa-notes-medical', 'title' => 'OT/DM (PM-BIO)', 'desc' => 'Suivi complet des OT/DM biomédicaux'],
                             ['icon' => 'fa-calendar-check', 'title' => 'Planification', 'desc' => 'Planification préventive intelligente'],
-                            ['icon' => 'fa-chart-bar', 'title' => 'Rapports', 'desc' => 'Statistiques et analytics détaillés'],
+                            ['icon' => 'fa-chart-bar', 'title' => 'Rapports', 'desc' => 'Statistiques et analyses détaillées'],
                         ];
                     @endphp
 
@@ -95,7 +95,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 @php
                     $mainFeatures = [
-                        ['icon' => 'fa-database', 'title' => 'Base de Données Centralisée', 'desc' => 'Tous les données de maintenance au même endroit'],
+                        ['icon' => 'fa-database', 'title' => 'Base de données centralisée', 'desc' => 'Toutes les données de maintenance au même endroit'],
                         ['icon' => 'fa-bell', 'title' => 'Notifications Automatiques', 'desc' => 'Alertes pour les maintenances préventives'],
                         ['icon' => 'fa-users', 'title' => 'Gestion d\'Équipes', 'desc' => 'Attribution et suivi des tâches par équipe'],
                         ['icon' => 'fa-mobile-alt', 'title' => 'Application Mobile Ready', 'desc' => 'Accès depuis n\'importe quel appareil'],
@@ -126,7 +126,7 @@
                     $stats = [
                         ['number' => '5+', 'label' => 'Modules Intégrés'],
                         ['number' => '100%', 'label' => 'Responsive Design'],
-                        ['number' => '24/7', 'label' => 'Support Disponible'],
+                        ['number' => '24/7', 'label' => 'Support disponible'],
                         ['number' => '99.9%', 'label' => 'Disponibilité'],
                     ];
                 @endphp
@@ -145,7 +145,7 @@
     <section id="contact" class="py-24 bg-gradient-to-b from-white to-blue-50">
         <div class="container mx-auto px-4 max-w-2xl">
             <div class="text-center mb-16">
-                <h2 class="text-4xl font-bold text-gray-900 mb-4" data-aos="fade-up">Nous Contacter</h2>
+                <h2 class="text-4xl font-bold text-gray-900 mb-4" data-aos="fade-up">Nous contacter</h2>
                 <p class="text-gray-600 text-lg" data-aos="fade-up" data-aos-delay="200">
                     Vous avez des questions ? Nous serions ravis de vous aider.
                 </p>
@@ -159,7 +159,7 @@
                         <input type="text" id="nom" name="nom" placeholder=" " required
                                class="w-full px-6 py-4 border-2 border-blue-200 rounded-lg focus:outline-none focus:border-blue-600 transition-colors duration-300 peer bg-transparent">
                         <label for="nom" class="absolute left-6 top-4 text-gray-400 transition-all duration-300 peer-focus:text-blue-600 peer-focus:-top-6 peer-focus:text-sm peer-[:not(:placeholder-shown)]:-top-6 peer-[:not(:placeholder-shown)]:text-sm">
-                            Nom Complet
+                            Nom complet
                         </label>
                     </div>
                 </div>
@@ -169,7 +169,7 @@
                         <input type="email" id="email" name="email" placeholder=" " required
                                class="w-full px-6 py-4 border-2 border-blue-200 rounded-lg focus:outline-none focus:border-blue-600 transition-colors duration-300 peer bg-transparent">
                         <label for="email" class="absolute left-6 top-4 text-gray-400 transition-all duration-300 peer-focus:text-blue-600 peer-focus:-top-6 peer-focus:text-sm peer-[:not(:placeholder-shown)]:-top-6 peer-[:not(:placeholder-shown)]:text-sm">
-                            Adresse Email
+                            Adresse e-mail
                         </label>
                     </div>
                 </div>
@@ -179,13 +179,13 @@
                         <textarea id="message" name="message" placeholder=" " rows="5" required
                                   class="w-full px-6 py-4 border-2 border-blue-200 rounded-lg focus:outline-none focus:border-blue-600 transition-colors duration-300 peer bg-transparent resize-none"></textarea>
                         <label for="message" class="absolute left-6 top-4 text-gray-400 transition-all duration-300 peer-focus:text-blue-600 peer-focus:-top-6 peer-focus:text-sm peer-[:not(:placeholder-shown)]:-top-6 peer-[:not(:placeholder-shown)]:text-sm">
-                            Votre Message
+                            Votre message
                         </label>
                     </div>
                 </div>
 
                 <button type="submit" class="w-full btn btn-primary py-4 rounded-lg font-bold transition-all duration-300 hover:scale-105">
-                    <i class="fas fa-paper-plane mr-2"></i> Envoyer le Message
+                    <i class="fas fa-paper-plane mr-2"></i> Envoyer le message
                 </button>
             </form>
         </div>

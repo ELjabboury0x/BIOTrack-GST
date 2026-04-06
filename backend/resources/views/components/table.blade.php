@@ -3,6 +3,25 @@
     $isMajorUser = auth()->user()?->role === 'major';
     $tableData = $data ?? [];
     $deleteEntityLabel = trim((string) ($deleteEntityLabel ?? 'cet enregistrement'));
+    $buttonStyle = $buttonStyle ?? null;
+    $isEquipmentsStyle = $buttonStyle === 'equipments';
+
+    $secondaryButtonClass = $isEquipmentsStyle
+        ? 'inline-flex h-10 items-center gap-2 rounded-lg border border-gray-300 px-4 text-sm font-semibold text-gray-700 transition-all duration-200 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300'
+        : 'px-4 py-2.5 border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 text-sm font-semibold text-gray-600';
+
+    $importButtonClass = $isEquipmentsStyle
+        ? 'inline-flex h-10 items-center gap-2 rounded-lg bg-emerald-600 px-4 text-sm font-semibold text-white transition-all duration-200 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-300'
+        : 'px-4 py-2.5 border border-blue-200 text-blue-600 rounded-xl hover:bg-blue-50 hover:border-blue-300 transition-all duration-200 text-sm font-semibold';
+
+    $exportButtonClass = $isEquipmentsStyle
+        ? 'inline-flex h-10 items-center gap-2 rounded-lg bg-slate-700 px-4 text-sm font-semibold text-white transition-all duration-200 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-300'
+        : 'px-4 py-2.5 border border-green-200 text-green-600 rounded-xl hover:bg-green-50 hover:border-green-300 transition-all duration-200 text-sm font-semibold';
+
+    $addButtonClass = $isEquipmentsStyle
+        ? 'inline-flex h-10 items-center gap-2 rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white transition-all duration-200 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300'
+        : 'gst-hover-scale px-6 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-200 font-semibold flex items-center gap-2';
+
     $tableColumns = $columns ?? [
         ['key' => 'id', 'label' => 'ID', 'visible' => true, 'type' => 'text'],
         ['key' => 'name', 'label' => 'Nom', 'visible' => true, 'type' => 'text'],
@@ -27,26 +46,20 @@
             </div>
 
             <!-- Column Toggle & Other Actions -->
-            <div class="flex justify-center gap-2">
+            <div class="table-toolbar-actions flex justify-center gap-2">
                 <button @click="toggleColumnVisibility()" 
-                        class="px-4 py-2.5 border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 text-sm font-semibold text-gray-600">
+                        class="{{ $secondaryButtonClass }}">
                     <i class="fas fa-columns mr-2 text-gray-400"></i> Colonnes
                 </button>
                 @if (($showImportAction ?? true) === true && !$isMajorUser)
                     <button onclick="showImportModal()" 
-                            class="px-4 py-2.5 border border-blue-200 text-blue-600 rounded-xl hover:bg-blue-50 hover:border-blue-300 transition-all duration-200 text-sm font-semibold">
+                            class="{{ $importButtonClass }}">
                         <i class="fas fa-upload mr-2"></i> Importer
-                    </button>
-                @endif
-                @if (($showTemplateAction ?? true) === true)
-                    <button @click="exportTemplateExcel()"
-                            class="px-4 py-2.5 border border-amber-200 text-amber-700 rounded-xl hover:bg-amber-50 hover:border-amber-300 transition-all duration-200 text-sm font-semibold">
-                        <i class="fas fa-file-download mr-2"></i> Template
                     </button>
                 @endif
                 @if (($showExportAction ?? true) === true)
                     <button @click="exportToPdf()" 
-                            class="px-4 py-2.5 border border-green-200 text-green-600 rounded-xl hover:bg-green-50 hover:border-green-300 transition-all duration-200 text-sm font-semibold">
+                            class="{{ $exportButtonClass }}">
                         <i class="fas fa-file-export mr-2"></i> Exporter
                     </button>
                 @endif
@@ -57,12 +70,12 @@
                 <div class="flex justify-end">
                     @if (!empty($addButtonRoute ?? null))
                         <a href="{{ route($addButtonRoute) }}"
-                           class="gst-hover-scale px-6 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-200 font-semibold flex items-center gap-2">
+                           class="{{ $addButtonClass }}">
                             <i class="fas {{ $addButtonIcon ?? 'fa-plus' }}"></i> {{ $addButtonLabel ?? 'Ajouter' }}
                         </a>
                     @else
                         <button onclick="showAddRecordModal()" 
-                                class="gst-hover-scale px-6 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-200 font-semibold flex items-center gap-2">
+                                class="{{ $addButtonClass }}">
                             <i class="fas fa-plus"></i> Ajouter
                         </button>
                     @endif
@@ -550,66 +563,6 @@ function tableComponent(initialData, initialColumns) {
 
             const dateSuffix = new Date().toISOString().slice(0, 10);
             XLSX.writeFile(workbook, `tableau-${dateSuffix}.xlsx`);
-        },
-
-        exportTemplateExcel() {
-            const visibleColumns = this.columns.filter(column => column.visible);
-            if (!visibleColumns.length) {
-                alert('Aucune colonne visible pour générer un template.');
-                return;
-            }
-
-            const sampleRow = visibleColumns.map((column) => {
-                const label = (column.label || '').toString().toLowerCase();
-
-                if (column.type === 'date' || label.includes('date')) {
-                    return '2026-03-12';
-                }
-
-                if (label.includes('prix')) {
-                    return '1500';
-                }
-
-                if (label.includes('qte') || label.includes('qté') || label.includes('quantite') || label.includes('quantité')) {
-                    return '10';
-                }
-
-                if (column.type === 'status' || label.includes('statut')) {
-                    return 'Actif';
-                }
-
-                if (label.includes('code')) {
-                    return 'CODE-001';
-                }
-
-                if (label.includes('nom')) {
-                    return 'Exemple Nom';
-                }
-
-                if (label.includes('fournisseur')) {
-                    return 'Exemple Fournisseur';
-                }
-
-                return 'Exemple';
-            });
-
-            if (!window.XLSX) {
-                const headers = visibleColumns.map(column => column.label);
-                const emptyRow = visibleColumns.map(() => '');
-                const dateSuffix = new Date().toISOString().slice(0, 10);
-                this.downloadCsv(`template-tableau-${dateSuffix}.csv`, headers, [sampleRow, emptyRow]);
-                return;
-            }
-
-            const headers = visibleColumns.map(column => column.label);
-            const emptyRow = visibleColumns.map(() => '');
-            const worksheet = XLSX.utils.aoa_to_sheet([headers, sampleRow, emptyRow]);
-            const workbook = XLSX.utils.book_new();
-
-            XLSX.utils.book_append_sheet(workbook, worksheet, 'Template');
-
-            const dateSuffix = new Date().toISOString().slice(0, 10);
-            XLSX.writeFile(workbook, `template-tableau-${dateSuffix}.xlsx`);
         }
     };
 }
@@ -642,16 +595,5 @@ function exportTableToExcel() {
     }
 
     tableRoot._x_dataStack[0].exportToExcel();
-}
-
-function exportTableTemplate() {
-    const tableRoot = document.querySelector('[x-data^="tableComponent("]');
-
-    if (!tableRoot || !tableRoot._x_dataStack || !tableRoot._x_dataStack[0] || typeof tableRoot._x_dataStack[0].exportTemplateExcel !== 'function') {
-        alert('Template non disponible pour ce tableau.');
-        return;
-    }
-
-    tableRoot._x_dataStack[0].exportTemplateExcel();
 }
 </script>

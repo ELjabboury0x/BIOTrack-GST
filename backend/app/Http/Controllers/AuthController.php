@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginRequest;
 use App\Models\Service;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class AuthController extends Controller
@@ -14,30 +16,38 @@ class AuthController extends Controller
     {
         $loginOnlyHospitalServiceName = 'Hôpital Universitaire Mère-Enfant Mohammed VI-Tanger';
 
-        $services = Service::query()
-            ->excludeHiddenForUi()
-            ->orderBy('name')
-            ->get(['id', 'name']);
+        try {
+            $services = Service::query()
+                ->excludeHiddenForUi()
+                ->orderBy('name')
+                ->get(['id', 'name']);
 
-        $loginOnlyHospitalService = Service::query()
-            ->whereRaw('LOWER(TRIM(name)) = ?', [mb_strtolower(trim($loginOnlyHospitalServiceName))])
-            ->first(['id', 'name']);
+            $loginOnlyHospitalService = Service::query()
+                ->whereRaw('LOWER(TRIM(name)) = ?', [mb_strtolower(trim($loginOnlyHospitalServiceName))])
+                ->first(['id', 'name']);
 
-        if ($loginOnlyHospitalService) {
-            $services->push($loginOnlyHospitalService);
+            if ($loginOnlyHospitalService) {
+                $services->push($loginOnlyHospitalService);
+            }
+
+            $services = $services
+                ->unique(function (Service $service): string {
+                    return Str::of($service->name)
+                        ->ascii()
+                        ->lower()
+                        ->replaceMatches('/\s+/', ' ')
+                        ->trim()
+                        ->value();
+                })
+                ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
+                ->values();
+        } catch (QueryException $exception) {
+            Log::warning('Unable to load services on login page. Database may be unavailable.', [
+                'error' => $exception->getMessage(),
+            ]);
+
+            $services = collect();
         }
-
-        $services = $services
-            ->unique(function (Service $service): string {
-                return Str::of($service->name)
-                    ->ascii()
-                    ->lower()
-                    ->replaceMatches('/\s+/', ' ')
-                    ->trim()
-                    ->value();
-            })
-            ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
-            ->values();
 
         return view('login', compact('services'));
     }

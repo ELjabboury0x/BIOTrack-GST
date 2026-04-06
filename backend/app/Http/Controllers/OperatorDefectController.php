@@ -53,7 +53,7 @@ class OperatorDefectController extends Controller
             'equipment_id' => ['required', 'integer', 'exists:equipments,id'],
             'room_number' => ['nullable', 'string', 'max:80'],
             'description' => ['required', 'string', 'max:4000'],
-            'priority' => ['required', 'in:normal,urgent,low,medium,high'],
+            'priority' => ['required', 'in:normal,urgent'],
             'attachments' => ['nullable', 'array', 'max:5'],
             'attachments.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
         ]);

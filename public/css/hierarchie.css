@@ -68,17 +68,17 @@
 }
 
 .hierarchy-toolbar {
-    margin-bottom: 0.75rem;
+    margin-bottom: 1rem;
 }
 
 .hierarchy-search-wrap {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.55rem 0.7rem;
-    border: 1px solid rgba(148, 163, 184, 0.35);
+    padding: 0.62rem 0.8rem;
+    border: 1px solid #e5e7eb;
     border-radius: 0.75rem;
-    background: rgba(255, 255, 255, 0.72);
+    background: #ffffff;
 }
 
 .hierarchy-search-wrap i {
@@ -158,13 +158,14 @@
     align-items: center;
     justify-content: space-between;
     gap: 0.8rem;
-    border: 1px solid rgba(203, 213, 225, 0.45);
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
     transition: all 0.3s ease;
 }
 
 .tree-node:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+    border-color: #dbeafe;
+    background: #f8fbff;
 }
 
 .tree-node-main {
@@ -280,20 +281,20 @@
     display: inline-flex;
     align-items: center;
     gap: 0.45rem;
-    padding: 0.45rem 0.7rem;
+    height: 2.25rem;
+    padding: 0 0.9rem;
     border-radius: 0.65rem;
     color: #fff;
-    background: linear-gradient(135deg, #0284c7, #2563eb);
+    background: #2563eb;
     font-size: 0.78rem;
-    font-weight: 600;
+    font-weight: 700;
     text-decoration: none;
     transition: all 0.3s ease;
     white-space: nowrap;
 }
 
 .tree-action-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 8px 18px rgba(37, 99, 235, 0.28);
+    background: #1d4ed8;
 }
 
 .tree-type-branche {

@@ -117,7 +117,10 @@ Route::middleware(['auth', 'prevent-back-history', 'force-password-change', 'enf
             Route::get('/dashboard/equipements/formations', [EquipmentController::class, 'formations'])->name('formations.index');
             Route::post('/dashboard/equipements/formations/import-pdf', [EquipmentController::class, 'importFormationPdf'])->name('formations.import-pdf');
             Route::get('/dashboard/equipements/formations/export-pdf', [EquipmentController::class, 'exportFormationsPdf'])->name('formations.export-pdf');
+            Route::get('/dashboard/equipements/formations/scans/{scan}', [EquipmentController::class, 'formationScanFile'])->name('formations.scan.file');
+            Route::delete('/dashboard/equipements/formations/scans/{scan}', [EquipmentController::class, 'deleteFormationScan'])->name('formations.scan.delete');
             Route::get('/dashboard/equipements/assets/{asset}/{type}', [EquipmentController::class, 'designationAssetFile'])->name('equipements.assets.file');
+            Route::delete('/dashboard/equipements/assets/{asset}/{type}', [EquipmentController::class, 'deleteDesignationAssetFile'])->name('equipements.assets.delete');
             Route::get('/dashboard/equipements/services', [EquipmentController::class, 'servicesByZone'])->name('equipements.services');
             Route::get('/dashboard/equipements/salles', [EquipmentController::class, 'roomsByService'])->name('equipements.rooms');
             Route::patch('/dashboard/equipements/{id}/status', [EquipmentController::class, 'updateStatus'])->name('equipements.update-status');

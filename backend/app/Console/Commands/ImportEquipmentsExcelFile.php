@@ -10,7 +10,6 @@ use App\Models\Service;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Throwable;
@@ -27,6 +26,7 @@ class ImportEquipmentsExcelFile extends Command
 
     public function handle(): int
     {
+        @ini_set('memory_limit', '1024M');
         @ini_set('max_execution_time', '0');
         @set_time_limit(0);
 
@@ -43,8 +43,14 @@ class ImportEquipmentsExcelFile extends Command
         }
 
         try {
-            $spreadsheet = IOFactory::load($filePath);
-            if (!$spreadsheet instanceof Spreadsheet || count($spreadsheet->getAllSheets()) === 0) {
+            $reader = IOFactory::createReaderForFile($filePath);
+            $reader->setReadDataOnly(true);
+            if (method_exists($reader, 'setReadEmptyCells')) {
+                $reader->setReadEmptyCells(false);
+            }
+
+            $worksheetInfos = $reader->listWorksheetInfo($filePath);
+            if (empty($worksheetInfos)) {
                 $this->line(json_encode([
                     'ok' => false,
                     'message' => 'Le fichier Excel est vide.',
@@ -85,13 +91,27 @@ class ImportEquipmentsExcelFile extends Command
                 }
             }
 
-            $hospital = Hospital::query()->first()
+            $fallbackHospital = Hospital::query()->first()
                 ?? Hospital::query()->create([
                     'code' => 'HSP',
                     'name' => 'Hôpital Principal',
                 ]);
 
-            foreach ($spreadsheet->getWorksheetIterator() as $sheet) {
+            foreach ($worksheetInfos as $worksheetInfo) {
+                $sheetName = (string) ($worksheetInfo['worksheetName'] ?? '');
+                if ($sheetName === '') {
+                    continue;
+                }
+
+                $reader->setLoadSheetsOnly([$sheetName]);
+                $spreadsheet = $reader->load($filePath);
+
+                try {
+                    $sheet = $spreadsheet->getActiveSheet();
+                    if (!$sheet instanceof Worksheet) {
+                        continue;
+                    }
+
                     $sheetTitle = $sheet->getTitle();
                     $layout = $this->resolveSheetLayout($sheet);
                     if ($layout === null) {
@@ -158,6 +178,7 @@ class ImportEquipmentsExcelFile extends Command
                         $payload['zone_id'] = $serviceContext['zone_id'];
                         $payload['service_id'] = $serviceContext['service_id'];
                         $payload['room_id'] = $serviceContext['room_id'];
+                        $payload['hospital_id'] = $serviceContext['hospital_id'] ?: $fallbackHospital->id;
 
                         $market = $this->resolveMarketFromLabel($payload['market_label'] ?? null);
                         $payload['market_id'] = $market?->id;
@@ -170,14 +191,18 @@ class ImportEquipmentsExcelFile extends Command
                         } else {
                             Equipment::query()->create(array_merge([
                                 'inventory_number_current' => $inventory,
-                                'hospital_id' => $hospital->id,
                             ], $payload));
                             $created++;
                         }
 
                         $importedRows++;
                     }
+                } finally {
+                    $spreadsheet->disconnectWorksheets();
+                    unset($spreadsheet);
+                    gc_collect_cycles();
                 }
+            }
 
             if ($importedRows === 0) {
                 $this->line(json_encode([
@@ -534,6 +559,7 @@ class ImportEquipmentsExcelFile extends Command
                 'zone_id' => null,
                 'service_id' => null,
                 'room_id' => null,
+                'hospital_id' => null,
             ];
 
             $this->serviceContextCache[$cacheKey] = $result;
@@ -551,6 +577,7 @@ class ImportEquipmentsExcelFile extends Command
                 'zone_id' => null,
                 'service_id' => null,
                 'room_id' => null,
+                'hospital_id' => null,
             ];
 
             $this->serviceContextCache[$cacheKey] = $result;
@@ -570,6 +597,7 @@ class ImportEquipmentsExcelFile extends Command
             'zone_id' => $service->zone_id,
             'service_id' => $service->id,
             'room_id' => $roomId,
+            'hospital_id' => $service->hospital_id,
         ];
 
         $this->serviceContextCache[$cacheKey] = $result;

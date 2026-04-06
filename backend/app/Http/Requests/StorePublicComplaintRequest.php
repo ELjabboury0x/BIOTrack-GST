@@ -21,7 +21,7 @@ class StorePublicComplaintRequest extends FormRequest
             'equipment_id' => ['required', 'integer', 'exists:equipments,id'],
             'room_number' => ['nullable', 'string', 'max:80'],
             'description' => ['required', 'string', 'max:4000'],
-            'priority' => ['required', 'in:normal,urgent,low,medium,high'],
+            'priority' => ['required', 'in:normal,urgent'],
             'attachments' => ['nullable', 'array', 'max:5'],
             'attachments.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
         ];
@@ -45,10 +45,12 @@ class StorePublicComplaintRequest extends FormRequest
                 $serviceCodeDb = mb_strtoupper(trim((string) ($service->code ?? '')));
                 $serviceNameToken = $this->normalizeServiceToken($serviceName);
                 $serviceCodeToken = $this->normalizeServiceToken($serviceCodeDb);
+                $serviceNameExpr = $this->normalizedEquipmentTokenExpression('service_name');
+                $unitNameExpr = $this->normalizedEquipmentTokenExpression('unit_name');
 
                 $belongsToService = Equipment::query()
                     ->where('id', $equipmentId)
-                    ->where(function ($query) use ($service, $serviceName, $serviceCodeDb, $serviceNameToken, $serviceCodeToken) {
+                    ->where(function ($query) use ($service, $serviceName, $serviceCodeDb, $serviceNameToken, $serviceCodeToken, $serviceNameExpr, $unitNameExpr) {
                         $query->where('service_id', $service->id);
 
                         if ($serviceName !== '') {
@@ -66,19 +68,19 @@ class StorePublicComplaintRequest extends FormRequest
                         }
 
                         if ($serviceNameToken !== '') {
-                            $query->orWhereRaw("REPLACE(REPLACE(REPLACE(REPLACE(UPPER(TRIM(service_name)), ' ', ''), '-', ''), '_', ''), '/', '') like ?", ['%' . $serviceNameToken . '%'])
-                                ->orWhereRaw("REPLACE(REPLACE(REPLACE(REPLACE(UPPER(TRIM(unit_name)), ' ', ''), '-', ''), '_', ''), '/', '') like ?", ['%' . $serviceNameToken . '%']);
+                            $query->orWhereRaw($serviceNameExpr . ' like ?', ['%' . $serviceNameToken . '%'])
+                                ->orWhereRaw($unitNameExpr . ' like ?', ['%' . $serviceNameToken . '%']);
                         }
 
                         if ($serviceCodeToken !== '') {
-                            $query->orWhereRaw("REPLACE(REPLACE(REPLACE(REPLACE(UPPER(TRIM(service_name)), ' ', ''), '-', ''), '_', ''), '/', '') like ?", ['%' . $serviceCodeToken . '%'])
-                                ->orWhereRaw("REPLACE(REPLACE(REPLACE(REPLACE(UPPER(TRIM(unit_name)), ' ', ''), '-', ''), '_', ''), '/', '') like ?", ['%' . $serviceCodeToken . '%']);
+                            $query->orWhereRaw($serviceNameExpr . ' like ?', ['%' . $serviceCodeToken . '%'])
+                                ->orWhereRaw($unitNameExpr . ' like ?', ['%' . $serviceCodeToken . '%']);
                         }
                     })
                     ->exists();
 
                 $hasAnyMappedEquipment = Equipment::query()
-                    ->where(function ($query) use ($service, $serviceName, $serviceCodeDb, $serviceNameToken, $serviceCodeToken) {
+                    ->where(function ($query) use ($service, $serviceName, $serviceCodeDb, $serviceNameToken, $serviceCodeToken, $serviceNameExpr, $unitNameExpr) {
                         $query->where('service_id', $service->id);
 
                         if ($serviceName !== '') {
@@ -96,13 +98,13 @@ class StorePublicComplaintRequest extends FormRequest
                         }
 
                         if ($serviceNameToken !== '') {
-                            $query->orWhereRaw("REPLACE(REPLACE(REPLACE(REPLACE(UPPER(TRIM(service_name)), ' ', ''), '-', ''), '_', ''), '/', '') like ?", ['%' . $serviceNameToken . '%'])
-                                ->orWhereRaw("REPLACE(REPLACE(REPLACE(REPLACE(UPPER(TRIM(unit_name)), ' ', ''), '-', ''), '_', ''), '/', '') like ?", ['%' . $serviceNameToken . '%']);
+                            $query->orWhereRaw($serviceNameExpr . ' like ?', ['%' . $serviceNameToken . '%'])
+                                ->orWhereRaw($unitNameExpr . ' like ?', ['%' . $serviceNameToken . '%']);
                         }
 
                         if ($serviceCodeToken !== '') {
-                            $query->orWhereRaw("REPLACE(REPLACE(REPLACE(REPLACE(UPPER(TRIM(service_name)), ' ', ''), '-', ''), '_', ''), '/', '') like ?", ['%' . $serviceCodeToken . '%'])
-                                ->orWhereRaw("REPLACE(REPLACE(REPLACE(REPLACE(UPPER(TRIM(unit_name)), ' ', ''), '-', ''), '_', ''), '/', '') like ?", ['%' . $serviceCodeToken . '%']);
+                            $query->orWhereRaw($serviceNameExpr . ' like ?', ['%' . $serviceCodeToken . '%'])
+                                ->orWhereRaw($unitNameExpr . ' like ?', ['%' . $serviceCodeToken . '%']);
                         }
                     })
                     ->exists();
@@ -146,7 +148,12 @@ class StorePublicComplaintRequest extends FormRequest
     {
         $ascii = Str::upper(Str::ascii(trim($value)));
 
-        return str_replace([' ', '-', '_', '/'], '', $ascii);
+        return preg_replace('/[^A-Z0-9]+/', '', $ascii) ?? '';
+    }
+
+    private function normalizedEquipmentTokenExpression(string $column): string
+    {
+        return "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(UPPER(TRIM($column)), ' ', ''), '-', ''), '_', ''), '/', ''), '\'', ''), '’', ''), '.', ''), ',', '')";
     }
 
     private function isAllowedService(Service $service): bool

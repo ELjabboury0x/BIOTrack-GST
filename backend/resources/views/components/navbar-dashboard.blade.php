@@ -182,7 +182,7 @@
                                             <span class="text-[11px] px-2 py-0.5 rounded-full font-semibold"
                                                   :class="statusBadgeClass(item.status)"
                                                   x-text="statusLabel(item.status)"></span>
-                                            <span class="text-xs text-gray-500" x-text="'Priorité: ' + item.priority + ' • Réf: ' + (item.service_name || '-')"></span>
+                                            <span class="text-xs text-gray-500" x-text="'Priorité: ' + priorityLabel(item.priority) + ' • Réf: ' + (item.service_name || '-')"></span>
                                         </div>
                                     </div>
                                 </div>
@@ -349,6 +349,16 @@ function complaintNotifications() {
             if (normalized === 'resolved') return 'bg-green-100 text-green-700';
             if (normalized === 'in_progress') return 'bg-amber-100 text-amber-700';
             return 'bg-red-100 text-red-700';
+        },
+
+        priorityLabel(priority) {
+            const normalized = (priority || '').toLowerCase();
+
+            if (normalized === 'urgent' || normalized === 'high') {
+                return 'Urgente';
+            }
+
+            return 'Normale';
         },
     };
 }

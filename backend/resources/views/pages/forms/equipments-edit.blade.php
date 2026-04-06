@@ -109,6 +109,11 @@
                     @if (!empty($designationAssetImageUrl))
                         <div class="mb-3">
                             <img src="{{ $designationAssetImageUrl }}" alt="Image actuelle" class="max-h-56 rounded-lg border border-gray-200">
+                            @if (!empty($designationAssetImageDeleteUrl))
+                                <button type="button" data-delete-url="{{ $designationAssetImageDeleteUrl }}" data-delete-label="l'image" class="mt-2 inline-flex px-3 py-2 bg-red-50 border border-red-300 rounded-lg text-sm text-red-700 hover:bg-red-100 designation-file-delete-btn">
+                                    Supprimer l'image
+                                </button>
+                            @endif
                         </div>
                     @endif
 
@@ -117,12 +122,22 @@
                             <a href="{{ $designationUserManualUrl }}" target="_blank" rel="noopener" class="px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-200">
                                 Manuel d'utilisation actuel
                             </a>
+                            @if (!empty($designationUserManualDeleteUrl))
+                                <button type="button" data-delete-url="{{ $designationUserManualDeleteUrl }}" data-delete-label="le manuel d'utilisation" class="px-3 py-2 bg-red-50 border border-red-300 rounded-lg text-sm text-red-700 hover:bg-red-100 designation-file-delete-btn">
+                                    Supprimer manuel d'utilisation
+                                </button>
+                            @endif
                         @endif
 
                         @if (!empty($designationTechnicalManualUrl))
                             <a href="{{ $designationTechnicalManualUrl }}" target="_blank" rel="noopener" class="px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-200">
                                 Manuel technique actuel
                             </a>
+                            @if (!empty($designationTechnicalManualDeleteUrl))
+                                <button type="button" data-delete-url="{{ $designationTechnicalManualDeleteUrl }}" data-delete-label="le manuel technique" class="px-3 py-2 bg-red-50 border border-red-300 rounded-lg text-sm text-red-700 hover:bg-red-100 designation-file-delete-btn">
+                                    Supprimer manuel technique
+                                </button>
+                            @endif
                         @endif
                     </div>
                 </div>
@@ -150,4 +165,48 @@
         </div>
     </form>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const buttons = document.querySelectorAll('.designation-file-delete-btn');
+    if (!buttons.length) {
+        return;
+    }
+
+    buttons.forEach(function (button) {
+        button.addEventListener('click', async function () {
+            const deleteUrl = button.getAttribute('data-delete-url') || '';
+            const label = button.getAttribute('data-delete-label') || 'ce fichier';
+
+            if (!deleteUrl) {
+                return;
+            }
+
+            const confirmed = window.confirm(`Supprimer ${label} pour toute cette désignation ?`);
+            if (!confirmed) {
+                return;
+            }
+
+            try {
+                const response = await fetch(deleteUrl, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                    },
+                });
+
+                const payload = await response.json().catch(() => ({}));
+                if (!response.ok || payload.ok !== true) {
+                    throw new Error(payload.message || 'Suppression impossible.');
+                }
+
+                window.location.reload();
+            } catch (error) {
+                window.alert(error?.message || 'Erreur lors de la suppression du fichier.');
+            }
+        });
+    });
+});
+</script>
 @endsection

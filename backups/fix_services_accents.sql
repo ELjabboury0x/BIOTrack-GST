@@ -1,0 +1,17 @@
+﻿USE gmao_gst;
+UPDATE services SET name='Réanimation Pédiatrique' WHERE id=1;
+UPDATE services SET name='Urgences Pédiatriques' WHERE id=2;
+UPDATE services SET name='Consultations et Explorations Fonctionnelles Pédiatriques' WHERE id=3;
+UPDATE services SET name='Chirurgie Pédiatrique Traumato-orthopédique' WHERE id=4;
+UPDATE services SET name='Chirurgie Pédiatrique Urologique-Viscérale' WHERE id=5;
+UPDATE services SET name='Néonatologie (Réanimation néonatale)' WHERE id=6;
+UPDATE services SET name='Pédiatrie' WHERE id=7;
+UPDATE services SET name='Unité d''Oncologie Pédiatrique' WHERE id=8;
+UPDATE services SET name='Unité Technique d''Accouchement' WHERE id=9;
+UPDATE services SET name='Unité de gynécologie' WHERE id=10;
+UPDATE services SET name='Unité d''obstétrique' WHERE id=11;
+UPDATE services SET name='Unité de PMA' WHERE id=12;
+UPDATE services SET name='Bloc Opératoire Central - Module 3' WHERE id=13;
+UPDATE services SET name='Bloc Opératoire Central - Module 4' WHERE id=14;
+UPDATE services SET name='Bloc Opératoire Central - Réveil Enfant' WHERE id=15;
+UPDATE services SET name='Hôpital Universitaire Mère-Enfant Mohammed VI-Tanger' WHERE id=16;
