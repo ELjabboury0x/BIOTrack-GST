@@ -50,7 +50,7 @@ app/
 │   ├── Controllers/
 │   │   ├── AccountPasswordController.php    # Changement mot de passe
 │   │   ├── AccountProfileController.php     # Profil utilisateur
-│   │   ├── AdminSecurityController.php      # Sécurité admin
+│   │   ├── AdminSecurityController.php      # Sécurité
 │   │   ├── AdminUserController.php          # Gestion utilisateurs admin
 │   │   ├── AuthController.php               # Authentification (login/logout)
 │   │   ├── BiomedDataController.php         # Dashboard, marchés, import Excel
@@ -60,7 +60,7 @@ app/
 │   │   ├── HomeController.php               # Page d'accueil
 │   │   ├── InterventionController.php       # CRUD interventions
 │   │   ├── MaintenanceReportController.php  # Rapports maintenance (cycle de vie)
-│   │   ├── OperatorDefectController.php     # Déclaration pannes opérateur
+│   │   ├── OperatorDefectController.php     # Déclaration pannes technicien
 │   │   ├── PlanningController.php           # Planning sociétés externes
 │   │   ├── PreventiveMaintenanceController.php  # Maintenance préventive
 │   │   ├── PublicComplaintController.php    # Réclamation publique
@@ -203,8 +203,8 @@ resources/views/
     ├── notifications/                # Notifications réclamations
     ├── account/                      # Profil, mot de passe
     ├── admin/                        # Users, sécurité
-    ├── operator/                     # Déclaration pannes
-    ├── technician/                   # PLC status/logs
+    ├── operator/                     # Déclaration pannes technicien
+    ├── technician/                   # PLC status/logs technicien
     └── forms/                        # Formulaires divers
 ```
 

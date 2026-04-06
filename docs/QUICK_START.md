@@ -43,7 +43,7 @@ npm run realtime
 
 ### 4. Se connecter
 - URL : `http://localhost/login` (ou `http://localhost:8001/login` en accès direct Laravel)
-- Identifiant : `admin` / Mot de passe : `123456`
+- Identifiant : `AHADDOUT.HANAE` / Mot de passe : `123456`
 
 ---
 

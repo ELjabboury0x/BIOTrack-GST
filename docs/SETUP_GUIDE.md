@@ -159,18 +159,16 @@ Tous les mots de passe sont : **`123456`**
 
 | Login | Rôle | Accès |
 |-------|------|-------|
-| `ADMIN` | admin | Accès complet + administration |
-| `MESRAR.ASMAE` | manager | Tous les modules métier |
 | `KHANTOUR.MOHAMED` | major | Lecture seule |
-| `AHADDOUT.HANAE` | ingenieur | Filtré par service |
-| `JABRANE.LATIFA` | ingenieur | Filtré par service |
-| `NAWAL` | ingenieur | Filtré par service |
-| `ZERKOUNI.HOUDA` | ingenieur | Filtré par service |
-| `BENADDI.FATIMA` | technicien | Filtré par unité |
-| `IHADJITANE.MALAK` | technicien | Filtré par unité |
-| `SAKROUHI.SAID` | technicien | Filtré par unité |
-| `KHALIL.HAMZA` | technician | PLC + défauts |
-| `ZOUIN.MAROUANE` | operator | Déclaration défauts |
+| `AHADDOUT.HANAE` | ingenieur | Accès global aux données métier |
+| `JABRANE.LATIFA` | ingenieur | Accès global aux données métier |
+| `NAWAL` | ingenieur | Accès global aux données métier |
+| `ZERKOUNI.HOUDA` | ingenieur | Accès global aux données métier |
+| `BENADDI.FATIMA` | technicien | Même données que ingénieur, actions limitées par rôle |
+| `IHADJITANE.MALAK` | technicien | Même données que ingénieur, actions limitées par rôle |
+| `SAKROUHI.SAID` | technicien | Même données que ingénieur, actions limitées par rôle |
+| `KHALIL.HAMZA` | ingenieur | Accès global aux données métier |
+| `ZOUIN.MAROUANE` | technicien | Même données que ingénieur, actions limitées par rôle |
 
 ---
 

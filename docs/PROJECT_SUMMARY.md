@@ -53,12 +53,12 @@ Le système **GST GMAO** est une application web Laravel complète dédiée à l
 
 ### 1. Authentification & Sécurité
 - Login personnalisé avec sélection du service
-- 7 rôles : admin, manager, major, ingénieur, technicien, technician, operator
+- 3 rôles actifs : major, ingénieur, technicien
 - Middleware `MajorReadOnly` — Accès lecture seule pour le rôle major
 - Middleware `ForcePasswordChange` — Changement de mot de passe obligatoire
 - Middleware `EnforceAccountSecurity` — Contrôle de sécurité des comptes
 - Middleware `PreventBackHistory` — Protection contre le retour arrière
-- Filtrage des données par service (ingénieur) et par unité (technicien) via `ServiceAccess`
+- Portée des données : ingénieur et technicien (visibilité globale), major (lecture seule) via `ServiceAccess`
 
 ### 2. Dashboard
 - 6 cartes KPI animées (équipements, interventions, réclamations, etc.)
@@ -108,12 +108,12 @@ Le système **GST GMAO** est une application web Laravel complète dédiée à l
 - **Techniciens** — Gestion du personnel technique
 - **Maintenance préventive** — Module de planification
 - **Paramètres** — Configuration générale et panneau
-- **Déclaration de pannes** (opérateur) — Signalement rapide
-- **PLC Status/Logs** (technician) — Interface automates
+- **Déclaration de pannes** (technicien) — Signalement rapide
+- **PLC Status/Logs** (technicien) — Interface automates
 
 ### 10. Administration
 - **Gestion des utilisateurs** — CRUD, activation/désactivation, reset mot de passe
-- **Sécurité** — Tableau de bord de sécurité admin
+- **Sécurité** — Tableau de bord de sécurité
 - **Profil** — Modification du profil utilisateur
 
 ---

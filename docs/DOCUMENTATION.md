@@ -54,7 +54,7 @@ Request → Authenticate → PreventBackHistory → ForcePasswordChange
 |-----------|--------|-------------|
 | `auth` | `Authenticate` | Vérifie l'authentification |
 | `guest` | `RedirectIfAuthenticated` | Redirige si connecté |
-| `role:admin,...` | `EnsureUserRole` | Vérifie le rôle |
+| `role:ingenieur,technicien,major` | `EnsureUserRole` | Vérifie le rôle |
 | `major-read-only` | `MajorReadOnly` | Bloque POST/PUT/PATCH/DELETE pour major |
 | `force-password-change` | `ForcePasswordChange` | Oblige le changement de mot de passe |
 | `enforce-account-security` | `EnforceAccountSecurity` | Contrôles de sécurité |
@@ -65,9 +65,8 @@ Request → Authenticate → PreventBackHistory → ForcePasswordChange
 
 | Rôle | Méthode | Portée |
 |------|---------|--------|
-| `admin`, `manager` | `hasGlobalAccess()` | Toutes les données |
-| `ingenieur` | Filtrage par `service_id` | Données du service uniquement |
-| `technicien` | `isUnitRestricted()` | Données de l'unité uniquement |
+| `ingenieur`, `technicien` | `hasGlobalAccess()` | Toutes les données métier |
+| `major` | `MajorReadOnly` + scopes | Lecture seule |
 
 Implémenté dans `app/Support/ServiceAccess.php` avec 4 scope methods.
 
@@ -194,7 +193,7 @@ GET  /dashboard/notifications/complaints/{id}         → DashboardNotificationC
 PATCH /dashboard/notifications/complaints/{id}/close  → DashboardNotificationController@closeComplaint
 POST /dashboard/notifications/complaints/read-all     → DashboardNotificationController@markAllComplaintAsRead
 
-# Admin (admin uniquement)
+# Administration (ingénieur)
 GET  /dashboard/admin/security             → AdminSecurityController@index
 GET|POST|PUT|DELETE /dashboard/admin/users → AdminUserController (CRUD)
 PATCH /dashboard/admin/users/{id}/toggle-active → AdminUserController@toggleActive
@@ -204,11 +203,11 @@ POST /dashboard/admin/users/{id}/reset-password → AdminUserController@resetPas
 GET|PUT /dashboard/profile                 → AccountProfileController
 GET|POST /dashboard/change-password        → AccountPasswordController
 
-# Opérateur
+# Déclaration pannes (technicien)
 GET  /dashboard/operator/defects/create    → OperatorDefectController@create
 POST /dashboard/operator/defects           → OperatorDefectController@store
 
-# Technician PLC
+# PLC (technicien)
 GET  /dashboard/technician/plc-status      → TechnicianPlcController@status
 GET  /dashboard/technician/plc-logs        → TechnicianPlcController@logs
 ```

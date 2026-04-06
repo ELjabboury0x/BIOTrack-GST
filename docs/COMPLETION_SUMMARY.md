@@ -116,7 +116,7 @@ Le système GST GMAO v3.0 est une application Laravel complète pour la gestion 
 
 1. `AccountPasswordController` — Changement mot de passe
 2. `AccountProfileController` — Profil utilisateur
-3. `AdminSecurityController` — Sécurité admin
+3. `AdminSecurityController` — Sécurité
 4. `AdminUserController` — CRUD utilisateurs
 5. `AuthController` — Login/logout (auth par login+password)
 6. `BiomedDataController` — Dashboard, marchés, import Excel, techniciens, pièces, rapports
@@ -127,7 +127,7 @@ Le système GST GMAO v3.0 est une application Laravel complète pour la gestion 
 11. `HomeController` — Page d'accueil
 12. `InterventionController` — CRUD interventions + clôture
 13. `MaintenanceReportController` — Rapports maintenance (cycle de vie + PDF)
-14. `OperatorDefectController` — Déclaration pannes opérateur
+14. `OperatorDefectController` — Déclaration pannes technicien
 15. `PlanningController` — Planning sociétés externes
 16. `PreventiveMaintenanceController` — Maintenance préventive
 17. `PublicComplaintController` — Réclamation publique (sans auth)
