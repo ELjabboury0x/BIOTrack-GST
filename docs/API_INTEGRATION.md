@@ -1,7 +1,7 @@
 # API / Intégration - État Réel du Projet
 
 ## Version
-- Date: 2026-02-15
+- Date: 2026-05-22
 - Scope: Endpoints réellement implémentés
 
 ## Notes importantes
@@ -46,7 +46,7 @@ Réponse `GET /dashboard/live-metrics`:
     "equipments_added": { "labels": [], "data": [] }
   },
   "hasData": false,
-  "updated_at": "2026-02-15 00:00:00"
+  "updated_at": "2026-05-22 00:00:00"
 }
 ```
 
@@ -61,7 +61,7 @@ Réponse `GET /dashboard/live-metrics`:
     "kpi": {},
     "charts": {},
     "hasData": true,
-    "updated_at": "2026-02-15 00:00:00"
+    "updated_at": "2026-05-22 00:00:00"
   }
 }
 ```

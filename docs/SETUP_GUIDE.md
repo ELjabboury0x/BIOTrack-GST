@@ -1,6 +1,6 @@
 # 🔧 GST GMAO — Guide d'Installation
 
-> **Version 3.1** | 2026-03-19
+> **Version 3.1** | 2026-05-22
 
 ---
 

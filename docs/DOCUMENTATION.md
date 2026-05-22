@@ -1,6 +1,6 @@
 # 📖 GST GMAO — Documentation Technique Complète
 
-> **Version 3.1** | 2026-03-19
+> **Version 3.1** | 2026-05-22
 
 ---
 
@@ -28,9 +28,9 @@
 ```
 
 ### Pattern MVC
-- **Models** (15) : Eloquent avec relations, scopes, accessors
+- **Models** (31) : Eloquent avec relations, scopes, accessors
 - **Views** : Blade templates avec components, layouts
-- **Controllers** (24) : Logique métier, validation, autorisation
+- **Controllers** (31) : Logique métier, validation, autorisation
 
 ### Couche Sécurité (Middlewares)
 ```

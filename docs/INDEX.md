@@ -1,6 +1,6 @@
 # 📘 GST GMAO — Index des Ressources (État Actuel)
 
-> **Version 3.1** | **Mise à jour : 2026-03-19**
+> **Version 3.1** | **Mise à jour : 2026-05-22**
 
 ---
 
@@ -44,10 +44,10 @@ Tâches utiles :
 
 ---
 
-## 📌 Snapshot Technique (2026-03-19)
+## 📌 Snapshot Technique (2026-05-22)
 
 - **31 contrôleurs** (`app/Http/Controllers`)
-- **12 middlewares** (`app/Http/Middleware`)
-- **69 migrations** (`database/migrations`)
+- **13 middlewares** (`app/Http/Middleware`)
+- **73 migrations** (`database/migrations`)
 - **11 seeders** (`database/seeders`)
 - **Realtime server** : `realtime/server.js` (port `6001`)

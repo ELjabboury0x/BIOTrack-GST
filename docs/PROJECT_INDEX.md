@@ -1,6 +1,6 @@
 # 📘 GST GMAO — Index Complet du Projet
 
-> **Version 3.1** | 2026-03-19
+> **Version 3.1** | 2026-05-22
 
 ---
 
@@ -118,7 +118,7 @@ app/
 ### 🗄️ Base de Données (`database/`)
 ```
 database/
-├── migrations/                       # 29 migrations
+├── migrations/                       # 73 migrations
 │   ├── 2026_02_15_000000_create_users_table.php
 │   ├── 2026_02_15_000001_create_hospitals_table.php
 │   ├── 2026_02_15_000002_create_companies_table.php

@@ -1,13 +1,13 @@
 # ✅ GST GMAO — Résumé d'Achèvement
 
-> **Version 3.3** | 2026-03-23  
+> **Version 3.3** | 2026-05-22  
 > **Statut global** : ✅ Complet — Production-ready
 
-## 🔄 Mise à jour d'état (2026-03-23)
+## 🔄 Mise à jour d'état (2026-05-22)
 
 - Le périmètre fonctionnel reste complet et opérationnel
 - Lancement/arrêt validés via les tâches VS Code (`Start Full Stack`, `Stop Full Stack`)
-- Référentiel technique actuel : **31 contrôleurs**, **12 middlewares**, **69 migrations**, **11 seeders**
+- Référentiel technique actuel : **31 contrôleurs**, **13 middlewares**, **73 migrations**, **11 seeders**
 - Rôle `major` renforcé en lecture seule stricte (blocage actions + écrans create/edit)
 - Synchronisation temps réel major activée sur les vues de consultation (OT/SAV/Réclamations)
 - Module OT renforcé avec signal realtime explicite après `create` / `update` / `close`
@@ -35,7 +35,7 @@ Le système GST GMAO v3.0 est une application Laravel complète pour la gestion 
 | Projet Laravel 9.52 configuré | ✅ |
 | PHP 8.2 (WinGet) avec extensions | ✅ |
 | MySQL via pdo_mysql | ✅ |
-| 70 migrations créées et exécutées | ✅ |
+| 73 migrations créées et exécutées | ✅ |
 | 11 seeders (12 utilisateurs, structure hospitalière, zones, entreprises, liaison équipements) | ✅ |
 | Serveur WebSocket Node.js (port 6001) | ✅ |
 | Tasks VS Code (Start/Stop Full Stack) | ✅ |

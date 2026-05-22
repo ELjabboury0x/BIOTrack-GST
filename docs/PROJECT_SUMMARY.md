@@ -1,13 +1,13 @@
 # 📊 GST GMAO — Résumé du Projet
 
-> **Version 3.3** | Mise à jour : 2026-03-23  
+> **Version 3.3** | Mise à jour : 2026-05-22  
 > **Statut** : ✅ Production-ready
 
-## 🔄 État actuel consolidé (2026-03-23)
+## 🔄 État actuel consolidé (2026-05-22)
 
 - Architecture confirmée : Laravel + Blade + MySQL + WebSocket Node.js
 - Démarrage normalisé via scripts `scripts/start-full-stack.ps1` et VS Code Tasks
-- Base projet actuelle : **31 contrôleurs**, **12 middlewares**, **69 migrations**, **11 seeders**
+- Base projet actuelle : **31 contrôleurs**, **13 middlewares**, **73 migrations**, **11 seeders**
 - Documentation alignée sur les fichiers réellement présents dans le dépôt
 
 ## 📝 Release Note (2026-03-23)

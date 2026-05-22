@@ -1,5 +1,7 @@
 # Share Readiness Guide
 
+_Mise à jour : 2026-05-22_
+
 ## Architecture Snapshot
 
 - **Framework:** Laravel 9 (PHP backend)

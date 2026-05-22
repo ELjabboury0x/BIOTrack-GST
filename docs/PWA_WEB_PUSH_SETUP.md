@@ -1,5 +1,7 @@
 # PWA + Web Push Setup
 
+_Dernière mise à jour : 2026-05-22_
+
 ## 1) Generate VAPID keys
 Run:
 

@@ -1,5 +1,7 @@
 # 🎨 GMAO Dashboard - Guide Visuel & Présentation
 
+_Mise à jour : 2026-05-22_
+
 ## 📐 Vue d'Ensemble de l'Interface
 
 ```
