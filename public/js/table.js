@@ -497,4 +497,8 @@ function showNotification(message, type = 'success') {
     }, 3000);
 }
 
-export { TableManager, excelUtils, AdvancedFilter, BulkActions, rowActions };
+window.TableManager = TableManager;
+window.excelUtils = excelUtils;
+window.AdvancedFilter = AdvancedFilter;
+window.BulkActions = BulkActions;
+window.rowActions = rowActions;

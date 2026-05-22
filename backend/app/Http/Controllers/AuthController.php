@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginRequest;
+use App\Models\User;
 use App\Models\Service;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -58,36 +60,31 @@ class AuthController extends Controller
 
         $serviceId = isset($validated['service_id']) ? (int) $validated['service_id'] : null;
 
-        // Authenticate with login + password only (no service in credentials)
-        $credentials = [
-            'login'    => $validated['login'],
-            'password' => $validated['password'],
-        ];
+        $identifier = $this->normalizeIdentifier((string) ($validated['login'] ?? ''));
+        $plainPassword = (string) ($validated['password'] ?? '');
 
-        $attempted = Auth::attempt($credentials, $request->boolean('remember'));
+        $user = $this->findUserForAuthentication($identifier);
+        $passwordValid = $user ? $this->verifyUserPassword($user, $plainPassword) : false;
 
-        // Fallback: attempt by email
-        if (!$attempted) {
-            $attempted = Auth::attempt([
-                'email'    => $validated['login'],
-                'password' => $validated['password'],
-            ], $request->boolean('remember'));
-        }
+        if (!$user || !$passwordValid) {
+            Log::warning('Authentication failed for submitted credentials.', [
+                'identifier' => $identifier,
+                'ip' => $request->ip(),
+                'user_agent' => (string) $request->userAgent(),
+            ]);
 
-        if (!$attempted) {
             return back()
                 ->withErrors(['login' => 'Identifiants invalides.'])
                 ->withInput($request->except('password'));
         }
 
-        $user = Auth::user();
-
         if ($user && !$user->is_active) {
-            Auth::logout();
             return back()
                 ->withErrors(['login' => 'Votre compte est désactivé. Contactez un administrateur.'])
                 ->withInput($request->except('password'));
         }
+
+        Auth::login($user, $request->boolean('remember'));
 
         if ($user && !$user->hasGlobalAccess() && !$serviceId) {
             Auth::logout();
@@ -121,6 +118,56 @@ class AuthController extends Controller
         }
 
         return redirect()->intended($this->redirectToByRole($user?->role));
+    }
+
+    private function normalizeIdentifier(string $value): string
+    {
+        $normalized = str_replace(["\u{00A0}", "\u{2007}", "\u{202F}"], ' ', $value);
+        $trimmed = preg_replace('/^\s+|\s+$/u', '', $normalized);
+
+        return (string) ($trimmed ?? '');
+    }
+
+    private function findUserForAuthentication(string $identifier): ?User
+    {
+        $normalized = mb_strtolower(trim($identifier));
+        if ($normalized === '') {
+            return null;
+        }
+
+        return User::query()
+            ->where(function ($query) use ($normalized): void {
+                $query
+                    ->whereRaw('LOWER(TRIM(login)) = ?', [$normalized])
+                    ->orWhereRaw('LOWER(TRIM(email)) = ?', [$normalized]);
+            })
+            ->orderBy('id')
+            ->first();
+    }
+
+    private function verifyUserPassword(User $user, string $plainPassword): bool
+    {
+        $storedPassword = (string) $user->getAuthPassword();
+        if ($storedPassword === '' || $plainPassword === '') {
+            return false;
+        }
+
+        $valid = Hash::check($plainPassword, $storedPassword);
+
+        // Legacy safeguard: if a plain password was stored historically, accept once and migrate to hash.
+        if (!$valid && !Str::startsWith($storedPassword, ['$2y$', '$argon2'])) {
+            $valid = hash_equals($storedPassword, $plainPassword);
+            if ($valid) {
+                $user->forceFill(['password' => Hash::make($plainPassword)])->save();
+                return true;
+            }
+        }
+
+        if ($valid && Hash::needsRehash($storedPassword)) {
+            $user->forceFill(['password' => Hash::make($plainPassword)])->save();
+        }
+
+        return $valid;
     }
 
     private function redirectToByRole(?string $role): string

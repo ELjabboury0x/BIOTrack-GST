@@ -5,6 +5,7 @@
     $deleteEntityLabel = trim((string) ($deleteEntityLabel ?? 'cet enregistrement'));
     $buttonStyle = $buttonStyle ?? null;
     $isEquipmentsStyle = $buttonStyle === 'equipments';
+    $showColumnsToggle = ($showColumnsToggle ?? true) === true;
 
     $secondaryButtonClass = $isEquipmentsStyle
         ? 'inline-flex h-10 items-center gap-2 rounded-lg border border-gray-300 px-4 text-sm font-semibold text-gray-700 transition-all duration-200 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300'
@@ -39,7 +40,7 @@
             <!-- Search Bar -->
             <div class="relative">
                 <i class="fas fa-search absolute left-3.5 top-3 text-gray-400"></i>
-                <input type="text" 
+                  <input id="table-search-input" name="table_search" type="text" 
                        placeholder="Rechercher..." 
                        class="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all duration-200 bg-gray-50/50"
                        @input="searchTerm = $el.value; filterData()">
@@ -47,10 +48,12 @@
 
             <!-- Column Toggle & Other Actions -->
             <div class="table-toolbar-actions flex justify-center gap-2">
-                <button @click="toggleColumnVisibility()" 
-                        class="{{ $secondaryButtonClass }}">
-                    <i class="fas fa-columns mr-2 text-gray-400"></i> Colonnes
-                </button>
+                @if ($showColumnsToggle)
+                    <button @click="toggleColumnVisibility()" 
+                            class="{{ $secondaryButtonClass }}">
+                        <i class="fas fa-columns mr-2 text-gray-400"></i> Colonnes
+                    </button>
+                @endif
                 @if (($showImportAction ?? true) === true && !$isMajorUser)
                     <button onclick="showImportModal()" 
                             class="{{ $importButtonClass }}">
@@ -84,37 +87,39 @@
         </div>
 
         <!-- Column Visibility Dropdown (Hidden by default) -->
-        <div x-show="showColumnDropdown" 
-             @click.away="showColumnDropdown = false"
-             class="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-            <p class="text-sm font-semibold text-gray-700 mb-3">Afficher/Masquer colonnes:</p>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-                <template x-for="column in columns" :key="column.key">
-                    <label class="flex items-center space-x-2 cursor-pointer">
-                        <input type="checkbox" 
-                               :checked="column.visible" 
-                               @change="column.visible = !column.visible"
-                               class="rounded">
-                        <span class="text-sm text-gray-700" x-text="column.label"></span>
-                    </label>
-                </template>
-            </div>
+        @if ($showColumnsToggle)
+            <div x-show="showColumnDropdown" 
+                 @click.away="showColumnDropdown = false"
+                 class="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <p class="text-sm font-semibold text-gray-700 mb-3">Afficher/Masquer colonnes:</p>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    <template x-for="column in columns" :key="column.key">
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="checkbox" 
+                                   :checked="column.visible" 
+                                   @change="column.visible = !column.visible"
+                                   class="rounded">
+                            <span class="text-sm text-gray-700" x-text="column.label"></span>
+                        </label>
+                    </template>
+                </div>
 
-            <div class="mt-4 border-t border-gray-200 pt-4">
-                <p class="text-sm font-semibold text-gray-700 mb-2">Ajouter une colonne manuellement</p>
-                <div class="flex flex-col md:flex-row gap-2">
-                    <input type="text"
-                           x-model="manualColumnLabel"
-                           placeholder="Nom de la colonne"
-                           class="w-full md:w-72 px-3 py-2 border border-gray-300 rounded-lg text-sm">
-                    <button @click="addManualColumn()"
-                            type="button"
-                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-semibold">
-                        Ajouter
-                    </button>
+                <div class="mt-4 border-t border-gray-200 pt-4">
+                    <p class="text-sm font-semibold text-gray-700 mb-2">Ajouter une colonne manuellement</p>
+                    <div class="flex flex-col md:flex-row gap-2">
+                           <input id="table-manual-column-label" name="manual_column_label" type="text"
+                               x-model="manualColumnLabel"
+                               placeholder="Nom de la colonne"
+                               class="w-full md:w-72 px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                        <button @click="addManualColumn()"
+                                type="button"
+                                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-semibold">
+                            Ajouter
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
+        @endif
     </div>
 
     <!-- Table -->
@@ -377,6 +382,9 @@ function tableComponent(initialData, initialColumns) {
         
         getStatusBadge(status) {
             const badges = {
+                'decharge': 'Décharge',
+                'reception': 'Réception',
+                'retour': 'Réception / Retour',
                 'actif': '✓ Actif',
                 'en_cours': '⏳ En Cours',
                 'en_attente': '⏸ En Attente',

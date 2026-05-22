@@ -175,6 +175,8 @@ class ImportBilanActivites extends Command
                 continue;
             }
 
+            $activityRaw = $this->valueByAliases($row, $map, ['activite achevee oui non']);
+
             $payload = [
                 'company_name' => $this->valueByAliasesOrIndex($row, $map, ['societe'], 0),
                 'equipment_designation' => $this->valueByAliasesOrIndex($row, $map, ['designation de lequipement', 'designation de l equipement'], 1),
@@ -186,9 +188,10 @@ class ImportBilanActivites extends Command
                 'observations' => $this->valueByAliasesOrIndex($row, $map, ['observations'], 7),
                 'service_names' => $this->valueByAliasesOrIndex($row, $map, ['services'], 8),
                 'intervention_date_text' => $this->valueByAliasesOrIndex($row, $map, ['date dintervention'], 9),
+                'activity_completed' => $this->parseOuiNon($activityRaw),
             ];
 
-            if (!$payload['company_name'] && !$payload['equipment_designation']) {
+            if ($this->isPayloadEmpty($payload)) {
                 $skipped++;
                 continue;
             }
@@ -468,6 +471,21 @@ class ImportBilanActivites extends Command
     {
         foreach ($row as $value) {
             if (trim((string) $value) !== '') {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private function isPayloadEmpty(array $payload): bool
+    {
+        foreach ($payload as $value) {
+            if (is_string($value) && trim($value) !== '') {
+                return false;
+            }
+
+            if (!is_string($value) && $value !== null) {
                 return false;
             }
         }

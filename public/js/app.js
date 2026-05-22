@@ -230,19 +230,22 @@ class GMAOApp {
     setupSmoothScroll() {
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', (e) => {
-                const href = anchor.getAttribute('href');
-                if (href === '#') return;
+                const href = (anchor.getAttribute('href') || '').trim();
+                if (!href.startsWith('#') || href === '#') {
+                    return;
+                }
+
+                const element = document.getElementById(href.slice(1)) || document.querySelector(href);
+                if (!element) {
+                    return;
+                }
 
                 e.preventDefault();
-                const element = document.querySelector(href);
-
-                if (element) {
-                    const offsetTop = element.offsetTop - 100;
-                    window.scrollTo({
-                        top: offsetTop,
-                        behavior: 'smooth'
-                    });
-                }
+                const offsetTop = element.offsetTop - 100;
+                window.scrollTo({
+                    top: offsetTop,
+                    behavior: 'smooth'
+                });
             });
         });
     }

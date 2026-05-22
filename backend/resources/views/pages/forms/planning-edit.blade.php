@@ -1,10 +1,10 @@
 @extends('layouts.dashboard')
 
-@section('page-title', 'Modifier un planning')
+@section('page-title', 'Modifier une maintenance préventive')
 
 @section('content')
 <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-md p-8">
-    <h2 class="text-xl font-bold text-gray-800 mb-6">Modifier Planning Sociétés Externes</h2>
+    <h2 class="text-xl font-bold text-gray-800 mb-6">Modifier Maintenance Préventive</h2>
 
     @if ($errors->any())
         <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700 text-sm">
@@ -16,7 +16,7 @@
         </div>
     @endif
 
-    <form class="grid grid-cols-1 md:grid-cols-2 gap-6" method="POST" action="{{ route('planning.update', $planning) }}">
+    <form class="grid grid-cols-1 md:grid-cols-2 gap-6" method="POST" action="{{ route('maintenance-preventive.update', $planning) }}">
         @csrf
         @method('PUT')
 
@@ -58,7 +58,7 @@
         <textarea name="description" placeholder="Description" class="md:col-span-2 px-4 py-2 border border-gray-300 rounded-lg" rows="3">{{ old('description', $planning->description) }}</textarea>
 
         <div class="md:col-span-2 flex justify-end gap-3">
-            <a href="{{ route('planning.index') }}" class="px-5 py-2 border border-gray-300 rounded-lg text-gray-700">Annuler</a>
+            <a href="{{ route('maintenance-preventive') }}" class="px-5 py-2 border border-gray-300 rounded-lg text-gray-700">Annuler</a>
             <button type="submit" class="px-5 py-2 bg-blue-600 text-white rounded-lg">Enregistrer</button>
         </div>
     </form>

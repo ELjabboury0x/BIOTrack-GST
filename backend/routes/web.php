@@ -7,7 +7,6 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\BiomedDataController;
 use App\Http\Controllers\EquipmentController;
 use App\Http\Controllers\InterventionController;
-use App\Http\Controllers\PreventiveMaintenanceController;
 use App\Http\Controllers\TechnicianController;
 use App\Http\Controllers\SparePartController;
 use App\Http\Controllers\PlanningController;
@@ -111,6 +110,7 @@ Route::middleware(['auth', 'prevent-back-history', 'force-password-change', 'enf
             Route::post('/dashboard/equipements', [EquipmentController::class, 'store'])->name('equipements.store');
             Route::put('/dashboard/equipements/{id}', [EquipmentController::class, 'update'])->name('equipements.update');
             Route::delete('/dashboard/equipements/{id}', [EquipmentController::class, 'destroy'])->name('equipements.destroy');
+            Route::post('/dashboard/equipements/bulk-delete', [EquipmentController::class, 'bulkDestroy'])->name('equipements.bulk-delete');
             Route::post('/dashboard/equipements/import-excel', [EquipmentController::class, 'importExcelFile'])->name('equipements.import-excel');
             Route::get('/dashboard/equipements/export/excel', [EquipmentController::class, 'exportExcel'])->name('equipements.export.excel');
             Route::get('/dashboard/equipements/export/pdf', [EquipmentController::class, 'exportPdf'])->name('equipements.export.pdf');
@@ -172,14 +172,6 @@ Route::middleware(['auth', 'prevent-back-history', 'force-password-change', 'enf
                 ->name('dashboard.notifications.complaints.read-all');
         });
 
-        // Maintenance Préventive Module
-        Route::get('/dashboard/maintenance-preventive', [PreventiveMaintenanceController::class, 'index'])->name('maintenance-preventive');
-        Route::get('/dashboard/maintenance-preventive/create', [PreventiveMaintenanceController::class, 'create'])->name('maintenance-preventive.create');
-        Route::post('/dashboard/maintenance-preventive', [PreventiveMaintenanceController::class, 'store'])->name('maintenance-preventive.store');
-        Route::get('/dashboard/maintenance-preventive/{maintenance_preventive}/edit', [PreventiveMaintenanceController::class, 'edit'])->name('maintenance-preventive.edit');
-        Route::put('/dashboard/maintenance-preventive/{maintenance_preventive}', [PreventiveMaintenanceController::class, 'update'])->name('maintenance-preventive.update');
-        Route::delete('/dashboard/maintenance-preventive/{maintenance_preventive}', [PreventiveMaintenanceController::class, 'destroy'])->name('maintenance-preventive.destroy');
-
         // Techniciens Module
         Route::get('/dashboard/techniciens', [BiomedDataController::class, 'techniciens'])->name('techniciens');
         Route::get('/dashboard/techniciens/create', [TechnicianController::class, 'create'])->name('technicians.create');
@@ -211,11 +203,15 @@ Route::middleware(['auth', 'prevent-back-history', 'force-password-change', 'enf
         Route::post('/dashboard/rapports/interventions-internes/import-corrective', [MaintenanceReportController::class, 'importCorrectiveFromBilan'])->name('maintenance-reports.import-corrective');
         Route::post('/dashboard/rapports/interventions-internes/import-corrective-pdf', [MaintenanceReportController::class, 'importCorrectivePdf'])->name('maintenance-reports.import-corrective-pdf');
         Route::delete('/dashboard/rapports/interventions-internes/import-corrective-pdf', [MaintenanceReportController::class, 'deleteCorrectivePdf'])->name('maintenance-reports.delete-corrective-pdf');
+        Route::get('/dashboard/rapports/interventions-internes/maintenance-corrective/pdf-file', [MaintenanceReportController::class, 'viewCorrectivePdf'])->name('maintenance-reports.corrective-pdf.view');
         Route::get('/dashboard/rapports/interventions-internes/maintenance-corrective/manual', [MaintenanceReportController::class, 'correctiveManual'])->name('maintenance-reports.corrective.manual');
         Route::get('/dashboard/rapports/interventions-internes/maintenance-corrective/template-excel', [MaintenanceReportController::class, 'correctiveTemplate'])->name('maintenance-reports.corrective.template-excel');
         Route::get('/dashboard/rapports/interventions-internes/maintenance-corrective/export-excel', [MaintenanceReportController::class, 'exportCorrectiveExcel'])->name('maintenance-reports.corrective.export-excel');
         Route::get('/dashboard/rapports/interventions-internes/{maintenanceReport}/edit', [MaintenanceReportController::class, 'edit'])->name('maintenance-reports.edit');
         Route::put('/dashboard/rapports/interventions-internes/{maintenanceReport}', [MaintenanceReportController::class, 'update'])->name('maintenance-reports.update');
+        Route::get('/dashboard/rapports/interventions-internes/{maintenanceReport}/signature/{role}', [MaintenanceReportController::class, 'signatureFile'])
+            ->whereIn('role', ['technician', 'engineer'])
+            ->name('maintenance-reports.signature');
         Route::patch('/dashboard/rapports/interventions-internes/{maintenanceReport}/submit', [MaintenanceReportController::class, 'submit'])->name('maintenance-reports.submit');
         Route::patch('/dashboard/rapports/interventions-internes/{maintenanceReport}/validate', [MaintenanceReportController::class, 'validateReport'])->name('maintenance-reports.validate');
         Route::patch('/dashboard/rapports/interventions-internes/{maintenanceReport}/close', [MaintenanceReportController::class, 'close'])->name('maintenance-reports.close');
@@ -234,14 +230,15 @@ Route::middleware(['auth', 'prevent-back-history', 'force-password-change', 'enf
         Route::post('/dashboard/societes-externes/import-excel', [ExternalCompanyController::class, 'importExcel'])->name('external-companies.import-excel');
         Route::delete('/dashboard/societes-externes/{company}', [ExternalCompanyController::class, 'destroy'])->name('external-companies.destroy');
 
-        Route::get('/dashboard/planning-societes-externes', [PlanningController::class, 'index'])->name('planning.index');
-        Route::post('/dashboard/planning-societes-externes/import-excel', [PlanningController::class, 'importContractsExcel'])->name('planning.import-excel');
-        Route::post('/dashboard/planning-societes-externes/sync-contracts', [PlanningController::class, 'syncFromContracts'])->name('planning.sync-contracts');
-        Route::get('/dashboard/planning-societes-externes/create', [PlanningController::class, 'create'])->name('planning.create');
-        Route::post('/dashboard/planning-societes-externes', [PlanningController::class, 'store'])->name('planning.store');
-        Route::get('/dashboard/planning-societes-externes/{planning}/edit', [PlanningController::class, 'edit'])->name('planning.edit');
-        Route::put('/dashboard/planning-societes-externes/{planning}', [PlanningController::class, 'update'])->name('planning.update');
-        Route::delete('/dashboard/planning-societes-externes/{planning}', [PlanningController::class, 'destroy'])->name('planning.destroy');
+        // Maintenance Préventive Module (powered by external companies planning)
+        Route::get('/dashboard/maintenance-preventive', [PlanningController::class, 'index'])->name('maintenance-preventive');
+        Route::post('/dashboard/maintenance-preventive/import-excel', [PlanningController::class, 'importContractsExcel'])->name('maintenance-preventive.import-excel');
+        Route::post('/dashboard/maintenance-preventive/sync-contracts', [PlanningController::class, 'syncFromContracts'])->name('maintenance-preventive.sync-contracts');
+        Route::get('/dashboard/maintenance-preventive/create', [PlanningController::class, 'create'])->name('maintenance-preventive.create');
+        Route::post('/dashboard/maintenance-preventive', [PlanningController::class, 'store'])->name('maintenance-preventive.store');
+        Route::get('/dashboard/maintenance-preventive/{planning}/edit', [PlanningController::class, 'edit'])->name('maintenance-preventive.edit');
+        Route::put('/dashboard/maintenance-preventive/{planning}', [PlanningController::class, 'update'])->name('maintenance-preventive.update');
+        Route::delete('/dashboard/maintenance-preventive/{planning}', [PlanningController::class, 'destroy'])->name('maintenance-preventive.destroy');
 
         Route::get('/dashboard/stock-movements', [StockMovementController::class, 'movements'])->name('stock.movements');
         Route::get('/dashboard/stock-movements/create', [StockMovementController::class, 'create'])->name('stock.create');

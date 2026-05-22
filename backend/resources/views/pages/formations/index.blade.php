@@ -14,37 +14,37 @@
     <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700">{{ session('error') }}</div>
 @endif
 
-<div class="mb-4 bg-white rounded-xl shadow-md p-4">
-    <div class="flex flex-wrap items-end gap-3">
-        <form id="scan_import_form" method="POST" action="{{ route('formations.import-pdf') }}" enctype="multipart/form-data" class="flex flex-wrap items-end gap-3">
-            @csrf
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Désignation (optionnel)</label>
-                <input type="text" name="scan_title" class="w-64 px-4 py-2 border border-gray-300 rounded-lg" placeholder="Ex: Procédure maintenance IRM">
-            </div>
-            <div>
-                <input id="scanned_pdf" type="file" name="scanned_pdf" accept="application/pdf" class="hidden" required>
-                <button type="button" id="import_scan_pdf_btn" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                    <i class="fas fa-upload mr-2"></i>Importer scan PDF
-                </button>
-            </div>
-        </form>
+<div class="mb-4 flex flex-wrap items-center justify-end gap-3">
+    <form id="scan_import_form" method="POST" action="{{ route('formations.import-pdf') }}" enctype="multipart/form-data" class="inline-flex flex-wrap items-center gap-3">
+        @csrf
+        <div>
+            <label for="scan_title" class="sr-only">Désignation (optionnel)</label>
+            <input id="scan_title" type="text" name="scan_title" class="h-10 w-72 px-4 border border-gray-300 rounded-lg" placeholder="Désignation (optionnel)">
+        </div>
+        <div>
+            <input id="scanned_pdf" type="file" name="scanned_pdf" accept="application/pdf" class="hidden" required>
+            <button type="button" id="import_scan_pdf_btn" class="inline-flex h-10 items-center gap-2 rounded-lg bg-emerald-600 px-4 text-sm font-semibold text-white transition-all duration-200 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-300">
+                <i class="fas fa-file-pdf"></i>
+                <span>Importer</span>
+            </button>
+        </div>
+    </form>
 
-        <a href="{{ route('formations.export-pdf', ['q' => $search ?? '']) }}" class="inline-flex items-center px-4 py-2 border border-blue-200 text-blue-700 rounded-lg hover:bg-blue-50">
-            <i class="fas fa-file-pdf mr-2"></i>Exporter PDF
-        </a>
-    </div>
+    <a href="{{ route('formations.export-pdf', ['q' => $search ?? '']) }}" class="inline-flex h-10 items-center gap-2 rounded-lg bg-slate-700 px-4 text-sm font-semibold text-white transition-all duration-200 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-300">
+        <i class="fas fa-file-export"></i>
+        <span>Exporter</span>
+    </a>
 </div>
 
 <div class="mb-4 bg-white rounded-xl shadow-md p-4">
-    <form method="GET" action="{{ route('formations.index') }}" class="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
-        <div class="md:col-span-3">
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Recherche par titre ou fichier</label>
+    <form method="GET" action="{{ route('formations.index') }}" class="flex flex-col md:flex-row md:items-end gap-4">
+        <div class="w-full md:flex-1">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Recherche</label>
             <input type="text" name="q" value="{{ $search ?? '' }}" placeholder="Ex: scanner, maintenance, irm..." class="w-full px-4 py-2 border border-gray-300 rounded-lg">
         </div>
         <div class="flex gap-2">
             <button class="px-5 py-2 bg-blue-600 text-white rounded-lg">Filtrer</button>
-            <a href="{{ route('formations.index') }}" class="px-5 py-2 border border-gray-300 rounded-lg text-gray-700">Reset</a>
+            <a href="{{ route('formations.index') }}" class="px-5 py-2 border border-gray-300 rounded-lg text-gray-700">Réinitialiser</a>
         </div>
     </form>
 </div>

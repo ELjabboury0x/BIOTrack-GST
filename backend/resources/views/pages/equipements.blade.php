@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', function () {
 <div class="mb-4 bg-white rounded-xl shadow-md p-4">
     <form method="GET" action="{{ route('equipements') }}" class="flex flex-col md:flex-row md:items-end gap-4" id="equipments-filter-form">
         <div class="w-full md:w-72">
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Hôpital</label>
+            <label for="equipments-hospital-select" class="block text-sm font-semibold text-gray-700 mb-2">Hôpital</label>
             <select name="hospital_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg" id="equipments-hospital-select">
                 <option value="">Tous les hôpitaux</option>
                 @foreach (collect($hospitals ?? [])->filter() as $hospital)
@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function () {
             </select>
         </div>
         <div class="w-full md:w-72">
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Service</label>
+            <label for="equipments-service-select" class="block text-sm font-semibold text-gray-700 mb-2">Service</label>
             <select name="service_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg" id="equipments-service-select">
                 <option value="">Tous les services</option>
                 @foreach (collect($services ?? [])->filter() as $service)
@@ -101,8 +101,17 @@ document.addEventListener('DOMContentLoaded', function () {
                 @endforeach
             </select>
         </div>
+        <div class="w-full md:w-72">
+            <label for="equipments-company-select" class="block text-sm font-semibold text-gray-700 mb-2">Société</label>
+            <select name="company_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg" id="equipments-company-select">
+                <option value="">Toutes les sociétés</option>
+                @foreach (collect($companies ?? [])->filter() as $company)
+                    <option value="{{ $company->id }}" {{ (int) ($selectedCompanyId ?? 0) === (int) $company->id ? 'selected' : '' }}>{{ $company->name }}</option>
+                @endforeach
+            </select>
+        </div>
         <div class="w-full md:flex-1">
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Recherche</label>
+            <label for="equipments-search-input" class="block text-sm font-semibold text-gray-700 mb-2">Recherche</label>
             <input type="text" name="q" value="{{ $searchTerm ?? '' }}" placeholder="N° inventaire, désignation, N° série..." class="w-full px-4 py-2 border border-gray-300 rounded-lg" id="equipments-search-input" autocomplete="off">
         </div>
         <input type="hidden" name="sort" value="{{ ($sortDirection ?? 'desc') === 'asc' ? 'asc' : 'desc' }}" id="equipments-sort-input">
@@ -142,13 +151,22 @@ document.addEventListener('DOMContentLoaded', function () {
 <div class="bg-white rounded-xl shadow-md border border-gray-100">
     <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between gap-4">
         <h3 class="text-base font-semibold text-gray-800">Liste des équipements</h3>
-    <span id="equipments-count" class="text-sm text-gray-500">{{ ($equipementsData->total() ?? 0) }} équipement(s)</span>
+        <div class="flex items-center gap-3">
+            <span id="equipments-selection-count" class="hidden px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">0 sélectionné(s)</span>
+            <button type="button" id="bulk-delete-trigger" onclick="openBulkDeleteModalFromSelection()" class="hidden px-3 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-rose-600 to-red-600 text-white hover:from-rose-700 hover:to-red-700">
+                <i class="fas fa-trash-alt mr-1"></i> Supprimer la sélection
+            </button>
+            <span id="equipments-count" class="text-sm text-gray-500">{{ ($equipementsData->total() ?? 0) }} équipement(s)</span>
+        </div>
     </div>
 
     <div class="overflow-x-auto">
-        <table class="w-full min-w-[900px]">
+        <table class="w-full min-w-[960px]">
             <thead class="bg-gray-50 border-b border-gray-200">
                 <tr>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase w-10" onclick="event.stopPropagation()">
+                        <input id="select-all-equipments" type="checkbox" onchange="toggleSelectAllEquipments(event)" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                    </th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">N° inventaire</th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Désignation</th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">N° de série</th>
@@ -186,7 +204,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             $sBg='bg-gray-100'; $sTxt='text-gray-500'; $sBdr='border-gray-300'; $sDot='bg-gray-400'; $sIcon='fa-circle-question'; $sLabel=$equipment['statut_etat'] ?? $equipment['status'] ?? '-';
                         }
                     @endphp
-                    <tr onclick='openEquipmentDetails(this, @json($equipment))' class="border-b border-gray-100 hover:bg-blue-50/40 cursor-pointer transition-colors equipment-row" data-search="{{ trim(implode(' ', [
+                    <tr onclick='openEquipmentDetails(this, @json($equipment))' class="border-b border-gray-100 hover:bg-blue-50/40 cursor-pointer transition-colors equipment-row" data-equipment-id="{{ (int) ($equipment['id'] ?? 0) }}" data-search="{{ trim(implode(' ', [
                         (string) ($equipment['barcode'] ?? ''),
                         (string) ($equipment['equipment_description'] ?? ''),
                         (string) ($equipment['serial_number'] ?? ''),
@@ -198,6 +216,9 @@ document.addEventListener('DOMContentLoaded', function () {
                         (string) ($equipment['market_label'] ?? ''),
                         (string) ($equipment['lot_number'] ?? ''),
                     ])) }}">
+                        <td class="px-4 py-3 text-sm" onclick="event.stopPropagation()">
+                            <input type="checkbox" class="equipment-select-checkbox w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" value="{{ (int) ($equipment['id'] ?? 0) }}" onchange="toggleEquipmentSelection({{ (int) ($equipment['id'] ?? 0) }}, event)">
+                        </td>
                         <td class="px-6 py-3 text-sm text-gray-800 font-medium">{{ $equipment['barcode'] ?? '-' }}</td>
                         <td class="px-6 py-3 text-sm text-gray-700">{{ $equipment['equipment_description'] ?? '-' }}</td>
                         <td class="px-6 py-3 text-sm text-gray-700">{{ $equipment['serial_number'] ?? '-' }}</td>
@@ -218,18 +239,20 @@ document.addEventListener('DOMContentLoaded', function () {
                         </td>
                     </tr>
                 @empty
-                    <td colspan="4" class="px-6 py-8 text-center text-sm text-gray-500">
-                        Aucun équipement trouvé.
-                    </td>
+                    <tr>
+                        <td colspan="5" class="px-6 py-8 text-center text-sm text-gray-500">
+                            Aucun équipement trouvé.
+                        </td>
+                    </tr>
                 @endforelse
                 <tr id="no-live-results" class="hidden">
-                    <td colspan="4" class="px-6 py-8 text-center text-sm text-gray-500">
+                    <td colspan="5" class="px-6 py-8 text-center text-sm text-gray-500">
                         Aucun équipement ne correspond à la recherche.
                     </td>
                 </tr>
 
                 <tr id="equipment-inline-details-row" class="hidden bg-gradient-to-r from-blue-50/80 via-indigo-50/70 to-purple-50/70 border-b border-blue-100 opacity-0 -translate-y-1 scale-[0.99] transition-all duration-300 ease-in-out">
-                    <td colspan="4" class="px-6 py-5">
+                    <td colspan="5" class="px-6 py-5">
                         <div class="rounded-2xl bg-white/95 backdrop-blur border border-blue-100 shadow-lg overflow-hidden">
                             <div class="px-5 py-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 text-white flex items-start justify-between gap-4">
                                 <div>
@@ -264,6 +287,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                             <div><span class="font-semibold text-gray-700">Description secteur:</span> <span id="detail-sector-description" class="text-gray-800">-</span></div>
                                             <div><span class="font-semibold text-gray-700">Marque:</span> <span id="detail-brand" class="text-gray-800">-</span></div>
                                             <div><span class="font-semibold text-gray-700">Modèle:</span> <span id="detail-model" class="text-gray-800">-</span></div>
+                                            <div><span class="font-semibold text-gray-700">Société:</span> <span id="detail-company" class="text-gray-800">-</span></div>
                                             <div><span class="font-semibold text-gray-700">Marché:</span> <span id="detail-market" class="text-gray-800">-</span></div>
                                             <div><span class="font-semibold text-gray-700">Lot:</span> <span id="detail-lot" class="text-gray-800">-</span></div>
                                         </div>
@@ -332,10 +356,13 @@ document.addEventListener('DOMContentLoaded', function () {
                                 </div>
 
                                 <div class="mt-5 pt-4 border-t border-gray-100 flex justify-end gap-2">
-                                    <button type="button" onclick="openBulkUpdateModal()" id="detail-bulk-update-btn" class="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg hover:from-amber-600 hover:to-orange-600 text-sm">
+                                    <button type="button" onclick="openBulkUpdateModal(event)" id="detail-bulk-update-btn" class="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg hover:from-amber-600 hover:to-orange-600 text-sm">
                                         <i class="fas fa-edit mr-1"></i> Modifier en masse
                                     </button>
                                     <a id="detail-edit-url" href="#" class="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 text-sm">Modifier</a>
+                                    <button type="button" id="detail-delete-btn" onclick="confirmDeleteEquipment()" class="px-4 py-2 bg-gradient-to-r from-rose-600 to-red-600 text-white rounded-lg hover:from-rose-700 hover:to-red-700 text-sm">
+                                        <i class="fas fa-trash-alt mr-1"></i> Supprimer
+                                    </button>
                                     <button type="button" onclick="closeEquipmentDetails()" class="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700">Fermer</button>
                                 </div>
                             </div>
@@ -352,6 +379,30 @@ document.addEventListener('DOMContentLoaded', function () {
 
     <div class="px-6 py-3 text-xs text-gray-500 border-t border-gray-100">
         Cliquez sur une ligne pour afficher les détails juste en dessous.
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="delete-confirm-modal" class="fixed inset-0 bg-black/50 z-[10000] hidden items-center justify-center px-4">
+    <div class="w-full max-w-lg bg-white rounded-xl shadow-2xl overflow-hidden">
+        <div class="px-6 py-4 bg-gradient-to-r from-rose-600 to-red-600 text-white flex items-center justify-between">
+            <div>
+                <h3 id="delete-confirm-title" class="text-lg font-semibold">Confirmer la suppression</h3>
+                <p class="text-sm text-white/80">Cette action est irréversible.</p>
+            </div>
+            <button type="button" onclick="closeDeleteConfirmModal()" class="text-white/90 hover:text-white text-2xl leading-none">&times;</button>
+        </div>
+        <div class="p-6">
+            <p id="delete-confirm-message" class="text-sm text-gray-700 leading-relaxed">
+                Voulez-vous vraiment supprimer cet équipement ?
+            </p>
+            <div class="mt-6 flex justify-end gap-3">
+                <button type="button" onclick="closeDeleteConfirmModal()" class="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50">Annuler</button>
+                <button type="button" id="delete-confirm-submit" onclick="confirmDeleteAction()" class="px-5 py-2 bg-gradient-to-r from-rose-600 to-red-600 text-white rounded-lg hover:from-rose-700 hover:to-red-700 text-sm font-semibold">
+                    <i class="fas fa-trash-alt mr-1"></i> Supprimer
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -393,15 +444,16 @@ document.addEventListener('DOMContentLoaded', function () {
     </div>
 </div>
 
-<!-- Bulk Update Modal -->
-<div id="bulk-update-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center px-4">
-    <div class="w-full max-w-2xl bg-white rounded-xl shadow-2xl max-h-[90vh] overflow-y-auto">
+<!-- Bulk Update Modal (popover mode anchored to equipment details) -->
+<div id="bulk-update-modal" class="hidden z-[10000]">
+    <div id="bulk-update-overlay" class="fixed inset-0 bg-black/45 hidden"></div>
+    <div id="bulk-update-panel" class="absolute hidden w-full max-w-2xl bg-white rounded-xl shadow-2xl max-h-[90vh] overflow-y-auto border border-amber-100">
         <div class="px-6 py-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-t-xl flex items-center justify-between">
             <div>
                 <h3 class="text-lg font-semibold">Modification en masse</h3>
                 <p class="text-sm text-white/80">Appliquer à tous les équipements de même désignation</p>
             </div>
-            <button type="button" onclick="closeBulkUpdateModal()" class="text-white/90 hover:text-white text-2xl leading-none">&times;</button>
+            <button id="bulk-close-btn" type="button" data-bulk-close="1" onclick="closeBulkUpdateModal()" class="text-white/90 hover:text-white text-2xl leading-none">&times;</button>
         </div>
         <form id="bulk-update-form" class="p-6">
             <div class="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
@@ -415,44 +467,44 @@ document.addEventListener('DOMContentLoaded', function () {
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Durée de garantie</label>
-                    <input type="text" name="duree_garantie" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Ex: 24 mois">
+                    <label for="bulk-duree-garantie" class="block text-sm font-semibold text-gray-700 mb-1">Durée de garantie</label>
+                    <input id="bulk-duree-garantie" type="text" name="duree_garantie" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Ex: 24 mois">
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Marque</label>
-                    <input type="text" name="brand_name" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Ex: Philips">
+                    <label for="bulk-brand-name" class="block text-sm font-semibold text-gray-700 mb-1">Marque</label>
+                    <input id="bulk-brand-name" type="text" name="brand_name" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Ex: Philips">
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Société</label>
-                    <input type="text" name="company_name" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Ex: MedTech SARL">
+                    <label for="bulk-company-name" class="block text-sm font-semibold text-gray-700 mb-1">Société</label>
+                    <input id="bulk-company-name" type="text" name="company_name" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Ex: MedTech SARL">
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Modèle</label>
-                    <input type="text" name="model_name" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Ex: XR-2000">
+                    <label for="bulk-model-name" class="block text-sm font-semibold text-gray-700 mb-1">Modèle</label>
+                    <input id="bulk-model-name" type="text" name="model_name" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Ex: XR-2000">
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Marché</label>
-                    <input type="text" name="market_label" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Ex: Marché 2024-001">
+                    <label for="bulk-market-label" class="block text-sm font-semibold text-gray-700 mb-1">Marché</label>
+                    <input id="bulk-market-label" type="text" name="market_label" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Ex: Marché 2024-001">
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Unité</label>
-                    <input type="text" name="unit_name" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Ex: Réanimation">
+                    <label for="bulk-unit-name" class="block text-sm font-semibold text-gray-700 mb-1">Unité</label>
+                    <input id="bulk-unit-name" type="text" name="unit_name" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Ex: Réanimation">
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Secteur</label>
-                    <input type="text" name="sector_name" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Ex: Bloc A">
+                    <label for="bulk-sector-name" class="block text-sm font-semibold text-gray-700 mb-1">Secteur</label>
+                    <input id="bulk-sector-name" type="text" name="sector_name" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Ex: Bloc A">
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Lot</label>
-                    <input type="text" name="lot_number" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Ex: LOT-001">
+                    <label for="bulk-lot-number" class="block text-sm font-semibold text-gray-700 mb-1">Lot</label>
+                    <input id="bulk-lot-number" type="text" name="lot_number" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Ex: LOT-001">
                 </div>
                 <div class="md:col-span-2">
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Article</label>
-                    <input type="text" name="article" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Ex: ART-12345">
+                    <label for="bulk-article" class="block text-sm font-semibold text-gray-700 mb-1">Article</label>
+                    <input id="bulk-article" type="text" name="article" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Ex: ART-12345">
                 </div>
 
                 <div class="md:col-span-2">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Importer des PDF par désignation</label>
+                    <p class="block text-sm font-semibold text-gray-700 mb-2">Importer des PDF par désignation</p>
                     <div class="flex flex-wrap items-center gap-4">
                         <div class="flex items-center gap-2">
                             <input id="bulk-user-manual-file" type="file" name="user_manual_file" accept="application/pdf" class="hidden">
@@ -477,7 +529,7 @@ document.addEventListener('DOMContentLoaded', function () {
             <p class="text-xs text-gray-500 mt-4">Laissez les champs vides pour ne pas les modifier.</p>
             
             <div class="mt-6 flex justify-end gap-3">
-                <button type="button" onclick="closeBulkUpdateModal()" class="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50">Annuler</button>
+                <button id="bulk-cancel-btn" type="button" data-bulk-close="1" onclick="closeBulkUpdateModal()" class="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50">Annuler</button>
                 <button type="submit" class="px-5 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg hover:from-amber-600 hover:to-orange-600 text-sm font-semibold">
                     <i class="fas fa-save mr-1"></i> Appliquer les modifications
                 </button>
@@ -539,6 +591,114 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     let equipmentKpiChart = null;
+    let currentEquipmentDetails = null;
+    let pendingDeleteAction = null;
+    let isDeleteActionRunning = false;
+    const selectedEquipmentIds = new Set();
+
+    function getEquipmentCountValue() {
+        const countLabel = document.getElementById('equipments-count');
+        if (!countLabel) {
+            return 0;
+        }
+
+        const text = (countLabel.textContent || '').trim();
+        const numeric = text.replace(/[^0-9]/g, '');
+        return Number.parseInt(numeric || '0', 10);
+    }
+
+    function setEquipmentCountValue(nextValue) {
+        const countLabel = document.getElementById('equipments-count');
+        if (!countLabel) {
+            return;
+        }
+
+        const safeValue = Math.max(0, Number.parseInt(String(nextValue), 10) || 0);
+        countLabel.textContent = `${safeValue} équipement(s)`;
+    }
+
+    function normalizeSelectedEquipmentSet() {
+        const visibleIds = new Set(
+            Array.from(document.querySelectorAll('.equipment-select-checkbox'))
+                .map((checkbox) => Number.parseInt(checkbox.value || '0', 10))
+                .filter((id) => id > 0)
+        );
+
+        Array.from(selectedEquipmentIds).forEach((id) => {
+            if (!visibleIds.has(id)) {
+                selectedEquipmentIds.delete(id);
+            }
+        });
+    }
+
+    function updateSelectionUi() {
+        normalizeSelectedEquipmentSet();
+
+        const checkboxes = Array.from(document.querySelectorAll('.equipment-select-checkbox'));
+        const checkedCount = checkboxes.reduce((count, checkbox) => count + (checkbox.checked ? 1 : 0), 0);
+
+        const selectAll = document.getElementById('select-all-equipments');
+        if (selectAll) {
+            selectAll.checked = checkboxes.length > 0 && checkedCount === checkboxes.length;
+            selectAll.indeterminate = checkedCount > 0 && checkedCount < checkboxes.length;
+        }
+
+        const selectionLabel = document.getElementById('equipments-selection-count');
+        if (selectionLabel) {
+            selectionLabel.textContent = `${selectedEquipmentIds.size} sélectionné(s)`;
+            selectionLabel.classList.toggle('hidden', selectedEquipmentIds.size === 0);
+        }
+
+        const bulkDeleteTrigger = document.getElementById('bulk-delete-trigger');
+        if (bulkDeleteTrigger) {
+            bulkDeleteTrigger.classList.toggle('hidden', selectedEquipmentIds.size === 0);
+        }
+    }
+
+    function toggleEquipmentSelection(equipmentId, event) {
+        const numericId = Number.parseInt(String(equipmentId), 10);
+        if (!Number.isInteger(numericId) || numericId <= 0) {
+            return;
+        }
+
+        if (event?.target?.checked) {
+            selectedEquipmentIds.add(numericId);
+        } else {
+            selectedEquipmentIds.delete(numericId);
+        }
+
+        updateSelectionUi();
+    }
+
+    function toggleSelectAllEquipments(event) {
+        const shouldSelect = Boolean(event?.target?.checked);
+        const checkboxes = Array.from(document.querySelectorAll('.equipment-select-checkbox'));
+
+        checkboxes.forEach((checkbox) => {
+            checkbox.checked = shouldSelect;
+            const equipmentId = Number.parseInt(checkbox.value || '0', 10);
+
+            if (!Number.isInteger(equipmentId) || equipmentId <= 0) {
+                return;
+            }
+
+            if (shouldSelect) {
+                selectedEquipmentIds.add(equipmentId);
+            } else {
+                selectedEquipmentIds.delete(equipmentId);
+            }
+        });
+
+        updateSelectionUi();
+    }
+
+    function clearEquipmentSelection() {
+        selectedEquipmentIds.clear();
+        document.querySelectorAll('.equipment-select-checkbox').forEach((checkbox) => {
+            checkbox.checked = false;
+        });
+        updateSelectionUi();
+    }
 
     function renderEquipmentKpi(detailsData) {
         const kpi = detailsData?.kpi || {};
@@ -575,7 +735,7 @@ document.addEventListener('DOMContentLoaded', function () {
         equipmentKpiChart = new Chart(chartCanvas, {
             type: 'bar',
             data: {
-                labels: ['Préventive', 'Curative', 'Diagnostic', 'Ce mois'],
+                labels: ['Préventive', 'Corrective', 'Diagnostic', 'Ce mois'],
                 datasets: [
                     {
                         label: 'KPI du rapport',
@@ -683,6 +843,8 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
+        currentEquipmentDetails = detailsData || null;
+
         const isAlreadyOpenForSameRow = inlineRow.dataset.openRowId === (triggerRow.rowIndex + ':' + (detailsData?.id ?? '')) && !inlineRow.classList.contains('hidden');
         if (isAlreadyOpenForSameRow) {
             closeEquipmentDetails();
@@ -710,6 +872,7 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('detail-sector-description').textContent = detailsData?.sector_description || '-';
         document.getElementById('detail-brand').textContent = detailsData?.brand || '-';
         document.getElementById('detail-model').textContent = detailsData?.model || '-';
+        document.getElementById('detail-company').textContent = detailsData?.company_name || '-';
         document.getElementById('detail-market').textContent = detailsData?.market || '-';
         document.getElementById('detail-lot').textContent = detailsData?.lot || '-';
         document.getElementById('detail-article').textContent = detailsData?.article || '-';
@@ -722,6 +885,19 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('detail-pill-status').textContent = detailsData?.status || '-';
         document.getElementById('detail-pill-state').textContent = detailsData?.statut_etat || '-';
         document.getElementById('detail-edit-url').href = detailsData?.edit_url || '#';
+
+        const deleteButton = document.getElementById('detail-delete-btn');
+        const deleteUrl = detailsData?.delete_url || '';
+
+        if (deleteButton) {
+            const equipmentId = Number.parseInt(String(detailsData?.id ?? '0'), 10);
+            const canDelete = deleteUrl !== '' && Number.isInteger(equipmentId) && equipmentId > 0;
+            deleteButton.dataset.deleteUrl = deleteUrl;
+            deleteButton.dataset.equipmentId = String(equipmentId > 0 ? equipmentId : '');
+            deleteButton.disabled = !canDelete;
+            deleteButton.classList.toggle('opacity-50', !canDelete);
+            deleteButton.classList.toggle('cursor-not-allowed', !canDelete);
+        }
 
         renderEquipmentKpi(detailsData);
 
@@ -800,10 +976,225 @@ document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('tr.equipment-row').forEach(function (row) {
             row.classList.remove('bg-blue-50');
         });
+
+        currentEquipmentDetails = null;
+    }
+
+    function confirmDeleteEquipment() {
+        const deleteButton = document.getElementById('detail-delete-btn');
+        const deleteUrl = (deleteButton?.dataset?.deleteUrl || currentEquipmentDetails?.delete_url || '').trim();
+        const equipmentId = Number.parseInt(deleteButton?.dataset?.equipmentId || String(currentEquipmentDetails?.id || '0'), 10);
+
+        if (!deleteUrl || !Number.isInteger(equipmentId) || equipmentId <= 0) {
+            showNotification('Suppression indisponible pour cet équipement.', 'error');
+            return;
+        }
+
+        const inventory = (currentEquipmentDetails?.barcode || document.getElementById('detail-barcode')?.textContent || '').trim();
+        const designation = (currentEquipmentDetails?.equipment_description || document.getElementById('detail-description')?.textContent || '').trim();
+
+        const labelParts = [];
+        if (inventory && inventory !== '-') {
+            labelParts.push(inventory);
+        }
+        if (designation && designation !== '-') {
+            labelParts.push(designation);
+        }
+
+        const targetLabel = labelParts.length > 0 ? labelParts.join(' - ') : 'cet équipement';
+        openDeleteConfirmModal({
+            mode: 'single',
+            equipmentIds: [equipmentId],
+            deleteUrl,
+            label: targetLabel,
+        });
+    }
+
+    function openBulkDeleteModalFromSelection() {
+        if (selectedEquipmentIds.size === 0) {
+            showNotification('Sélectionnez au moins un équipement.', 'error');
+            return;
+        }
+
+        openDeleteConfirmModal({
+            mode: 'bulk',
+            equipmentIds: Array.from(selectedEquipmentIds),
+            label: `${selectedEquipmentIds.size} équipement(s) sélectionné(s)`,
+        });
+    }
+
+    function openDeleteConfirmModal(actionContext) {
+        const modal = document.getElementById('delete-confirm-modal');
+        const title = document.getElementById('delete-confirm-title');
+        const message = document.getElementById('delete-confirm-message');
+
+        if (!modal || !title || !message) {
+            return;
+        }
+
+        pendingDeleteAction = actionContext;
+
+        if (actionContext?.mode === 'bulk') {
+            title.textContent = 'Supprimer plusieurs équipements';
+            message.textContent = `Voulez-vous vraiment supprimer ${actionContext.label || 'la sélection'} ?`;
+        } else {
+            title.textContent = 'Supprimer un équipement';
+            message.textContent = `Voulez-vous vraiment supprimer ${actionContext?.label || 'cet équipement'} ?`;
+        }
+
+        setDeleteActionLoading(false);
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeDeleteConfirmModal(forceClose = false) {
+        if (isDeleteActionRunning && !forceClose) {
+            return;
+        }
+
+        const modal = document.getElementById('delete-confirm-modal');
+        if (!modal) {
+            return;
+        }
+
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        pendingDeleteAction = null;
+    }
+
+    function setDeleteActionLoading(loading) {
+        isDeleteActionRunning = loading;
+        const submitButton = document.getElementById('delete-confirm-submit');
+        if (!submitButton) {
+            return;
+        }
+
+        submitButton.disabled = loading;
+        submitButton.classList.toggle('opacity-70', loading);
+        submitButton.classList.toggle('cursor-not-allowed', loading);
+        submitButton.innerHTML = loading
+            ? '<i class="fas fa-spinner fa-spin mr-1"></i> Suppression...'
+            : '<i class="fas fa-trash-alt mr-1"></i> Supprimer';
+    }
+
+    function removeDeletedRowsFromUi(deletedIds) {
+        if (!Array.isArray(deletedIds) || deletedIds.length === 0) {
+            return;
+        }
+
+        const deletedIdSet = new Set(
+            deletedIds
+                .map((id) => Number.parseInt(String(id), 10))
+                .filter((id) => Number.isInteger(id) && id > 0)
+        );
+
+        if (deletedIdSet.size === 0) {
+            return;
+        }
+
+        document.querySelectorAll('tr.equipment-row').forEach((row) => {
+            const rowId = Number.parseInt(row.dataset.equipmentId || '0', 10);
+            if (deletedIdSet.has(rowId)) {
+                row.remove();
+            }
+        });
+
+        deletedIdSet.forEach((id) => selectedEquipmentIds.delete(id));
+        updateSelectionUi();
+
+        const currentDetailsId = Number.parseInt(String(currentEquipmentDetails?.id || '0'), 10);
+        if (deletedIdSet.has(currentDetailsId)) {
+            closeEquipmentDetails();
+        }
+
+        const noResultsRow = document.getElementById('no-live-results');
+        const remainingRows = document.querySelectorAll('tr.equipment-row').length;
+        if (noResultsRow) {
+            noResultsRow.classList.toggle('hidden', remainingRows > 0);
+        }
+
+        const nextCount = getEquipmentCountValue() - deletedIdSet.size;
+        setEquipmentCountValue(nextCount);
+    }
+
+    async function executeSingleDelete(actionContext) {
+        const response = await fetch(actionContext.deleteUrl, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json',
+            },
+        });
+
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || !result.success) {
+            throw new Error(result.message || 'Suppression impossible pour cet équipement.');
+        }
+
+        const deletedId = Number.parseInt(String(result.deleted_id || actionContext.equipmentIds?.[0] || '0'), 10);
+        removeDeletedRowsFromUi(Number.isInteger(deletedId) && deletedId > 0 ? [deletedId] : []);
+        showNotification(result.message || 'Équipement supprimé avec succès.', 'success');
+    }
+
+    async function executeBulkDelete(actionContext) {
+        const response = await fetch('{{ route("equipements.bulk-delete") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+                equipment_ids: actionContext.equipmentIds || [],
+            }),
+        });
+
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || !result.success) {
+            throw new Error(result.message || 'Suppression multiple impossible.');
+        }
+
+        const deletedIds = Array.isArray(result.deleted_ids) ? result.deleted_ids : [];
+        removeDeletedRowsFromUi(deletedIds);
+
+        if (result.success) {
+            showNotification(result.message || 'Suppression effectuée.', 'success');
+            return;
+        }
+
+        throw new Error(result.message || 'Suppression multiple impossible.');
+    }
+
+    async function confirmDeleteAction() {
+        if (!pendingDeleteAction || isDeleteActionRunning) {
+            return;
+        }
+
+        setDeleteActionLoading(true);
+
+        try {
+            if (pendingDeleteAction.mode === 'bulk') {
+                await executeBulkDelete(pendingDeleteAction);
+            } else {
+                await executeSingleDelete(pendingDeleteAction);
+            }
+
+            closeDeleteConfirmModal(true);
+        } catch (error) {
+            showNotification(error.message || 'Erreur lors de la suppression.', 'error');
+        } finally {
+            setDeleteActionLoading(false);
+        }
     }
 
     window.openEquipmentDetails = openEquipmentDetails;
     window.closeEquipmentDetails = closeEquipmentDetails;
+    window.confirmDeleteEquipment = confirmDeleteEquipment;
+    window.openBulkDeleteModalFromSelection = openBulkDeleteModalFromSelection;
+    window.toggleEquipmentSelection = toggleEquipmentSelection;
+    window.toggleSelectAllEquipments = toggleSelectAllEquipments;
+    window.confirmDeleteAction = confirmDeleteAction;
+    window.closeDeleteConfirmModal = closeDeleteConfirmModal;
     window.exportTableToExcel = exportTableToExcel;
     window.exportTableToPdf = exportTableToPdf;
 
@@ -820,7 +1211,12 @@ document.addEventListener('DOMContentLoaded', function () {
         event.preventDefault();
         
         const dropdown = document.getElementById('status-dropdown');
-        const button = event.currentTarget;
+        const button = event.currentTarget
+            || event.target?.closest('.status-btn')
+            || document.getElementById(`status-btn-${equipmentId}`);
+        if (!dropdown || !button) {
+            return;
+        }
         const rect = button.getBoundingClientRect();
 
         // Ensure dropdown is rendered at body level to avoid transformed/scroll container offsets.
@@ -840,10 +1236,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const viewportPadding = 8;
         const preferredGap = 8;
         const minWidth = 220;
-        const pageScrollX = window.scrollX || window.pageXOffset || 0;
-        const pageScrollY = window.scrollY || window.pageYOffset || 0;
 
-        dropdown.style.position = 'absolute';
+        dropdown.style.position = 'fixed';
         dropdown.style.minWidth = minWidth + 'px';
         dropdown.classList.remove('hidden');
         dropdown.style.visibility = 'hidden';
@@ -852,24 +1246,24 @@ document.addEventListener('DOMContentLoaded', function () {
         const dropdownHeight = dropdown.offsetHeight || 180;
 
         // Anchor under the clicked status button.
-        let left = pageScrollX + rect.left;
-        let top = pageScrollY + rect.bottom + preferredGap;
+        let left = rect.left;
+        let top = rect.bottom + preferredGap;
 
-        const viewportRight = pageScrollX + window.innerWidth;
-        const viewportBottom = pageScrollY + window.innerHeight;
+        const viewportRight = window.innerWidth;
+        const viewportBottom = window.innerHeight;
 
         if (left + dropdownWidth > viewportRight - viewportPadding) {
             left = viewportRight - dropdownWidth - viewportPadding;
         }
-        if (left < pageScrollX + viewportPadding) {
-            left = pageScrollX + viewportPadding;
+        if (left < viewportPadding) {
+            left = viewportPadding;
         }
 
         if (top + dropdownHeight > viewportBottom - viewportPadding) {
-            top = pageScrollY + rect.top - dropdownHeight - preferredGap;
+            top = rect.top - dropdownHeight - preferredGap;
         }
-        if (top < pageScrollY + viewportPadding) {
-            top = pageScrollY + viewportPadding;
+        if (top < viewportPadding) {
+            top = viewportPadding;
         }
 
         dropdown.style.top = Math.round(top) + 'px';
@@ -891,6 +1285,11 @@ document.addEventListener('DOMContentLoaded', function () {
     // Close status dropdown
     function closeStatusDropdown() {
         const dropdown = document.getElementById('status-dropdown');
+        if (!dropdown) {
+            currentStatusDropdownId = null;
+            currentStatusButton = null;
+            return;
+        }
         dropdown.classList.add('hidden');
         dropdown.style.visibility = '';
         currentStatusDropdownId = null;
@@ -901,6 +1300,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // Handle click outside to close dropdown
     document.addEventListener('click', function(event) {
         const dropdown = document.getElementById('status-dropdown');
+        if (!dropdown) {
+            return;
+        }
         if (!dropdown.contains(event.target) && !event.target.closest('.status-btn')) {
             closeStatusDropdown();
         }
@@ -989,31 +1391,190 @@ document.addEventListener('DOMContentLoaded', function () {
     window.selectStatus = selectStatus;
 
     // Bulk update modal functions
-    function openBulkUpdateModal() {
-        const designation = document.getElementById('detail-description')?.textContent || '';
-        if (!designation || designation === '-') {
-            showNotification('Désignation non disponible', 'error');
-            return;
+    let bulkIgnoreOutsideClickUntil = 0;
+    function openBulkUpdateModal(event) {
+        try {
+            console.debug('openBulkUpdateModal called', { event });
+            if (event && typeof event.stopPropagation === 'function') {
+                event.stopPropagation();
+            }
+
+            bulkIgnoreOutsideClickUntil = Date.now() + 300;
+
+            const designation = document.getElementById('detail-description')?.textContent || '';
+            if (!designation || designation === '-') {
+                showNotification('Désignation non disponible', 'error');
+                return;
+            }
+
+            currentDesignation = designation;
+            document.getElementById('bulk-designation-display').textContent = designation;
+            document.getElementById('bulk-designation-input').value = designation;
+            document.getElementById('bulk-update-form').reset();
+            document.getElementById('bulk-designation-input').value = designation;
+
+            const filesHint = document.getElementById('bulk-uploaded-files-hint');
+            if (filesHint) {
+                filesHint.textContent = 'Aucun PDF sélectionné.';
+            }
+
+            const modal = document.getElementById('bulk-update-modal');
+            const panel = document.getElementById('bulk-update-panel');
+            const overlay = document.getElementById('bulk-update-overlay');
+            if (!modal || !panel) {
+                console.error('bulk update elements not found');
+                return;
+            }
+
+            if (panel.dataset.open === '1') {
+                console.debug('bulk panel already open');
+                return;
+            }
+
+            // Ensure panel and overlay are appended to body to avoid clipping/transform issues
+            try {
+                console.debug('bulk update modal elements', { modalExists: !!modal, panelExists: !!panel, overlayExists: !!overlay });
+                if (panel.parentNode !== document.body) {
+                    document.body.appendChild(panel);
+                }
+                if (overlay && overlay.parentNode !== document.body) {
+                    document.body.appendChild(overlay);
+                }
+            } catch (e) {
+                console.debug('append to body failed', e);
+            }
+
+            // Bind close buttons once (after appending to body)
+            if (!panel.dataset.buttonsBound) {
+                const closeBtn = document.getElementById('bulk-close-btn');
+                const cancelBtn = document.getElementById('bulk-cancel-btn');
+                try {
+                    if (closeBtn) {
+                        closeBtn.addEventListener('click', closeBulkUpdateModal);
+                    }
+                    if (cancelBtn) {
+                        cancelBtn.addEventListener('click', closeBulkUpdateModal);
+                    }
+                } catch (e) {
+                    console.debug('binding bulk close buttons failed', e);
+                }
+                panel.dataset.buttonsBound = '1';
+            }
+
+            // Position the panel near the equipment inline details row using fixed positioning
+            const inlineRow = document.getElementById('equipment-inline-details-row');
+            let anchorRect = null;
+            if (inlineRow) {
+                anchorRect = inlineRow.getBoundingClientRect();
+            } else if (event && event.target) {
+                anchorRect = event.target.getBoundingClientRect();
+            }
+
+            // Make panel visible but hidden to measure its size
+            panel.style.position = 'fixed';
+            panel.style.visibility = 'hidden';
+            panel.style.display = 'block';
+            panel.classList.remove('hidden');
+            modal.classList.remove('hidden');
+
+            const viewportW = window.innerWidth;
+            const viewportH = window.innerHeight;
+            const panelRect = panel.getBoundingClientRect();
+            console.debug('panelRect measured', panelRect);
+            const panelW = Math.min(panelRect.width || 720, viewportW - 32);
+            const panelH = panelRect.height || 400;
+
+            let top = 16;
+            let left = Math.max(8, (viewportW - panelW) / 2);
+
+            if (anchorRect) {
+                const belowTop = anchorRect.bottom + 8;
+                const aboveTop = anchorRect.top - panelH - 8;
+
+                if (belowTop + panelH + 8 <= viewportH) {
+                    top = belowTop;
+                } else if (aboveTop >= 8) {
+                    top = aboveTop;
+                } else {
+                    top = Math.max(8, Math.min(belowTop, viewportH - panelH - 8));
+                }
+
+                left = Math.round(anchorRect.left + (anchorRect.width / 2) - (panelW / 2));
+                left = Math.max(8, Math.min(left, viewportW - panelW - 8));
+            }
+
+            panel.style.width = panelW + 'px';
+            panel.style.top = `${top}px`;
+            panel.style.left = `${left}px`;
+            panel.style.visibility = 'visible';
+            panel.style.display = 'block';
+            panel.style.zIndex = '12000';
+            panel.dataset.open = '1';
+
+            if (overlay) {
+                overlay.classList.add('hidden');
+            }
+
+            console.debug('bulk panel positioned', { top, left, panelW, panelH });
+        } catch (err) {
+            console.error('openBulkUpdateModal error', err);
+            showNotification('Erreur interne lors de l\'ouverture du panneau', 'error');
         }
-        currentDesignation = designation;
-        document.getElementById('bulk-designation-display').textContent = designation;
-        document.getElementById('bulk-designation-input').value = designation;
-        document.getElementById('bulk-update-form').reset();
-        document.getElementById('bulk-designation-input').value = designation;
-        const filesHint = document.getElementById('bulk-uploaded-files-hint');
-        if (filesHint) {
-            filesHint.textContent = 'Aucun PDF sélectionné.';
-        }
-        document.getElementById('bulk-update-modal').classList.remove('hidden');
-        document.getElementById('bulk-update-modal').classList.add('flex');
     }
     window.openBulkUpdateModal = openBulkUpdateModal;
 
     function closeBulkUpdateModal() {
-        document.getElementById('bulk-update-modal').classList.add('hidden');
-        document.getElementById('bulk-update-modal').classList.remove('flex');
+        const modal = document.getElementById('bulk-update-modal');
+        const panel = document.getElementById('bulk-update-panel');
+        const overlay = document.getElementById('bulk-update-overlay');
+        if (!modal || !panel) {
+            return;
+        }
+
+        panel.classList.add('hidden');
+        panel.style.display = 'none';
+        panel.style.visibility = '';
+        modal.classList.add('hidden');
+        if (overlay) {
+            overlay.classList.add('hidden');
+        }
+        panel.dataset.open = '0';
+        panel.style.zIndex = '';
+        // restore body scrolling if it was disabled previously
+        document.body.classList.remove('overflow-hidden');
     }
     window.closeBulkUpdateModal = closeBulkUpdateModal;
+
+    // Ensure close buttons always work, even if inline handlers fail
+    document.addEventListener('click', function (event) {
+        const closeTrigger = event.target?.closest?.('[data-bulk-close="1"]');
+        if (!closeTrigger) {
+            return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        closeBulkUpdateModal();
+    }, true);
+
+    // Close when clicking overlay (if overlay is visible) or clicking outside the panel
+    document.getElementById('bulk-update-overlay')?.addEventListener('click', function (event) {
+        closeBulkUpdateModal();
+    });
+
+    document.addEventListener('click', function (event) {
+        if (Date.now() < bulkIgnoreOutsideClickUntil) {
+            return;
+        }
+        const panel = document.getElementById('bulk-update-panel');
+        if (!panel || panel.classList.contains('hidden')) {
+            return;
+        }
+
+        if (!panel.contains(event.target)) {
+            // click outside the panel closes it
+            closeBulkUpdateModal();
+        }
+    });
 
     // Bulk update form submission
     document.getElementById('bulk-update-form')?.addEventListener('submit', function(e) {
@@ -1128,11 +1689,14 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 3000);
     }
 
+    updateSelectionUi();
+
     (function setupFilters() {
         const form = document.getElementById('equipments-filter-form');
         const hospitalSelect = document.getElementById('equipments-hospital-select');
         const serviceSelect = document.getElementById('equipments-service-select');
         const categorySelect = document.getElementById('equipments-category-select');
+        const companySelect = document.getElementById('equipments-company-select');
         const searchInput = document.getElementById('equipments-search-input');
         const tableBody = document.getElementById('equipments-table-body');
         const countLabel = document.getElementById('equipments-count');
@@ -1140,7 +1704,7 @@ document.addEventListener('DOMContentLoaded', function () {
         let liveSearchTimer = null;
         let liveSearchController = null;
 
-        if (!form || !serviceSelect) {
+        if (!form) {
             return;
         }
 
@@ -1187,6 +1751,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     paginationContainer.innerHTML = nextPagination.innerHTML;
                 }
 
+                currentEquipmentDetails = null;
+                clearEquipmentSelection();
+
                 window.history.replaceState({}, '', url);
             } catch (error) {
                 if (error.name !== 'AbortError') {
@@ -1200,6 +1767,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 form.submit();
             });
         });
+
+        if (companySelect) {
+            companySelect.addEventListener('change', function () {
+                applyLiveSearch();
+            });
+        }
 
         if (searchInput) {
             searchInput.addEventListener('input', function () {

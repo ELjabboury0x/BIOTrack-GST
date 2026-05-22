@@ -21,10 +21,10 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Example Fields - will be replaced dynamically -->
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <label for="add-record-designation" class="block text-sm font-semibold text-gray-700 mb-2">
                             Nom <span class="text-red-500">*</span>
                         </label>
-                        <input type="text" 
+                        <input id="add-record-designation" type="text" 
                                name="designation"
                                placeholder="Entrez le nom" 
                                required
@@ -32,10 +32,10 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <label for="add-record-inventory-number" class="block text-sm font-semibold text-gray-700 mb-2">
                             Code <span class="text-red-500">*</span>
                         </label>
-                        <input type="text" 
+                        <input id="add-record-inventory-number" type="text" 
                                name="inventory_number_current"
                                placeholder="Entrez le code" 
                                required
@@ -43,39 +43,39 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <label for="add-record-serial-number" class="block text-sm font-semibold text-gray-700 mb-2">
                             Numéro de série <span class="text-red-500">*</span>
                         </label>
-                        <input type="text"
+                        <input id="add-record-serial-number" type="text"
                                name="serial_number"
                                placeholder="Entrez le numéro de série"
                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <label for="add-record-brand-name" class="block text-sm font-semibold text-gray-700 mb-2">
                             Marque
                         </label>
-                        <input type="text"
+                        <input id="add-record-brand-name" type="text"
                                name="brand_name"
                                placeholder="Entrez la marque"
                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <label for="add-record-manufacture-date" class="block text-sm font-semibold text-gray-700 mb-2">
                             Date de fabrication
                         </label>
-                        <input type="date"
+                        <input id="add-record-manufacture-date" type="date"
                                name="manufacture_date"
                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <label for="add-record-icon-class" class="block text-sm font-semibold text-gray-700 mb-2">
                             Icône inventaire
                         </label>
-                        <select name="icon_class" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                        <select id="add-record-icon-class" name="icon_class" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
                             <option value="fas fa-stethoscope">Stéthoscope</option>
                             <option value="fas fa-heartbeat">Cardio</option>
                             <option value="fas fa-x-ray">Imagerie</option>
@@ -86,10 +86,10 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <label for="add-record-category-name" class="block text-sm font-semibold text-gray-700 mb-2">
                             Catégorie
                         </label>
-                        <select name="category_name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                        <select id="add-record-category-name" name="category_name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
                             <option selected>Sélectionner une catégorie santé</option>
                             <option>Imagerie médicale</option>
                             <option>Diagnostic patient</option>
@@ -115,10 +115,10 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <label for="add-record-service-name" class="block text-sm font-semibold text-gray-700 mb-2">
                             Service
                         </label>
-                        <select name="service_name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                        <select id="add-record-service-name" name="service_name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
                             <option>Réanimation Pédiatrique</option>
                             <option>Urgences pédiatriques</option>
                             <option>Consultations et Explorations Fonctionnelles Pédiatriques</option>
@@ -138,10 +138,10 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <label for="add-record-lifecycle-status" class="block text-sm font-semibold text-gray-700 mb-2">
                             Statut
                         </label>
-                        <select name="lifecycle_status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                        <select id="add-record-lifecycle-status" name="lifecycle_status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
                             <option value="actif">Actif</option>
                             <option value="inactif">Inactif</option>
                             <option value="en_maintenance">En maintenance</option>
@@ -149,10 +149,10 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <label for="add-record-operational-status" class="block text-sm font-semibold text-gray-700 mb-2">
                             État de fonctionnement
                         </label>
-                        <select name="operational_status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                        <select id="add-record-operational-status" name="operational_status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
                             <option value="fonctionnel">Fonctionnel</option>
                             <option value="reserve">Fonctionnel avec réserve</option>
                             <option value="panne">En panne</option>
@@ -161,10 +161,10 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <label for="add-record-hospital-code" class="block text-sm font-semibold text-gray-700 mb-2">
                             Hôpital <span class="text-red-500">*</span>
                         </label>
-                        <select name="hospital_code" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                        <select id="add-record-hospital-code" name="hospital_code" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
                             <option value="HSP">HSP</option>
                             <option value="HME">HME</option>
                             <option value="HO">HO</option>
@@ -172,29 +172,29 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <label for="add-record-company-name" class="block text-sm font-semibold text-gray-700 mb-2">
                             Société
                         </label>
-                        <input type="text"
+                        <input id="add-record-company-name" type="text"
                                name="company_name"
                                placeholder="Nom de la société"
                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <label for="add-record-market-date" class="block text-sm font-semibold text-gray-700 mb-2">
                             Date marché
                         </label>
-                        <input type="date"
+                        <input id="add-record-market-date" type="date"
                                name="market_date"
                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <label for="add-record-verification-status" class="block text-sm font-semibold text-gray-700 mb-2">
                             Vérification achevée
                         </label>
-                        <select name="verification_status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                        <select id="add-record-verification-status" name="verification_status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
                             <option value="">Non renseigné</option>
                             <option value="oui">Oui</option>
                             <option value="non">Non</option>
@@ -202,39 +202,39 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <label for="add-record-store-name" class="block text-sm font-semibold text-gray-700 mb-2">
                             Magasin
                         </label>
-                        <input type="text"
+                        <input id="add-record-store-name" type="text"
                                name="store_name"
                                placeholder="Nom du magasin"
                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
                     </div>
 
                     <div class="md:col-span-2">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <label for="add-record-exact-location" class="block text-sm font-semibold text-gray-700 mb-2">
                             Localisation exacte
                         </label>
-                        <input type="text"
+                        <input id="add-record-exact-location" type="text"
                                name="exact_location"
                                placeholder="Ex: Bâtiment A, 2ème étage, Salle 204"
                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
                     </div>
 
                     <div class="md:col-span-2">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <label for="add-record-description" class="block text-sm font-semibold text-gray-700 mb-2">
                             Description
                         </label>
-                        <textarea name="description" placeholder="Entrez une description" 
+                        <textarea id="add-record-description" name="description" placeholder="Entrez une description" 
                                   rows="4"
                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"></textarea>
                     </div>
 
                     <div class="md:col-span-2">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <label for="add-record-serial-label-comment" class="block text-sm font-semibold text-gray-700 mb-2">
                             Commentaire étiquette SN enlevée
                         </label>
-                        <textarea placeholder="Entrez une description" 
+                        <textarea id="add-record-serial-label-comment" placeholder="Entrez une description" 
                                   name="serial_label_comment"
                                   rows="4"
                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"></textarea>

@@ -111,7 +111,6 @@
                 <a href="{{ route('company-performance.index') }}" @click="if (window.innerWidth < 1024) { mobileSidebarOpen = false }" class="gst-nav-link {{ request()->routeIs('company-performance.*') ? 'active' : '' }} flex items-center px-4 py-2.5 rounded-xl transition-all duration-200"><i class="fas fa-chart-line w-5 text-center"></i><span class="ml-3 text-sm">Performance Sociétés</span></a>
                 <a href="{{ route('rapports') }}" @click="if (window.innerWidth < 1024) { mobileSidebarOpen = false }" class="gst-nav-link {{ request()->routeIs('rapports*') ? 'active' : '' }} flex items-center px-4 py-2.5 rounded-xl transition-all duration-200"><i class="fas fa-chart-bar w-5 text-center"></i><span class="ml-3 text-sm">Rapports</span></a>
                 <a href="{{ route('mttr-mtbf') }}" @click="if (window.innerWidth < 1024) { mobileSidebarOpen = false }" class="gst-nav-link {{ request()->routeIs('mttr-mtbf*') ? 'active' : '' }} flex items-center px-4 py-2.5 rounded-xl transition-all duration-200"><i class="fas fa-tachometer-alt w-5 text-center"></i><span class="ml-3 text-sm">KPI MTTR / MTBF</span></a>
-                <a href="{{ route('planning.index') }}" @click="if (window.innerWidth < 1024) { mobileSidebarOpen = false }" class="gst-nav-link {{ request()->routeIs('planning.*') ? 'active' : '' }} flex items-center px-4 py-2.5 rounded-xl transition-all duration-200"><i class="fas fa-calendar-alt w-5 text-center"></i><span class="ml-3 text-sm">Planning Sociétés</span></a>
                 <a href="{{ route('stock.movements') }}" @click="if (window.innerWidth < 1024) { mobileSidebarOpen = false }" class="gst-nav-link {{ request()->routeIs('stock.*') ? 'active' : '' }} flex items-center px-4 py-2.5 rounded-xl transition-all duration-200"><i class="fas fa-truck-loading w-5 text-center"></i><span class="ml-3 text-sm">Décharge & Réception</span></a>
                 @if(!$isMajor)
                 <a href="{{ route('parametres') }}" @click="if (window.innerWidth < 1024) { mobileSidebarOpen = false }" class="gst-nav-link {{ request()->routeIs('parametres*') ? 'active' : '' }} flex items-center px-4 py-2.5 rounded-xl transition-all duration-200"><i class="fas fa-cog w-5 text-center"></i><span class="ml-3 text-sm">Paramètres</span></a>
@@ -140,7 +139,7 @@
     <div class="mt-auto p-5 border-t border-white/5">
         <div class="flex items-center gap-2 text-[10px] text-blue-300/40">
             <i class="fas fa-heartbeat"></i>
-            <span class="gst-footer-text">GST GMAO v2.0</span>
+            <span class="gst-footer-text">BioTrack GST</span>
         </div>
     </div>
 </aside>

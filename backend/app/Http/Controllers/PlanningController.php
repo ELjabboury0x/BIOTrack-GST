@@ -62,8 +62,8 @@ class PlanningController extends Controller
                 'intervenant' => $planning->contact_person ?: '-',
                 'description' => $planning->description ? Str::limit($planning->description, 120) : '-',
                 'statut' => $planning->status,
-                'edit_url' => route('planning.edit', $planning),
-                'delete_url' => route('planning.destroy', $planning),
+                'edit_url' => route('maintenance-preventive.edit', $planning),
+                'delete_url' => route('maintenance-preventive.destroy', $planning),
             ];
         })->values();
 
@@ -120,7 +120,7 @@ class PlanningController extends Controller
                     'date' => optional($planning->planned_date)->format('d/m/Y') ?: '-',
                     'jours' => $daysLeft,
                     'description' => $planning->description ?: '-',
-                    'edit_url' => route('planning.edit', $planning),
+                    'edit_url' => route('maintenance-preventive.edit', $planning),
                 ];
             })
             ->values();
@@ -239,12 +239,12 @@ class PlanningController extends Controller
 
         if (!$hasContracts) {
             return redirect()
-                ->route('planning.index')
+                ->route('maintenance-preventive')
                 ->with('error', 'Aucune donnée de contrat trouvée. Lancez d\'abord l\'import du fichier Contrats de maintenance.');
         }
 
         return redirect()
-            ->route('planning.index')
+            ->route('maintenance-preventive')
             ->with('success', "Planning synchronisé depuis contrats. Créés: {$created}, mis à jour: {$updated}.");
     }
 
@@ -276,7 +276,7 @@ class PlanningController extends Controller
 
             if ($exitCode !== 0) {
                 return redirect()
-                    ->route('planning.index')
+                    ->route('maintenance-preventive')
                     ->with('error', 'Import Excel contrats échoué.');
             }
 
@@ -284,16 +284,16 @@ class PlanningController extends Controller
 
             if (!$hasContracts) {
                 return redirect()
-                    ->route('planning.index')
+                    ->route('maintenance-preventive')
                     ->with('error', 'Import terminé mais aucune donnée contrat exploitable n\'a été trouvée.');
             }
 
             return redirect()
-                ->route('planning.index')
+                ->route('maintenance-preventive')
                 ->with('success', 'Import Excel contrats réussi (' . $safeName . '). Planning synchronisé: créés ' . $created . ', mis à jour ' . $updated . '.');
         } catch (\Throwable $e) {
             return redirect()
-                ->route('planning.index')
+                ->route('maintenance-preventive')
                 ->with('error', 'Import Excel impossible: ' . $e->getMessage());
         } finally {
             if (is_dir($tempDir)) {
@@ -499,7 +499,7 @@ class PlanningController extends Controller
         ExternalCompanyPlanning::query()->create($data);
 
         return redirect()
-            ->route('planning.index')
+            ->route('maintenance-preventive')
             ->with('success', 'Planning ajouté avec succès.');
     }
 
@@ -521,7 +521,7 @@ class PlanningController extends Controller
         $planning->update($data);
 
         return redirect()
-            ->route('planning.index')
+            ->route('maintenance-preventive')
             ->with('success', 'Planning modifié avec succès.');
     }
 
@@ -530,7 +530,7 @@ class PlanningController extends Controller
         $planning->delete();
 
         return redirect()
-            ->route('planning.index')
+            ->route('maintenance-preventive')
             ->with('success', 'Planning supprimé avec succès.');
     }
 

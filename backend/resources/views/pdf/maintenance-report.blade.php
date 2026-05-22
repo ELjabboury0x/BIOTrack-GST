@@ -166,18 +166,36 @@
             <td style="width:50%">
                 <span class="label">Administrateur biomédical</span>
                 <span class="value">{{ $report->technician?->name ?: $report->technician?->login ?: '-' }}</span>
+                @php
+                    $techSigPath = ltrim((string) ($report->technician_signature_path ?? ''), '/');
+                    if (str_starts_with($techSigPath, 'public/')) {
+                        $techSigPath = substr($techSigPath, strlen('public/'));
+                    }
+                    $techSigFullPath = $techSigPath && \Illuminate\Support\Facades\Storage::disk('public')->exists($techSigPath)
+                        ? \Illuminate\Support\Facades\Storage::disk('public')->path($techSigPath)
+                        : null;
+                @endphp
                 <div class="sign-box">
-                    @if($report->technician_signature_path)
-                        <img src="{{ public_path('storage/' . $report->technician_signature_path) }}" alt="signature technicien">
+                    @if($techSigFullPath)
+                        <img src="{{ $techSigFullPath }}" alt="">
                     @endif
                 </div>
             </td>
             <td style="width:50%">
                 <span class="label">Major / Responsable service</span>
                 <span class="value">{{ $report->engineer?->name ?: $report->engineer?->login ?: '-' }}</span>
+                @php
+                    $engSigPath = ltrim((string) ($report->engineer_signature_path ?? ''), '/');
+                    if (str_starts_with($engSigPath, 'public/')) {
+                        $engSigPath = substr($engSigPath, strlen('public/'));
+                    }
+                    $engSigFullPath = $engSigPath && \Illuminate\Support\Facades\Storage::disk('public')->exists($engSigPath)
+                        ? \Illuminate\Support\Facades\Storage::disk('public')->path($engSigPath)
+                        : null;
+                @endphp
                 <div class="sign-box">
-                    @if($report->engineer_signature_path)
-                        <img src="{{ public_path('storage/' . $report->engineer_signature_path) }}" alt="signature ingénieur">
+                    @if($engSigFullPath)
+                        <img src="{{ $engSigFullPath }}" alt="">
                     @endif
                 </div>
             </td>

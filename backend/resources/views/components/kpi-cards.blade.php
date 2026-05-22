@@ -9,7 +9,7 @@
         'disponibilite' => 0,
         'temps_arret_moyen_heures' => 0,
         'planning_societes_a_venir' => 0,
-        'planning_prochaine_societe' => 'Aucune société planifiée',
+        'planning_prochaine_societe' => 'Aucune maintenance planifiée',
         'planning_prochaine_date_label' => '—',
         'reclamations_ouvertes' => 0,
         'maintenances_preventives_a_venir' => 0,
@@ -21,12 +21,12 @@
     ], $kpi ?? []);
 
     $upcomingCompaniesCount = (int) ($kpiValues['planning_societes_a_venir'] ?? 0);
-    $nextCompanyName = (string) ($kpiValues['planning_prochaine_societe'] ?? 'Aucune société planifiée');
+    $nextCompanyName = (string) ($kpiValues['planning_prochaine_societe'] ?? 'Aucune maintenance planifiée');
     $nextCompanyDateLabel = (string) ($kpiValues['planning_prochaine_date_label'] ?? '—');
     $nextCompanyInfo = trim($nextCompanyDateLabel . ' • ' . $nextCompanyName);
     $planningQuickFrom = now()->format('Y-m-d');
     $planningQuickTo = now()->addDays(14)->format('Y-m-d');
-    $planningQuickUrl = route('planning.index', [
+    $planningQuickUrl = route('maintenance-preventive', [
         'date_from' => $planningQuickFrom,
         'date_to' => $planningQuickTo,
     ]);
@@ -36,7 +36,6 @@
     $equipementsPanneUrl = route('equipements', ['status' => 'panne']);
     $availabilityUrl = route('equipements', ['status' => 'fonctionnel']);
     $reclamationsUrl = route('reclamations.index');
-    $preventivesUrl = route('maintenance-preventive');
     $stockUrl = route('pieces');
 @endphp
 
@@ -380,17 +379,17 @@
         </div>
     </a>
 
-    {{-- Card 5: Planning Sociétés — Calendar --}}
-    <a href="{{ $planningQuickUrl }}" class="kpi-card-v2 kpi-amber animate-fade-in block" style="animation-delay: 0.32s" data-kpi-card="planning-societes" title="Ouvrir Planning Sociétés (2 semaines)">
+    {{-- Card 5: Maintenance Préventive — Calendar --}}
+    <a href="{{ $planningQuickUrl }}" class="kpi-card-v2 kpi-amber animate-fade-in block" style="animation-delay: 0.32s" data-kpi-card="planning-societes" title="Ouvrir Maintenance Préventive (2 semaines)">
         <div class="flex items-center justify-between mb-3">
             <div class="flex items-center gap-1.5">
-                <p class="kpi-title text-gray-500 text-xs font-bold uppercase tracking-wider">Planning societes</p>
+                <p class="kpi-title text-gray-500 text-xs font-bold uppercase tracking-wider">Maintenance preventive</p>
                 <div class="relative group">
                     <span class="text-gray-300 hover:text-gray-500 transition-colors" aria-hidden="true">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
                     </span>
                     <div class="pointer-events-none absolute left-1/2 -translate-x-1/2 mt-2 w-64 rounded-xl bg-gray-900 text-white text-xs p-3 opacity-0 group-hover:opacity-100 transition-opacity z-20 shadow-xl">
-                        Nombre de sociétés externes planifiées dans les 2 prochaines semaines. Cliquez pour ouvrir le planning filtré.
+                        Nombre de maintenances préventives planifiées dans les 2 prochaines semaines. Cliquez pour ouvrir la page filtrée.
                     </div>
                 </div>
             </div>
@@ -399,8 +398,8 @@
         <div class="flex items-start justify-between">
             <div class="flex-1 min-w-0 pr-2">
                 <h3 id="kpi-planning-societes-count" class="kpi-value text-3xl font-extrabold text-gray-900 kpi-counter tabular-nums" data-target="{{ $upcomingCompaniesCount }}">0</h3>
-                <p class="kpi-sub text-xs text-gray-400 mt-1 font-medium">Sociétés (2 semaines)</p>
-                <p id="kpi-planning-societes-next" class="text-xs text-gray-500 mt-1 font-medium truncate" title="{{ $nextCompanyInfo }}">Prochaine: {{ $nextCompanyInfo }}</p>
+                <p class="kpi-sub text-xs text-gray-400 mt-1 font-medium">Planifiées (2 semaines)</p>
+                <p id="kpi-planning-societes-next" class="text-xs text-gray-500 mt-1 font-medium truncate" title="{{ $nextCompanyInfo }}">Prochaine maintenance: {{ $nextCompanyInfo }}</p>
             </div>
             <div class="kpi-icon-box" style="background: linear-gradient(135deg, #fef3c7, #fde68a); color: #d97706;">
                 <div class="kpi-icon-pulse" style="color: #d97706;"></div>
@@ -445,31 +444,7 @@
         </div>
     </a>
 
-    {{-- Card 7: Préventives à venir --}}
-    <a href="{{ $preventivesUrl }}" class="kpi-card-v2 kpi-green animate-fade-in block" style="animation-delay: 0.48s" data-kpi-card="preventives-avenir" title="Ouvrir Maintenance préventive">
-        <div class="flex items-center justify-between mb-3">
-            <p class="kpi-title text-gray-500 text-xs font-bold uppercase tracking-wider">Préventives à venir</p>
-            <span class="kpi-live-dot" title="Temps réel"></span>
-        </div>
-        <div class="flex items-start justify-between">
-            <div>
-                <h3 id="kpi-preventives-avenir" class="kpi-value text-3xl font-extrabold text-gray-900 kpi-counter tabular-nums" data-target="{{ (int) $kpiValues['maintenances_preventives_a_venir'] }}">0</h3>
-                <p class="kpi-sub text-xs text-gray-400 mt-1 font-medium">Maintenances actives planifiées</p>
-            </div>
-            <div class="kpi-icon-box" style="background: linear-gradient(135deg, #dcfce7, #bbf7d0); color: #16a34a;">
-                <div class="kpi-icon-pulse" style="color: #16a34a;"></div>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="4" width="18" height="18" rx="2"></rect>
-                    <line x1="16" y1="2" x2="16" y2="6"></line>
-                    <line x1="8" y1="2" x2="8" y2="6"></line>
-                    <line x1="3" y1="10" x2="21" y2="10"></line>
-                    <path d="M9 15l2 2 4-4"></path>
-                </svg>
-            </div>
-        </div>
-    </a>
-
-    {{-- Card 8: Pièces en stock faible --}}
+    {{-- Card 7: Pièces en stock faible --}}
     <a href="{{ $stockUrl }}" class="kpi-card-v2 kpi-red animate-fade-in block" style="animation-delay: 0.56s" data-kpi-card="stock-faible" title="Ouvrir Pièces de rechange">
         <div class="flex items-center justify-between mb-3">
             <p class="kpi-title text-gray-500 text-xs font-bold uppercase tracking-wider">Stock faible</p>
@@ -508,7 +483,6 @@
         planning_societes_a_venir: {{ (int) $kpiValues['planning_societes_a_venir'] }},
         planning_prochaine_info: @json($nextCompanyInfo),
         reclamations_ouvertes: {{ (int) $kpiValues['reclamations_ouvertes'] }},
-        maintenances_preventives_a_venir: {{ (int) $kpiValues['maintenances_preventives_a_venir'] }},
         pieces_stock_faible: {{ (int) $kpiValues['pieces_stock_faible'] }},
         mtbf_preventif_heures: {{ (float) $kpiValues['mtbf_preventif_heures'] }},
         mtbf_curatif_heures: {{ (float) $kpiValues['mtbf_curatif_heures'] }},
@@ -583,10 +557,9 @@
             equipements_panne_critique: parseInt(kpi.equipements_panne_critique ?? 0, 10),
             disponibilite: parseInt(kpi.disponibilite ?? 0, 10),
             planning_societes_a_venir: parseInt(kpi.planning_societes_a_venir ?? 0, 10),
-            planning_prochaine_societe: String(kpi.planning_prochaine_societe ?? 'Aucune société planifiée'),
+            planning_prochaine_societe: String(kpi.planning_prochaine_societe ?? 'Aucune maintenance planifiée'),
             planning_prochaine_date_label: String(kpi.planning_prochaine_date_label ?? '—'),
             reclamations_ouvertes: parseInt(kpi.reclamations_ouvertes ?? 0, 10),
-            maintenances_preventives_a_venir: parseInt(kpi.maintenances_preventives_a_venir ?? 0, 10),
             pieces_stock_faible: parseInt(kpi.pieces_stock_faible ?? 0, 10),
             mtbf_preventif_heures: parseFloat(kpi.mtbf_preventif_heures ?? kpi.mtbf_heures ?? 0),
             mtbf_curatif_heures: parseFloat(kpi.mtbf_curatif_heures ?? 0),
@@ -601,7 +574,6 @@
             { key: 'disponibilite',           elId: 'kpi-disponibilite',          card: 'disponibilite',       color: 'green' },
             { key: 'planning_societes_a_venir', elId: 'kpi-planning-societes-count', card: 'planning-societes', color: 'amber' },
             { key: 'reclamations_ouvertes',   elId: 'kpi-reclamations-ouvertes',  card: 'reclamations',        color: 'violet' },
-            { key: 'maintenances_preventives_a_venir', elId: 'kpi-preventives-avenir', card: 'preventives-avenir', color: 'green' },
             { key: 'pieces_stock_faible',     elId: 'kpi-stock-faible',          card: 'stock-faible',        color: 'red' },
         ];
 
@@ -636,7 +608,7 @@
         const planningInfoNode = document.getElementById('kpi-planning-societes-next');
         const planningNextInfo = (values.planning_prochaine_date_label + ' • ' + values.planning_prochaine_societe).trim();
         if (planningInfoNode) {
-            planningInfoNode.textContent = 'Prochaine: ' + planningNextInfo;
+            planningInfoNode.textContent = 'Prochaine maintenance: ' + planningNextInfo;
             planningInfoNode.setAttribute('title', planningNextInfo);
         }
 

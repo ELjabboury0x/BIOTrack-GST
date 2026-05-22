@@ -256,13 +256,13 @@ class DashboardMetricsService
             WHERE c.equipment_id = interventions.equipment_id
               AND c.created_at <= {$closureExpr}
         )";
+                $downtimeStartExpr = "COALESCE({$complaintCreatedExpr}, interventions.created_at)";
 
         $downtimeByMonthQuery = Intervention::query()
             ->where('status', 'termine')
             ->whereDate('date_end', '>=', $downtimeFromDate->toDateString())
-            ->whereRaw("{$complaintCreatedExpr} IS NOT NULL")
             ->selectRaw("DATE_FORMAT(COALESCE(interventions.date_end, interventions.updated_at), '%Y-%m') as ym")
-            ->selectRaw("AVG(TIMESTAMPDIFF(HOUR, {$complaintCreatedExpr}, {$closureExpr})) as avg_hours")
+            ->selectRaw("AVG(GREATEST(TIMESTAMPDIFF(SECOND, {$downtimeStartExpr}, {$closureExpr}), 0) / 3600) as avg_hours")
             ->groupBy('ym');
         ServiceAccess::applyInterventionScope($downtimeByMonthQuery, $user);
         $downtimeByMonth = $downtimeByMonthQuery->pluck('avg_hours', 'ym');
@@ -270,8 +270,7 @@ class DashboardMetricsService
         $downtimeGlobalAvgQuery = Intervention::query()
             ->where('status', 'termine')
             ->whereDate('date_end', '>=', $downtimeFromDate->toDateString())
-            ->whereRaw("{$complaintCreatedExpr} IS NOT NULL")
-            ->selectRaw("AVG(TIMESTAMPDIFF(HOUR, {$complaintCreatedExpr}, {$closureExpr})) as avg_hours");
+            ->selectRaw("AVG(GREATEST(TIMESTAMPDIFF(SECOND, {$downtimeStartExpr}, {$closureExpr}), 0) / 3600) as avg_hours");
         ServiceAccess::applyInterventionScope($downtimeGlobalAvgQuery, $user);
         $downtimeGlobalAvg = (float) ($downtimeGlobalAvgQuery->value('avg_hours') ?? 0);
 
@@ -280,9 +279,8 @@ class DashboardMetricsService
         $mttrByMonthQuery = Intervention::query()
             ->where('status', 'termine')
             ->whereDate('date_end', '>=', $reliabilityFromDate->toDateString())
-            ->whereRaw("{$complaintCreatedExpr} IS NOT NULL")
             ->selectRaw("DATE_FORMAT(COALESCE(interventions.date_end, interventions.updated_at), '%Y-%m') as ym")
-            ->selectRaw("AVG(TIMESTAMPDIFF(HOUR, {$complaintCreatedExpr}, {$closureExpr})) as avg_hours")
+            ->selectRaw("AVG(GREATEST(TIMESTAMPDIFF(SECOND, {$downtimeStartExpr}, {$closureExpr}), 0) / 3600) as avg_hours")
             ->groupBy('ym');
         ServiceAccess::applyInterventionScope($mttrByMonthQuery, $user);
         $mttrByMonth = $mttrByMonthQuery->pluck('avg_hours', 'ym');
@@ -299,8 +297,8 @@ class DashboardMetricsService
             $reliabilityFromDate
         );
 
-        $kpi['temps_arret_moyen_heures'] = round($downtimeGlobalAvg, 1);
-        $kpi['mttr_heures'] = round($downtimeGlobalAvg, 1);
+        $kpi['temps_arret_moyen_heures'] = round($downtimeGlobalAvg, 2);
+        $kpi['mttr_heures'] = round($downtimeGlobalAvg, 2);
 
         $mtbfPreventifHours = $this->calculateMtbfPreventifHours($user);
         $mtbfCuratifHours = $this->calculateMtbfCuratifHours($complaintQuery);
@@ -398,14 +396,14 @@ class DashboardMetricsService
             'downtime' => [
                 'labels' => $downtimeMonthLabels,
                 'avg_hours' => $downtimeMonthKeys
-                    ->map(fn ($key) => round((float) ($downtimeByMonth[$key] ?? 0), 1))
+                    ->map(fn ($key) => round((float) ($downtimeByMonth[$key] ?? 0), 2))
                     ->values()
                     ->all(),
             ],
             'reliability' => [
                 'labels' => $monthLabels,
                 'mttr' => $monthKeys
-                    ->map(fn ($key) => round((float) ($mttrByMonth[$key] ?? 0), 1))
+                    ->map(fn ($key) => round((float) ($mttrByMonth[$key] ?? 0), 2))
                     ->values()
                     ->all(),
                 'mtbf' => $monthKeys
@@ -810,6 +808,7 @@ class DashboardMetricsService
             WHERE c.equipment_id = interventions.equipment_id
               AND c.created_at <= {$closureExpr}
         )";
+        $repairStartExpr = "COALESCE({$complaintCreatedExpr}, interventions.created_at)";
 
         $mttrByDesignationQuery = Intervention::query()
             ->join('equipments as e', 'e.id', '=', 'interventions.equipment_id')
@@ -817,9 +816,8 @@ class DashboardMetricsService
             ->whereRaw("TRIM(e.designation) <> ''")
             ->where('interventions.status', 'termine')
             ->whereDate(DB::raw('COALESCE(interventions.date_end, interventions.updated_at, interventions.created_at)'), '>=', $fromDate->toDateString())
-            ->whereRaw("{$complaintCreatedExpr} IS NOT NULL")
             ->selectRaw('e.designation as designation')
-            ->selectRaw("AVG(TIMESTAMPDIFF(HOUR, {$complaintCreatedExpr}, {$closureExpr})) as mttr_hours")
+            ->selectRaw("AVG(GREATEST(TIMESTAMPDIFF(SECOND, {$repairStartExpr}, {$closureExpr}), 0) / 3600) as mttr_hours")
             ->groupBy('e.designation');
         ServiceAccess::applyInterventionScope($mttrByDesignationQuery, $user);
         if ($selectedDesignation !== null) {
@@ -828,10 +826,23 @@ class DashboardMetricsService
         $mttrByDesignation = $mttrByDesignationQuery->pluck('mttr_hours', 'designation');
 
         $designationKeys = collect(array_unique(array_merge(
-            array_keys($equipmentByDesignation->toArray()),
             array_keys($failureByDesignation->toArray()),
             array_keys($mttrByDesignation->toArray())
-        )))->sort()->values();
+        )))->filter(fn ($value) => trim((string) $value) !== '')->values();
+
+        if ($selectedDesignation !== null) {
+            $designationKeys = collect([$selectedDesignation]);
+        } else {
+            $designationKeys = $designationKeys
+                ->sortByDesc(function ($designation) use ($failureByDesignation, $mttrByDesignation) {
+                    $failures = (int) ($failureByDesignation[$designation] ?? 0);
+                    $mttr = (float) ($mttrByDesignation[$designation] ?? 0);
+
+                    return ($failures * 100000) + $mttr;
+                })
+                ->take(25)
+                ->values();
+        }
 
         $labels = [];
         $mttrSeries = [];
@@ -839,16 +850,18 @@ class DashboardMetricsService
         $availabilitySeries = [];
 
         foreach ($designationKeys as $designation) {
-            $equipmentCount = (int) ($equipmentByDesignation[$designation] ?? 0);
             $failureCount = (int) ($failureByDesignation[$designation] ?? 0);
-            $mttr = round((float) ($mttrByDesignation[$designation] ?? 0), 1);
+            $mttr = round((float) ($mttrByDesignation[$designation] ?? 0), 2);
 
-            $mtbf = $equipmentCount > 0
-                ? ($failureCount > 0
-                    ? (($equipmentCount * $periodHours) / $failureCount)
-                    : ($equipmentCount * $periodHours))
+            // MTBF realistic proxy by designation: observation period hours divided by recorded failures.
+            $mtbf = $failureCount > 0
+                ? ($periodHours / $failureCount)
                 : 0.0;
             $mtbf = round((float) $mtbf, 1);
+
+            if ($selectedDesignation === null && $failureCount <= 0 && $mttr <= 0) {
+                continue;
+            }
 
             $availability = ($mtbf + $mttr) > 0
                 ? round(($mtbf / ($mtbf + $mttr)) * 100, 1)

@@ -96,93 +96,37 @@
 
 <section class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-6">
     <div class="px-5 py-4 bg-gray-50 border-b border-gray-100">
-        <h3 class="text-lg font-semibold text-gray-800">Liste marchés et contrats de maintenance importés</h3>
-        <p class="text-sm text-gray-600">Une table unique avec pagination.</p>
+        <h3 class="text-lg font-semibold text-gray-800">Liste des marchés importés</h3>
     </div>
     <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-100">
             <thead class="bg-white">
                 <tr>
                     <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">N° DU MARCHÉ</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">OBJETS DU MARCHÉ</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">RÉFÉRENCE</th>
                     <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">SOCIÉTÉ</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">LOT N°</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">ART N°</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">DÉSIGNATION</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">QUANTITÉ</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">STATUS DE LIVRAISON</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">DATE DE LIVRAISON</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">STATUS DE RÉCLAMATION</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">DATE DE RÉCLAMATION</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">OBSERVATIONS</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">RECOMMANDATIONS</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">DATE MARCHÉ</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">LIGNES IMPORTÉES</th>
                     <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">ACTIONS</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
                 @forelse(($marketsData ?? []) as $row)
-                    <tr class="hover:bg-gray-50">
+                    <tr class="hover:bg-gray-50 cursor-pointer" onclick="window.location='{{ route('markets.show', $row['market_id']) }}'">
                         <td class="px-4 py-3 text-sm text-gray-700">{{ $row['market_number'] }}</td>
-                        <td class="px-4 py-3 text-sm text-gray-700">{{ $row['market_object'] }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-700">{{ $row['reference'] }}</td>
                         <td class="px-4 py-3 text-sm text-gray-700">{{ $row['company'] }}</td>
-                        <td class="px-4 py-3 text-sm text-gray-700">{{ $row['lot_number'] }}</td>
-                        <td class="px-4 py-3 text-sm text-gray-700">{{ $row['article'] }}</td>
-                        <td class="px-4 py-3 text-sm text-gray-700">{{ $row['designation'] }}</td>
-                        <td class="px-4 py-3 text-sm text-gray-700">{{ $row['quantity'] }}</td>
-                        <td class="px-4 py-3 text-sm text-gray-700">{{ $row['delivery_status'] }}</td>
-                        <td class="px-4 py-3 text-sm text-gray-700">{{ $row['delivery_date'] }}</td>
-                        <td class="px-4 py-3 text-sm text-gray-700">{{ $row['complaint_status'] }}</td>
-                        <td class="px-4 py-3 text-sm text-gray-700">{{ $row['complaint_date'] }}</td>
-                        <td class="px-4 py-3 text-sm text-gray-700">{{ $row['observations'] }}</td>
-                        <td class="px-4 py-3 text-sm text-gray-700">{{ $row['recommendations'] }}</td>
-                        <td class="px-4 py-3 text-sm text-gray-700">
-                            <div class="flex flex-wrap gap-2 min-w-[240px]">
-                                @if(!empty($row['market_id']))
-                                    <a href="{{ route('markets.show', $row['market_id']) }}" class="px-2.5 py-1.5 text-xs font-medium rounded-lg border border-blue-200 text-blue-700 bg-blue-50 hover:bg-blue-100">
-                                        <i class="fas fa-eye mr-1"></i> Voir
-                                    </a>
-                                @endif
-
-                                <form method="POST" action="{{ route('markets.equipments.line.quick-action', $row['line_id']) }}" class="inline">
-                                    @csrf
-                                    @method('PATCH')
-                                    <input type="hidden" name="action" value="mark_delivered">
-                                    <button type="submit" class="px-2.5 py-1.5 text-xs font-medium rounded-lg border border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100">
-                                        <i class="fas fa-truck mr-1"></i> Livré
-                                    </button>
-                                </form>
-
-                                <form method="POST" action="{{ route('markets.equipments.line.quick-action', $row['line_id']) }}" class="inline">
-                                    @csrf
-                                    @method('PATCH')
-                                    <input type="hidden" name="action" value="mark_complaint">
-                                    <button type="submit" class="px-2.5 py-1.5 text-xs font-medium rounded-lg border border-amber-200 text-amber-700 bg-amber-50 hover:bg-amber-100">
-                                        <i class="fas fa-exclamation-circle mr-1"></i> Réclamation
-                                    </button>
-                                </form>
-
-                                <form method="POST" action="{{ route('markets.equipments.line.quick-action', $row['line_id']) }}" class="inline">
-                                    @csrf
-                                    @method('PATCH')
-                                    <input type="hidden" name="action" value="clear_statuses">
-                                    <button type="submit" class="px-2.5 py-1.5 text-xs font-medium rounded-lg border border-gray-300 text-gray-700 bg-gray-50 hover:bg-gray-100">
-                                        <i class="fas fa-eraser mr-1"></i> Reset
-                                    </button>
-                                </form>
-
-                                <form method="POST" action="{{ route('markets.equipments.line.destroy', $row['line_id']) }}" class="inline" onsubmit="return confirm('Supprimer cette ligne importée ?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="px-2.5 py-1.5 text-xs font-medium rounded-lg border border-red-200 text-red-700 bg-red-50 hover:bg-red-100">
-                                        <i class="fas fa-trash mr-1"></i> Supprimer
-                                    </button>
-                                </form>
-                            </div>
+                        <td class="px-4 py-3 text-sm text-gray-700">{{ $row['market_date'] }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-700">{{ $row['lines_count'] }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-700" onclick="event.stopPropagation()">
+                            <a href="{{ route('markets.show', $row['market_id']) }}" class="px-2.5 py-1.5 text-xs font-medium rounded-lg border border-blue-200 text-blue-700 bg-blue-50 hover:bg-blue-100">
+                                <i class="fas fa-eye mr-1"></i> Voir
+                            </a>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="14" class="px-4 py-4 text-sm text-gray-500 text-center">Aucune donnée de marché importée disponible.</td>
+                        <td colspan="6" class="px-4 py-4 text-sm text-gray-500 text-center">Aucun marché importé disponible.</td>
                     </tr>
                 @endforelse
             </tbody>

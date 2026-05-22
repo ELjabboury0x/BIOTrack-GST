@@ -21,6 +21,7 @@ class StoreEquipmentRequest extends FormRequest
             'brand_name' => ['nullable', 'string', 'max:120'],
             'model_name' => ['nullable', 'string', 'max:120'],
             'unit_name' => ['nullable', 'string', 'max:120'],
+            'service_id' => ['nullable', 'integer', 'exists:services,id'],
             'sector_name' => ['nullable', 'string', 'max:120'],
             'sector_description' => ['nullable', 'string', 'max:255'],
             'market_label' => ['nullable', 'string', 'max:120'],
@@ -32,6 +33,7 @@ class StoreEquipmentRequest extends FormRequest
             'designation_image' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'user_manual_file' => ['nullable', 'file', 'mimes:pdf', 'max:15360'],
             'technical_manual_file' => ['nullable', 'file', 'mimes:pdf', 'max:15360'],
+            'company_name' => ['nullable', 'string', 'max:255'],
         ];
     }
 

@@ -214,14 +214,30 @@
         <td colspan="2" class="sig-header">Major du service (ou intérim)</td>
     </tr>
     <tr>
+        @php
+            $techSigPath = ltrim((string) ($report->technician_signature_path ?? ''), '/');
+            $engSigPath = ltrim((string) ($report->engineer_signature_path ?? ''), '/');
+            if (str_starts_with($techSigPath, 'public/')) {
+                $techSigPath = substr($techSigPath, strlen('public/'));
+            }
+            if (str_starts_with($engSigPath, 'public/')) {
+                $engSigPath = substr($engSigPath, strlen('public/'));
+            }
+            $techSigFullPath = $techSigPath && \Illuminate\Support\Facades\Storage::disk('public')->exists($techSigPath)
+                ? \Illuminate\Support\Facades\Storage::disk('public')->path($techSigPath)
+                : null;
+            $engSigFullPath = $engSigPath && \Illuminate\Support\Facades\Storage::disk('public')->exists($engSigPath)
+                ? \Illuminate\Support\Facades\Storage::disk('public')->path($engSigPath)
+                : null;
+        @endphp
         <td class="sig-box">
-            @if($report->technician_signature_path)
-                <img src="{{ public_path('storage/' . $report->technician_signature_path) }}" alt="Signature administrateur biomédical">
+            @if($techSigFullPath)
+                <img src="{{ $techSigFullPath }}" alt="">
             @endif
         </td>
         <td colspan="2" class="sig-box">
-            @if($report->engineer_signature_path)
-                <img src="{{ public_path('storage/' . $report->engineer_signature_path) }}" alt="Signature major du service">
+            @if($engSigFullPath)
+                <img src="{{ $engSigFullPath }}" alt="">
             @endif
         </td>
     </tr>

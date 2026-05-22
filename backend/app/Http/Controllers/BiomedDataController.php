@@ -203,7 +203,7 @@ class BiomedDataController extends Controller
             $latestDate = $bucket && !empty($bucket->latest_date)
                 ? Carbon::parse((string) $bucket->latest_date)->toDateString()
                 : $today;
-            $typeLabel = $maintenanceType === MaintenanceReport::TYPE_PREVENTIVE ? 'Préventive interne' : 'Curative interne';
+            $typeLabel = $maintenanceType === MaintenanceReport::TYPE_PREVENTIVE ? 'Préventive interne' : 'Corrective interne';
 
             $rows[] = [
                 'id' => 10 + $index,
@@ -227,7 +227,7 @@ class BiomedDataController extends Controller
             ->map(function (MaintenanceReport $report) {
                 $typeLabel = $report->intervention_type === MaintenanceReport::TYPE_PREVENTIVE
                     ? 'Préventive'
-                    : 'Curative';
+                    : 'Corrective';
                 $scopeLabel = strtolower(trim((string) ($report->intervention_scope ?: 'interne'))) === 'externe'
                     ? 'externe'
                     : 'interne';
@@ -342,14 +342,13 @@ class BiomedDataController extends Controller
         $companyFilter = trim((string) $request->query('company', ''));
         $normalizedMarketNumberFilter = preg_replace('/\s+/', '', $marketNumberFilter) ?? $marketNumberFilter;
 
-        $query = MarketEquipmentImportLine::query()
-            ->with([
-                'market.company',
-            ])
-            ->whereHas('market');
+        $query = Market::query()
+            ->with(['company'])
+            ->withCount('importLines')
+            ->whereHas('importLines');
 
         if ($marketNumberFilter !== '') {
-            $query->whereHas('market', function ($marketQuery) use ($marketNumberFilter, $normalizedMarketNumberFilter) {
+            $query->where(function ($marketQuery) use ($marketNumberFilter, $normalizedMarketNumberFilter) {
                 if (preg_match('/^\d+\/\d{4}$/', $normalizedMarketNumberFilter) === 1) {
                     $marketQuery->whereRaw('REPLACE(market_number, " ", "") = ?', [$normalizedMarketNumberFilter]);
                     return;
@@ -360,105 +359,30 @@ class BiomedDataController extends Controller
         }
 
         if ($companyFilter !== '') {
-            $query->whereHas('market.company', function ($companyQuery) use ($companyFilter) {
+            $query->whereHas('company', function ($companyQuery) use ($companyFilter) {
                 $companyQuery->where('name', 'like', '%' . $companyFilter . '%');
             });
         }
-
-        $marketSummary = [
-            'lines_total' => (clone $query)->count(),
-            'markets_total' => (clone $query)->distinct('market_id')->count('market_id'),
-            'companies_total' => (clone $query)
-                ->join('markets as summary_markets', 'summary_markets.id', '=', 'market_equipment_import_lines.market_id')
-                ->whereNotNull('summary_markets.company_id')
-                ->distinct('summary_markets.company_id')
-                ->count('summary_markets.company_id'),
-            'delivery_filled' => (clone $query)
-                ->whereRaw('TRIM(COALESCE(delivery_status, "")) <> ""')
-                ->count(),
-            'complaint_filled' => (clone $query)
-                ->whereRaw('TRIM(COALESCE(market_complaint_status, "")) <> ""')
-                ->count(),
-            'no_status_lines' => (clone $query)
-                ->whereRaw('TRIM(COALESCE(delivery_status, "")) = ""')
-                ->whereRaw('TRIM(COALESCE(market_complaint_status, "")) = ""')
-                ->count(),
-        ];
-
-        $deliveryDistributionRaw = (clone $query)
-            ->selectRaw('LOWER(TRIM(COALESCE(delivery_status, ""))) as status_key, COUNT(*) as total')
-            ->groupBy('status_key')
-            ->pluck('total', 'status_key');
-
-        $complaintDistributionRaw = (clone $query)
-            ->selectRaw('LOWER(TRIM(COALESCE(market_complaint_status, ""))) as status_key, COUNT(*) as total')
-            ->groupBy('status_key')
-            ->pluck('total', 'status_key');
-
-        $formatDistribution = function ($distributionRaw) use ($marketSummary) {
-            return collect($distributionRaw)
-                ->map(function ($count, $statusKey) use ($marketSummary) {
-                    $statusKey = trim((string) $statusKey);
-                    $label = $statusKey === '' ? 'Vide' : (string) Str::of($statusKey)->replace('_', ' ')->title();
-                    $countInt = (int) $count;
-                    $pct = ($marketSummary['lines_total'] ?? 0) > 0
-                        ? (int) round(($countInt / (int) $marketSummary['lines_total']) * 100)
-                        : 0;
-
-                    return [
-                        'key' => $statusKey,
-                        'label' => $label,
-                        'count' => $countInt,
-                        'pct' => $pct,
-                    ];
-                })
-                ->sortByDesc('count')
-                ->values()
-                ->all();
-        };
-
-        $marketSummary['delivery_distribution'] = $formatDistribution($deliveryDistributionRaw);
-        $marketSummary['complaint_distribution'] = $formatDistribution($complaintDistributionRaw);
-
         $marketsPagination = $query
-            ->orderBy('market_id')
-            ->orderBy('source_row_index')
+            ->orderBy('market_number')
             ->orderBy('id')
             ->paginate(50)
             ->withQueryString();
 
-        $marketsData = $marketsPagination->getCollection()->map(function (MarketEquipmentImportLine $line) {
-            $market = $line->market;
-
-            $deliveryStatus = trim((string) ($line->delivery_status ?? ''));
-            $deliveryDate = optional($line->delivery_date)->format('Y-m-d') ?: null;
-
-            $complaintStatus = trim((string) ($line->market_complaint_status ?? ''));
-            $complaintDate = optional($line->market_complaint_date)->format('Y-m-d') ?: null;
-
+        $marketsData = $marketsPagination->getCollection()->map(function (Market $market) {
             return [
-                'line_id' => $line->id,
-                'market_id' => $market?->id,
-                'market_number' => $market?->market_number ?: '-',
-                'market_object' => $line->market_object ?: ($market?->reference ?: '-'),
-                'company' => $market?->company?->name ?: '-',
-                'lot_number' => $line->lot_number ?: '-',
-                'article' => $line->article ?: '-',
-                'designation' => $line->designation ?: '-',
-                'quantity' => $line->quantity !== null ? rtrim(rtrim(number_format((float) $line->quantity, 2, '.', ''), '0'), '.') : '-',
-                'delivery_status' => $deliveryStatus !== '' ? $deliveryStatus : '-',
-                'delivery_date' => $deliveryDate ?: '-',
-                'complaint_status' => $complaintStatus !== '' ? $complaintStatus : '-',
-                'complaint_date' => $complaintDate ?: '-',
-                'observations' => $line->observations ?: '-',
-                'recommendations' => $line->recommendations ?: '-',
+                'market_id' => $market->id,
+                'market_number' => $market->market_number ?: '-',
+                'reference' => $market->reference ?: '-',
+                'company' => $market->company?->name ?: '-',
+                'market_date' => optional($market->market_date)->format('Y-m-d') ?: '-',
+                'lines_count' => (int) ($market->import_lines_count ?? 0),
             ];
         })->values();
 
         return view('pages.markets-equipments', [
             'marketsData' => $marketsData,
             'marketsPagination' => $marketsPagination,
-            'marketSummary' => $marketSummary,
             'marketNumberFilter' => $marketNumberFilter,
             'companyFilter' => $companyFilter,
         ]);

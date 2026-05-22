@@ -27,7 +27,7 @@
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 
@@ -35,7 +35,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    @php($useViteDashboardAssets = file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
+    @php($isHierarchyRoute = request()->routeIs('hierarchie.*'))
+    @php($disablePageLoader = false)
+    @php($forceDirectAssets = $isHierarchyRoute)
+    @php($useViteDashboardAssets = !$forceDirectAssets && (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot'))))
     <!-- App Styles -->
     @if($useViteDashboardAssets)
         @vite(['public/css/dashboard.css', 'public/css/modern-ui.css'])
@@ -58,8 +61,8 @@
     
     @yield('styles')
 </head>
-<body x-data="{ mobileSidebarOpen: false, sidebarHovered: false, sidebarCollapsed: true }" class="antialiased" style="font-family: 'Inter', system-ui, sans-serif;">
-        @if(auth()->user()?->role === 'major')
+<body x-data="{ mobileSidebarOpen: false, sidebarHovered: false, sidebarCollapsed: true }" class="antialiased" style="font-family: 'Inter', system-ui, sans-serif;" data-disable-page-loader="{{ $disablePageLoader ? '1' : '0' }}">
+        @if(auth()->user()?->role === 'major' && !request()->routeIs('hierarchie.*'))
         <script>
         document.addEventListener('DOMContentLoaded', function () {
             const wsUrl = @json((request()->isSecure() ? 'wss' : 'ws') . '://' . request()->getHost() . ':' . (int) env('REALTIME_PORT', 6001) . '/ws');
@@ -182,10 +185,10 @@
         @vite(['public/js/modern-ui.js', 'public/js/dashboard.js', 'public/js/table.js', 'public/js/charts.js', 'public/js/pwa-push.js'])
     @else
         <script src="{{ asset('js/pwa-push.js') }}?v={{ filemtime(public_path('js/pwa-push.js')) }}" defer></script>
-        <script src="/js/modern-ui.js"></script>
-        <script src="/js/dashboard.js" defer></script>
-        <script src="/js/table.js" defer></script>
-        <script src="/js/charts.js" defer></script>
+        <script src="{{ asset('js/modern-ui.js') }}?v={{ filemtime(public_path('js/modern-ui.js')) }}"></script>
+        <script src="{{ asset('js/dashboard.js') }}?v={{ filemtime(public_path('js/dashboard.js')) }}" defer></script>
+        <script src="{{ asset('js/table.js') }}?v={{ filemtime(public_path('js/table.js')) }}" defer></script>
+        <script src="{{ asset('js/charts.js') }}?v={{ filemtime(public_path('js/charts.js')) }}" defer></script>
     @endif
     
     @yield('scripts')

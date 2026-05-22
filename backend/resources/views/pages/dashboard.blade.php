@@ -86,7 +86,7 @@
                 </div>
                 <div>
                     <h3 class="text-lg font-bold text-gray-800">Maintenance Préventive</h3>
-                    <p class="text-sm text-gray-600">Ajouter ou modifier les interventions préventives</p>
+                    <p class="text-sm text-gray-600">Gérer la planification des maintenances préventives et les contrats associés</p>
                 </div>
             </div>
             <div class="text-emerald-600 group-hover:translate-x-2 transition-transform duration-300">
@@ -162,7 +162,6 @@
 <div class="mt-8 bg-white rounded-xl shadow-md p-8 text-center text-gray-500 animate-fade-in" style="animation-delay: 0.9s">
     <i class="fas fa-database text-3xl mb-3"></i>
     <p>Aucune donnée réelle disponible pour le tableau de bord.</p>
-    <p class="text-sm mt-1">Importez vos équipements et opérations pour alimenter les KPI et activités.</p>
 </div>
 @endif
 

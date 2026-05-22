@@ -5,7 +5,7 @@
 @section('content')
 @include('components.module-page-header', [
     'breadcrumb' => 'Modèle / Décharge & Réception des Pièces',
-    'addRoute' => 'stock.create',
+    'addRoute' => 'pieces.create',
     'addLabel' => 'Ajouter un mouvement',
     'addIcon' => 'fa-truck-loading'
 ])

@@ -157,7 +157,22 @@ class PublicComplaintController extends Controller
             }
 
             try {
+                $equipment = $complaint->equipment;
+                if ($equipment && $equipment->operational_status !== 'panne') {
+                    $equipment->update(['operational_status' => 'panne']);
+                }
+            } catch (\Throwable $e) {
+            }
+
+            try {
                 $this->dashboardMetricsService->invalidateCache();
+            } catch (\Throwable $e) {
+            }
+
+            try {
+                $this->realtimeMetricsBroadcaster->broadcastDashboardMetrics(
+                    $this->dashboardMetricsService->build()
+                );
             } catch (\Throwable $e) {
             }
         });

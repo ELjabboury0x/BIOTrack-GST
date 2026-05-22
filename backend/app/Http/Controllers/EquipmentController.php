@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Http\Requests\StoreEquipmentRequest;
 use App\Http\Requests\UpdateEquipmentRequest;
 use App\Models\Equipment;
+use App\Models\Company;
 use App\Models\EquipmentDesignationAsset;
 use App\Models\Hospital;
 use App\Models\MaintenanceReport;
@@ -42,6 +43,7 @@ class EquipmentController extends Controller
         $selectedHospitalId = $request->integer('hospital_id');
         $selectedServiceId = $request->integer('service_id');
         $selectedCategoryId = 0;
+        $selectedCompanyId = $request->integer('company_id');
         $structureId = $request->integer('structure_id');
 
         if ($selectedServiceId <= 0 && $structureId > 0) {
@@ -74,7 +76,7 @@ class EquipmentController extends Controller
         $selectedHospitalIds = $this->resolveCanonicalHospitalIds($selectedHospitalId, $rawHospitals);
         $hospitals = $this->deduplicateHospitals($rawHospitals);
 
-        $equipmentQuery = $this->buildFilteredEquipmentQuery($selectedHospitalId, $selectedServiceId, $selectedCategoryId, $search, $sortDirection, $user, $selectedHospitalIds);
+        $equipmentQuery = $this->buildFilteredEquipmentQuery($selectedHospitalId, $selectedServiceId, $selectedCategoryId, $search, $sortDirection, $user, $selectedCompanyId, $selectedHospitalIds);
 
         $equipments = $equipmentQuery->paginate(200)->withQueryString();
         $designationValues = $equipments->getCollection()
@@ -252,6 +254,8 @@ class EquipmentController extends Controller
             $breadcrumb .= ' > ' . $selectedCategoryName;
         }
 
+        $companies = Company::query()->orderBy('name')->get(['id', 'name']);
+
         return view('pages.equipements', [
             'equipementsData' => $equipments,
             'breadcrumb' => $breadcrumb,
@@ -266,6 +270,8 @@ class EquipmentController extends Controller
             'selectedCategoryName' => $selectedCategoryName,
             'searchTerm' => $search,
             'sortDirection' => $sortDirection,
+            'companies' => $companies,
+            'selectedCompanyId' => $selectedCompanyId,
         ]);
     }
 
@@ -289,10 +295,35 @@ class EquipmentController extends Controller
                 ->withInput();
         }
 
-        $serviceContext = $this->resolveServiceContext(
-            (string) ($request->validated('unit_name') ?? ''),
-            (string) ($request->validated('sector_name') ?? '')
-        );
+        // If a service_id was explicitly provided, prefer it and sync unit_name
+        $providedServiceId = (int) ($request->validated('service_id') ?? 0);
+        $providedUnitName = (string) ($request->validated('unit_name') ?? '');
+
+        if ($providedServiceId > 0) {
+            $serviceModel = Service::query()->select('id', 'zone_id', 'name', 'hospital_id')->find($providedServiceId);
+            $serviceContext = $serviceModel
+                ? [
+                    'zone_id' => $serviceModel->zone_id,
+                    'service_id' => $serviceModel->id,
+                    'category_id' => null,
+                    'hospital_id' => $serviceModel->hospital_id,
+                    'room_id' => null,
+                ]
+                : [
+                    'zone_id' => null,
+                    'service_id' => null,
+                    'category_id' => null,
+                    'hospital_id' => null,
+                    'room_id' => null,
+                ];
+
+            // If unit_name is empty, use service name for consistency
+            if ($providedUnitName === '' && $serviceModel) {
+                $providedUnitName = $serviceModel->name;
+            }
+        } else {
+            $serviceContext = $this->resolveServiceContext($providedUnitName, (string) ($request->validated('sector_name') ?? ''));
+        }
         $hospitalId = (int) ($serviceContext['hospital_id'] ?? 0);
         if ($hospitalId <= 0) {
             $hospital = Hospital::query()->first()
@@ -304,13 +335,21 @@ class EquipmentController extends Controller
         }
         $marketId = $this->resolveMarketIdFromLabel($request->validated('market_label'));
 
+        // Handle company_name: create or find external company and link
+        $companyId = null;
+        $companyName = trim((string) ($request->validated('company_name') ?? ''));
+        if ($companyName !== '') {
+            $company = \App\Models\Company::query()->firstOrCreate(['name' => $companyName]);
+            $companyId = $company->id;
+        }
+
         Equipment::create([
             'inventory_number_current' => $inventoryNumber,
             'serial_number' => $request->validated('serial_number'),
             'designation' => $request->validated('designation'),
             'brand_name' => $request->validated('brand_name'),
             'model_name' => $request->validated('model_name'),
-            'unit_name' => $request->validated('unit_name'),
+            'unit_name' => $providedUnitName,
             'sector_name' => $request->validated('sector_name'),
             'sector_description' => $request->validated('sector_description'),
             'market_label' => $request->validated('market_label'),
@@ -320,7 +359,7 @@ class EquipmentController extends Controller
             'date_reception_provisoire' => $request->validated('date_reception_provisoire'),
             'duree_garantie' => $request->validated('duree_garantie'),
             'date_reception_definitive' => $request->validated('date_reception_definitive'),
-            'service_name' => $request->validated('unit_name'),
+            'service_name' => $providedUnitName,
             'exact_location' => $request->validated('sector_description'),
             'zone_id' => $serviceContext['zone_id'],
             'service_id' => $serviceContext['service_id'],
@@ -328,6 +367,7 @@ class EquipmentController extends Controller
             'room_id' => $serviceContext['room_id'],
             'hospital_id' => $hospitalId,
             'operational_status' => 'fonctionnel',
+            'company_id' => $companyId,
         ]);
 
         $this->persistDesignationAssets((string) $request->validated('designation'), $request);
@@ -389,12 +429,43 @@ class EquipmentController extends Controller
         $equipment = Equipment::query()->findOrFail($id);
         Gate::authorize('view-equipment', $equipment);
 
-        $serviceContext = $this->resolveServiceContext(
-            (string) ($request->validated('unit_name') ?? ''),
-            (string) ($request->validated('sector_name') ?? '')
-        );
+        $providedServiceId = (int) ($request->validated('service_id') ?? 0);
+        $providedUnitName = (string) ($request->validated('unit_name') ?? '');
+
+        if ($providedServiceId > 0) {
+            $serviceModel = Service::query()->select('id', 'zone_id', 'name', 'hospital_id')->find($providedServiceId);
+            $serviceContext = $serviceModel
+                ? [
+                    'zone_id' => $serviceModel->zone_id,
+                    'service_id' => $serviceModel->id,
+                    'category_id' => null,
+                    'hospital_id' => $serviceModel->hospital_id,
+                    'room_id' => null,
+                ]
+                : [
+                    'zone_id' => null,
+                    'service_id' => null,
+                    'category_id' => null,
+                    'hospital_id' => null,
+                    'room_id' => null,
+                ];
+
+            if ($providedUnitName === '' && $serviceModel) {
+                $providedUnitName = $serviceModel->name;
+            }
+        } else {
+            $serviceContext = $this->resolveServiceContext($providedUnitName, (string) ($request->validated('sector_name') ?? ''));
+        }
         $resolvedHospitalId = (int) ($serviceContext['hospital_id'] ?? 0);
         $marketId = $this->resolveMarketIdFromLabel($request->validated('market_label'));
+
+        // Handle company_name: create or find external company and link (keep existing if empty)
+        $companyName = trim((string) ($request->validated('company_name') ?? ''));
+        $companyIdToSet = $equipment->company_id;
+        if ($companyName !== '') {
+            $company = \App\Models\Company::query()->firstOrCreate(['name' => $companyName]);
+            $companyIdToSet = $company->id;
+        }
 
         $equipment->update([
             'inventory_number_current' => $request->validated('inventory_number_current'),
@@ -402,7 +473,7 @@ class EquipmentController extends Controller
             'designation' => $request->validated('designation'),
             'brand_name' => $request->validated('brand_name'),
             'model_name' => $request->validated('model_name'),
-            'unit_name' => $request->validated('unit_name'),
+            'unit_name' => $providedUnitName,
             'sector_name' => $request->validated('sector_name'),
             'sector_description' => $request->validated('sector_description'),
             'market_label' => $request->validated('market_label'),
@@ -412,13 +483,14 @@ class EquipmentController extends Controller
             'date_reception_provisoire' => $request->validated('date_reception_provisoire'),
             'duree_garantie' => $request->validated('duree_garantie'),
             'date_reception_definitive' => $request->validated('date_reception_definitive'),
-            'service_name' => $request->validated('unit_name'),
+            'service_name' => $providedUnitName,
             'exact_location' => $request->validated('sector_description'),
             'zone_id' => $serviceContext['zone_id'] ?? $equipment->zone_id,
             'service_id' => $serviceContext['service_id'] ?? $equipment->service_id,
             'category_id' => $serviceContext['category_id'] ?? $equipment->category_id,
             'room_id' => $serviceContext['room_id'] ?? $equipment->room_id,
             'hospital_id' => $resolvedHospitalId > 0 ? $resolvedHospitalId : $equipment->hospital_id,
+            'company_id' => $companyIdToSet,
         ]);
 
         $this->persistDesignationAssets((string) $request->validated('designation'), $request);
@@ -436,6 +508,7 @@ class EquipmentController extends Controller
     public function destroy(Request $request, int $id)
     {
         $equipment = Equipment::query()->findOrFail($id);
+        $wantsJson = $request->expectsJson() || $request->wantsJson() || $request->ajax();
 
         Gate::authorize('view-equipment', $equipment);
 
@@ -446,15 +519,172 @@ class EquipmentController extends Controller
                 $this->dashboardMetricsService->build()
             );
 
+            if ($wantsJson) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Équipement supprimé avec succès.',
+                    'deleted_id' => (int) $equipment->id,
+                ]);
+            }
+
             return redirect()
                 ->route('equipements')
                 ->with('success', 'Équipement supprimé avec succès.')
                 ->with('deleted_message', 'Équipement supprimé avec succès.');
         } catch (QueryException $exception) {
+            if ($wantsJson) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Suppression impossible : cet équipement est lié à des données existantes (interventions, rapports ou autres).',
+                ], 422);
+            }
+
             return redirect()
                 ->route('equipements')
                 ->with('error', 'Suppression impossible : cet équipement est lié à des données existantes (interventions, rapports ou autres).');
         }
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        $validated = $request->validate([
+            'equipment_ids' => 'required|array|min:1|max:200',
+            'equipment_ids.*' => 'required|integer|distinct',
+        ]);
+
+        $requestedIds = collect($validated['equipment_ids'])
+            ->map(fn ($id) => (int) $id)
+            ->filter(fn ($id) => $id > 0)
+            ->values();
+
+        if ($requestedIds->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Aucun équipement valide sélectionné.',
+                'deleted_count' => 0,
+                'deleted_ids' => [],
+            ], 422);
+        }
+
+        $equipments = Equipment::query()
+            ->whereIn('id', $requestedIds)
+            ->get(['id', 'service_id']);
+
+        $requestedIdSet = $requestedIds->flip();
+        $existingIds = $equipments->pluck('id')->map(fn ($id) => (int) $id)->values();
+        $missingCount = $requestedIdSet->diffKeys($existingIds->flip())->count();
+
+        $authorizedIds = [];
+        foreach ($equipments as $equipment) {
+            if (Gate::allows('view-equipment', $equipment)) {
+                $authorizedIds[] = (int) $equipment->id;
+            }
+        }
+
+        $unauthorizedCount = $existingIds->count() - count($authorizedIds);
+
+        if ($authorizedIds === []) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Aucun équipement sélectionné ne peut être supprimé.',
+                'deleted_count' => 0,
+                'deleted_ids' => [],
+                'blocked_count' => 0,
+                'unauthorized_count' => $unauthorizedCount,
+                'missing_count' => $missingCount,
+            ], 403);
+        }
+
+        $deletedIds = [];
+        $blockedIds = [];
+
+        foreach (array_chunk($authorizedIds, 50) as $chunk) {
+            try {
+                $deletedRows = Equipment::query()
+                    ->whereIn('id', $chunk)
+                    ->delete();
+
+                if ($deletedRows === count($chunk)) {
+                    $deletedIds = array_merge($deletedIds, $chunk);
+                    continue;
+                }
+
+                $remainingIds = Equipment::query()
+                    ->whereIn('id', $chunk)
+                    ->pluck('id')
+                    ->map(fn ($id) => (int) $id)
+                    ->all();
+
+                $deletedInBatch = array_values(array_diff($chunk, $remainingIds));
+                if ($deletedInBatch !== []) {
+                    $deletedIds = array_merge($deletedIds, $deletedInBatch);
+                }
+
+                foreach ($remainingIds as $equipmentId) {
+                    try {
+                        $deleted = Equipment::query()->whereKey($equipmentId)->delete();
+                        if ($deleted > 0) {
+                            $deletedIds[] = (int) $equipmentId;
+                        } else {
+                            $blockedIds[] = (int) $equipmentId;
+                        }
+                    } catch (QueryException $exception) {
+                        $blockedIds[] = (int) $equipmentId;
+                    }
+                }
+            } catch (QueryException $exception) {
+                foreach ($chunk as $equipmentId) {
+                    try {
+                        $deleted = Equipment::query()->whereKey($equipmentId)->delete();
+                        if ($deleted > 0) {
+                            $deletedIds[] = (int) $equipmentId;
+                        } else {
+                            $blockedIds[] = (int) $equipmentId;
+                        }
+                    } catch (QueryException $innerException) {
+                        $blockedIds[] = (int) $equipmentId;
+                    }
+                }
+            }
+        }
+
+        $deletedIds = array_values(array_unique($deletedIds));
+        $blockedIds = array_values(array_unique($blockedIds));
+        $deletedCount = count($deletedIds);
+        $blockedCount = count($blockedIds);
+
+        if ($deletedCount > 0) {
+            $this->realtimeMetricsBroadcaster->broadcastDashboardMetrics(
+                $this->dashboardMetricsService->build()
+            );
+        }
+
+        $message = $deletedCount > 0
+            ? $deletedCount . ' équipement(s) supprimé(s) avec succès.'
+            : 'Suppression impossible : les équipements sélectionnés sont liés à des données existantes.';
+
+        if ($blockedCount > 0) {
+            $message .= ' ' . $blockedCount . ' équipement(s) n\'ont pas pu être supprimés.';
+        }
+
+        if ($unauthorizedCount > 0) {
+            $message .= ' ' . $unauthorizedCount . ' équipement(s) non autorisé(s).';
+        }
+
+        if ($missingCount > 0) {
+            $message .= ' ' . $missingCount . ' équipement(s) introuvable(s).';
+        }
+
+        return response()->json([
+            'success' => $deletedCount > 0,
+            'message' => $message,
+            'deleted_count' => $deletedCount,
+            'deleted_ids' => $deletedIds,
+            'blocked_count' => $blockedCount,
+            'blocked_ids' => $blockedIds,
+            'unauthorized_count' => $unauthorizedCount,
+            'missing_count' => $missingCount,
+        ], $deletedCount > 0 ? 200 : 422);
     }
 
     /**
@@ -687,6 +917,7 @@ class EquipmentController extends Controller
         $selectedHospitalId = $request->integer('hospital_id');
         $selectedServiceId = $request->integer('service_id');
         $selectedCategoryId = $request->integer('category_id');
+        $selectedCompanyId = $request->integer('company_id');
         $search = trim((string) $request->query('q', ''));
         $sortDirection = strtolower((string) $request->query('sort', 'desc')) === 'asc' ? 'asc' : 'desc';
         $selectedHospitalIds = $this->resolveCanonicalHospitalIds(
@@ -701,6 +932,7 @@ class EquipmentController extends Controller
             $search,
             $sortDirection,
             $request->user(),
+            $selectedCompanyId,
             $selectedHospitalIds
         );
 
@@ -745,6 +977,7 @@ class EquipmentController extends Controller
         $selectedHospitalId = $request->integer('hospital_id');
         $selectedServiceId = $request->integer('service_id');
         $selectedCategoryId = $request->integer('category_id');
+        $selectedCompanyId = $request->integer('company_id');
         $search = trim((string) $request->query('q', ''));
         $sortDirection = strtolower((string) $request->query('sort', 'desc')) === 'asc' ? 'asc' : 'desc';
         $selectedHospitalIds = $this->resolveCanonicalHospitalIds(
@@ -752,7 +985,7 @@ class EquipmentController extends Controller
             Hospital::query()->select('id', 'code', 'name')->get()
         );
 
-        $equipments = $this->buildFilteredEquipmentQuery($selectedHospitalId, $selectedServiceId, $selectedCategoryId, $search, $sortDirection, $request->user(), $selectedHospitalIds)->get();
+        $equipments = $this->buildFilteredEquipmentQuery($selectedHospitalId, $selectedServiceId, $selectedCategoryId, $search, $sortDirection, $request->user(), $selectedCompanyId, $selectedHospitalIds)->get();
         $rows = $this->formatEquipmentsForExport($equipments);
 
         return response()->view('pages.exports.equipements-print', [
@@ -1099,7 +1332,7 @@ class EquipmentController extends Controller
         return dirname(PHP_BINARY) . DIRECTORY_SEPARATOR . 'ext';
     }
 
-    private function buildFilteredEquipmentQuery(int $selectedHospitalId, int $selectedServiceId, int $selectedCategoryId, string $search, string $sortDirection, $user, array $selectedHospitalIds = []): Builder
+    private function buildFilteredEquipmentQuery(int $selectedHospitalId, int $selectedServiceId, int $selectedCategoryId, string $search, string $sortDirection, $user, int $selectedCompanyId = 0, array $selectedHospitalIds = []): Builder
     {
         $query = Equipment::query()
             ->with([
@@ -1157,10 +1390,72 @@ class EquipmentController extends Controller
                 $innerQuery->where('hospital_id', $selectedHospitalId);
             })
             ->when($selectedServiceId > 0, function ($innerQuery) use ($selectedServiceId) {
-                $innerQuery->where('service_id', $selectedServiceId);
+                $service = Service::query()->select(['id', 'name', 'code'])->find($selectedServiceId);
+                $serviceName = trim((string) ($service?->name ?? ''));
+                $serviceCode = trim((string) ($service?->code ?? ''));
+                $serviceNameNorm = mb_strtolower(preg_replace('/\s+/', ' ', $serviceName));
+                $serviceCodeNorm = mb_strtolower(preg_replace('/\s+/', ' ', $serviceCode));
+                $serviceNameKey = preg_replace('/[^\p{L}\p{N}]+/u', '', $serviceNameNorm);
+                $serviceCodeKey = preg_replace('/[^\p{L}\p{N}]+/u', '', $serviceCodeNorm);
+                $serviceNamePrefix = mb_substr($serviceNameKey, 0, 6);
+                $serviceCodePrefix = mb_substr($serviceCodeKey, 0, 4);
+
+                $innerQuery->where(function ($serviceQuery) use ($selectedServiceId, $serviceName, $serviceCode, $serviceNameNorm, $serviceCodeNorm, $serviceNamePrefix, $serviceCodePrefix) {
+                    $serviceQuery->where('service_id', $selectedServiceId);
+
+                    if ($serviceName !== '') {
+                        $serviceQuery->orWhereRaw('LOWER(TRIM(service_name)) = ?', [$serviceNameNorm])
+                            ->orWhereRaw('LOWER(TRIM(unit_name)) = ?', [$serviceNameNorm])
+                            ->orWhere('service_name', 'like', '%' . $serviceName . '%')
+                            ->orWhere('unit_name', 'like', '%' . $serviceName . '%')
+                            ->orWhereRaw('LOWER(?) LIKE CONCAT("%", LOWER(TRIM(service_name)), "%")', [$serviceNameNorm])
+                            ->orWhereRaw('LOWER(?) LIKE CONCAT("%", LOWER(TRIM(unit_name)), "%")', [$serviceNameNorm]);
+
+                        if ($serviceNamePrefix !== '') {
+                            $serviceQuery->orWhereRaw('LOWER(REPLACE(service_name, " ", "")) LIKE ?', [$serviceNamePrefix . '%'])
+                                ->orWhereRaw('LOWER(REPLACE(unit_name, " ", "")) LIKE ?', [$serviceNamePrefix . '%']);
+                        }
+                    }
+
+                    if ($serviceCode !== '') {
+                        $serviceQuery->orWhereRaw('LOWER(TRIM(service_name)) = ?', [$serviceCodeNorm])
+                            ->orWhereRaw('LOWER(TRIM(unit_name)) = ?', [$serviceCodeNorm])
+                            ->orWhere('service_name', 'like', '%' . $serviceCode . '%')
+                            ->orWhere('unit_name', 'like', '%' . $serviceCode . '%')
+                            ->orWhereRaw('LOWER(?) LIKE CONCAT("%", LOWER(TRIM(service_name)), "%")', [$serviceCodeNorm])
+                            ->orWhereRaw('LOWER(?) LIKE CONCAT("%", LOWER(TRIM(unit_name)), "%")', [$serviceCodeNorm]);
+
+                        if ($serviceCodePrefix !== '') {
+                            $serviceQuery->orWhereRaw('LOWER(REPLACE(service_name, " ", "")) LIKE ?', [$serviceCodePrefix . '%'])
+                                ->orWhereRaw('LOWER(REPLACE(unit_name, " ", "")) LIKE ?', [$serviceCodePrefix . '%']);
+                        }
+                    }
+                });
+                // Also include equipments whose related room or category is assigned to the selected service
+                $innerQuery->orWhereHas('room', function (Builder $q) use ($selectedServiceId) {
+                    $q->where('service_id', $selectedServiceId);
+                });
+
+                $innerQuery->orWhereHas('category', function (Builder $q) use ($selectedServiceId) {
+                    $q->where('service_id', $selectedServiceId);
+                });
             })
             ->when($selectedCategoryId > 0, function ($innerQuery) use ($selectedCategoryId) {
                 $innerQuery->where('category_id', $selectedCategoryId);
+            })
+            ->when($selectedCompanyId > 0, function ($innerQuery) use ($selectedCompanyId) {
+                $innerQuery->where(function ($companyQuery) use ($selectedCompanyId) {
+                    $companyQuery->where('company_id', $selectedCompanyId)
+                        ->orWhereHas('company', function (Builder $relationQuery) use ($selectedCompanyId) {
+                            $relationQuery->where('id', $selectedCompanyId);
+                        })
+                        ->orWhereHas('market', function (Builder $relationQuery) use ($selectedCompanyId) {
+                            $relationQuery->where('company_id', $selectedCompanyId)
+                                ->orWhereHas('company', function (Builder $marketCompanyQuery) use ($selectedCompanyId) {
+                                    $marketCompanyQuery->where('id', $selectedCompanyId);
+                                });
+                        });
+                });
             })
             ->when($search !== '', function ($innerQuery) use ($search) {
                 $innerQuery->where(function ($searchQuery) use ($search) {
@@ -1170,12 +1465,23 @@ class EquipmentController extends Controller
                         ->orWhere('designation', 'like', $like)
                         ->orWhere('serial_number', 'like', $like)
                         ->orWhere('unit_name', 'like', $like)
+                        ->orWhere('service_name', 'like', $like)
                         ->orWhere('sector_name', 'like', $like)
                         ->orWhere('sector_description', 'like', $like)
+                        ->orWhere('exact_location', 'like', $like)
                         ->orWhere('brand_name', 'like', $like)
                         ->orWhere('model_name', 'like', $like)
                         ->orWhere('market_label', 'like', $like)
                         ->orWhere('lot_number', 'like', $like);
+
+                    $searchQuery->orWhereHas('company', function (Builder $companyQuery) use ($like) {
+                        $companyQuery->where('name', 'like', $like);
+                    });
+
+                    $searchQuery->orWhereHas('market', function (Builder $marketQuery) use ($like) {
+                        $marketQuery->where('market_number', 'like', $like)
+                            ->orWhere('reference', 'like', $like);
+                    });
                 });
             })
             ->orderBy('id', $sortDirection);

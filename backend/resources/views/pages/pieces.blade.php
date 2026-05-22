@@ -12,10 +12,7 @@
 @endphp
 
 @include('components.module-page-header', [
-    'breadcrumb' => 'Stock / Pièces de Rechange / Mouvements',
-    'addRoute' => 'pieces.create',
-    'addLabel' => 'Nouveau mouvement',
-    'addIcon' => 'fa-plus'
+    'breadcrumb' => 'Stock / Pièces de Rechange / Mouvements'
 ])
 
 <div class="mb-6 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -40,25 +37,22 @@
 @if ($total === 0)
     <div class="mb-6 rounded-xl border border-indigo-100 bg-indigo-50 p-4 text-sm text-indigo-700">
         <div class="font-semibold mb-1"><i class="fas fa-circle-info mr-2"></i>Aucun mouvement enregistré</div>
-        Utilise le bouton <strong>Nouveau mouvement</strong> pour créer une Décharge ou une Réception/Retour, soit via PDF, soit via formulaire structuré.
+        Les mouvements sont créés depuis le module <strong>Décharge & Réception</strong>.
     </div>
 @endif
 
 @include('components.table', [
     'data' => $piecesData ?? [],
     'showAddButton' => false,
+    'showImportAction' => false,
+    'showExportAction' => true,
     'columns' => [
-        ['key' => 'phase', 'label' => 'Phase', 'visible' => true, 'type' => 'text'],
-        ['key' => 'date_mouvement', 'label' => 'Date', 'visible' => true, 'type' => 'text'],
-        ['key' => 'code', 'label' => 'Code', 'visible' => true, 'type' => 'text'],
-        ['key' => 'nom', 'label' => 'Nom', 'visible' => true, 'type' => 'text'],
-        ['key' => 'sn', 'label' => 'SN', 'visible' => false, 'type' => 'text'],
-        ['key' => 'description', 'label' => 'Description', 'visible' => false, 'type' => 'text'],
-        ['key' => 'quantite', 'label' => 'Qté Stock', 'visible' => true, 'type' => 'text'],
-        ['key' => 'fournisseur', 'label' => 'Fournisseur', 'visible' => true, 'type' => 'text'],
-        ['key' => 'etat', 'label' => 'État', 'visible' => false, 'type' => 'text'],
-        ['key' => 'mode_saisie', 'label' => 'Mode', 'visible' => true, 'type' => 'text'],
-        ['key' => 'pdf', 'label' => 'PDF', 'visible' => true, 'type' => 'text'],
+        ['key' => 'type', 'label' => 'Type', 'visible' => true, 'type' => 'status'],
+        ['key' => 'reference_piece', 'label' => 'Référence pièce', 'visible' => true, 'type' => 'text'],
+        ['key' => 'quantite', 'label' => 'Quantité', 'visible' => true, 'type' => 'text'],
+        ['key' => 'date_mouvement', 'label' => 'Date', 'visible' => true, 'type' => 'date'],
+        ['key' => 'description', 'label' => 'Description', 'visible' => true, 'type' => 'text'],
+        ['key' => 'auteur', 'label' => 'Créé par', 'visible' => true, 'type' => 'text'],
     ]
 ])
 

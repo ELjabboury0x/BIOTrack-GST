@@ -6,12 +6,19 @@ use App\Events\ComplaintCreated;
 use App\Models\Complaint;
 use App\Models\Equipment;
 use App\Models\Service;
+use App\Services\DashboardMetricsService;
+use App\Services\RealtimeMetricsBroadcaster;
 use App\Support\ServiceAccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class OperatorDefectController extends Controller
 {
+    public function __construct(
+        private DashboardMetricsService $dashboardMetricsService,
+        private RealtimeMetricsBroadcaster $realtimeMetricsBroadcaster
+    ) {}
+
     public function create(Request $request)
     {
         $scopedEquipmentsQuery = $this->biomedicalEquipmentsQuery($request);
@@ -97,12 +104,32 @@ class OperatorDefectController extends Controller
         $complaint->load(['service:id,code,name', 'equipment:id,service_id,inventory_number_current,designation']);
 
         try {
+            $equipment = $complaint->equipment;
+            if ($equipment && $equipment->operational_status !== 'panne') {
+                $equipment->update(['operational_status' => 'panne']);
+            }
+        } catch (\Throwable $e) {
+        }
+
+        try {
             event(new ComplaintCreated($complaint));
         } catch (\Throwable $e) {
             Log::warning('ComplaintCreated event failed in operator defect flow', [
                 'complaint_id' => (int) $complaint->id,
                 'message' => $e->getMessage(),
             ]);
+        }
+
+        try {
+            $this->dashboardMetricsService->invalidateCache();
+        } catch (\Throwable $e) {
+        }
+
+        try {
+            $this->realtimeMetricsBroadcaster->broadcastDashboardMetrics(
+                $this->dashboardMetricsService->build($request->user())
+            );
+        } catch (\Throwable $e) {
         }
 
         return redirect()->route('operator.defects.create')->with('success', 'Défaut enregistré avec succès.');

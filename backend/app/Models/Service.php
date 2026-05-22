@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Str;
 
 class Service extends Model
 {
@@ -95,54 +94,9 @@ class Service extends Model
         )));
 
         if ($hiddenNames === []) {
-            $filteredQuery = $query;
-        } else {
-            $placeholders = implode(',', array_fill(0, count($hiddenNames), '?'));
-            $filteredQuery = $query->whereRaw('LOWER(TRIM(name)) NOT IN (' . $placeholders . ')', $hiddenNames);
+            return $query;
         }
 
-        $catalog = collect((array) config('hme_public_services', []));
-
-        $normalizedCodes = $catalog
-            ->pluck('code')
-            ->map(fn ($value) => $this->normalizeCatalogToken((string) $value))
-            ->filter()
-            ->unique()
-            ->values()
-            ->all();
-
-        $normalizedNames = $catalog
-            ->pluck('name')
-            ->map(fn ($value) => $this->normalizeCatalogToken((string) $value))
-            ->filter()
-            ->unique()
-            ->values()
-            ->all();
-
-        if ($normalizedCodes === [] && $normalizedNames === []) {
-            return $filteredQuery;
-        }
-
-        $normalizedCodeExpression = "REPLACE(REPLACE(REPLACE(REPLACE(UPPER(TRIM(code)), ' ', ''), '-', ''), '_', ''), '/', '')";
-        $normalizedNameExpression = "REPLACE(REPLACE(REPLACE(REPLACE(UPPER(TRIM(name)), ' ', ''), '-', ''), '_', ''), '/', '')";
-
-        return $filteredQuery->where(function (Builder $innerQuery) use ($normalizedCodes, $normalizedNames, $normalizedCodeExpression, $normalizedNameExpression): void {
-            if ($normalizedCodes !== []) {
-                $codePlaceholders = implode(',', array_fill(0, count($normalizedCodes), '?'));
-                $innerQuery->whereRaw($normalizedCodeExpression . ' IN (' . $codePlaceholders . ')', $normalizedCodes);
-            }
-
-            if ($normalizedNames !== []) {
-                $namePlaceholders = implode(',', array_fill(0, count($normalizedNames), '?'));
-                $innerQuery->orWhereRaw($normalizedNameExpression . ' IN (' . $namePlaceholders . ')', $normalizedNames);
-            }
-        });
-    }
-
-    private function normalizeCatalogToken(string $value): string
-    {
-        $ascii = Str::upper(Str::ascii(trim($value)));
-
-        return str_replace([' ', '-', '_', '/'], '', $ascii);
+        return $query->whereRaw('LOWER(TRIM(name)) NOT IN (' . implode(',', array_fill(0, count($hiddenNames), '?')) . ')', $hiddenNames);
     }
 }

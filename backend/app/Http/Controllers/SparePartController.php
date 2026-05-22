@@ -16,6 +16,10 @@ class SparePartController extends Controller
     public function index()
     {
         $parts = SparePart::query()
+            ->with([
+                'actionUser:id,name,login',
+                'returnTechnician:id,name,login',
+            ])
             ->orderBy('code')
             ->orderBy('id')
             ->get();
@@ -27,23 +31,36 @@ class SparePartController extends Controller
                 default => 'Standard',
             };
 
+            $movementType = match ($part->phase) {
+                'decharge' => 'decharge',
+                'retour' => 'reception',
+                default => 'decharge',
+            };
+
             $mainDate = $part->phase === 'retour'
                 ? optional($part->return_date)->format('Y-m-d')
                 : optional($part->discharge_date)->format('Y-m-d');
 
+            $author = $part->phase === 'retour'
+                ? ($part->returnTechnician?->name ?: $part->returnTechnician?->login)
+                : ($part->actionUser?->name ?: $part->actionUser?->login);
+
             return [
                 'id' => $part->id,
                 'phase' => $phaseLabel,
+                'type' => $movementType,
                 'date_mouvement' => $mainDate ?: '-',
+                'reference_piece' => $part->code,
                 'code' => $part->code,
                 'nom' => $part->name,
                 'sn' => $part->serial_number ?: '-',
-                'description' => $part->description ?: '-',
+                'description' => $part->description ?: ($part->comment ?: '-'),
                 'quantite' => (int) $part->quantity,
                 'fournisseur' => $part->supplier ?: '-',
                 'etat' => $part->condition_state ?: '-',
                 'mode_saisie' => $part->entry_mode === 'pdf' ? 'Import PDF' : 'Formulaire',
                 'pdf' => $part->document_pdf_path ? 'Oui' : 'Non',
+                'auteur' => $author ?: '-',
                 'edit_url' => route('pieces.edit', $part),
                 'delete_url' => route('pieces.destroy', $part),
             ];

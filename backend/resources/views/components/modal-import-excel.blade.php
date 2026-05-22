@@ -37,14 +37,12 @@
             <div x-show="step === 1">
                 <div class="border-2 border-dashed border-green-300 rounded-lg p-12 text-center hover:border-green-500 transition-colors cursor-pointer"
                      @click="$el.querySelector('input[type=file]').click()">
-                    <input type="file" 
+                          <input id="import-excel-file" name="import_excel_file" type="file" 
                            accept=".xlsx,.xls,.csv"
                            @change="handleFileUpload($event)"
                            class="hidden">
                     <i class="fas fa-file-excel text-4xl text-green-500 mb-4 block"></i>
                     <h3 class="text-lg font-semibold text-gray-800 mb-2">Télécharger un fichier Excel</h3>
-                    <p class="text-gray-600 mb-4">Formats acceptés: .xlsx, .xls, .csv</p>
-                    <p class="text-sm text-gray-500">ou cliquez pour sélectionner</p>
                 </div>
 
                 <template x-if="fileName">
@@ -60,7 +58,6 @@
             <!-- Step 2: Column Mapping -->
             <div x-show="step === 2">
                 <h3 class="text-lg font-semibold text-gray-800 mb-6">Mapper les colonnes</h3>
-                <p class="text-gray-600 mb-6">Associez les colonnes du fichier Excel aux champs du système:</p>
 
                 <div class="space-y-4 max-h-96 overflow-y-auto">
                     <template x-for="(excelCol, index) in excelColumns" :key="index">
@@ -88,11 +85,11 @@
                         <i class="fas fa-plus mr-2"></i> Créer un nouveau champ
                     </button>
                     <div x-show="showNewFieldForm" class="mt-4 space-y-3">
-                        <input type="text" 
+                           <input id="new-field-name" name="new_field_name" type="text" 
                                placeholder="Nom du champ"
                                x-model="newFieldName"
                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                        <select x-model="newFieldType"
+                           <select id="new-field-type" name="new_field_type" x-model="newFieldType"
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                             <option value="text">Texte</option>
                             <option value="number">Nombre</option>
@@ -131,9 +128,6 @@
                         </tbody>
                     </table>
                 </div>
-                <p class="text-sm text-gray-600 mt-4" x-show="previewData.length > 5">
-                    ... et <span x-text="previewData.length - 5"></span> enregistrements supplémentaires
-                </p>
             </div>
 
             <!-- Actions -->

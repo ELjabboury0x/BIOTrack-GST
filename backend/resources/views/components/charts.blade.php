@@ -550,14 +550,14 @@ document.addEventListener('DOMContentLoaded', function() {
             data: {
                 labels: @json($chartValues['interventions']['labels'] ?? []),
                 datasets: [{
-                    label: 'Interventions Préventive',
+                    label: 'Interventions préventives',
                     data: @json($chartValues['interventions']['preventive'] ?? []),
                     backgroundColor: colors.primary,
                     borderColor: colors.primary,
                     borderRadius: 8,
                     borderSkipped: false,
                 }, {
-                    label: 'Interventions Curative',
+                    label: 'Interventions correctives',
                     data: @json($chartValues['interventions']['curative'] ?? []),
                     backgroundColor: colors.secondary,
                     borderColor: colors.secondary,

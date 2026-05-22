@@ -139,7 +139,6 @@
         <div id="chart-empty" class="hidden py-16 text-center text-gray-400">
             <i class="fas fa-chart-bar text-4xl mb-3 opacity-30"></i>
             <p class="text-sm">Aucune donnée pour les critères sélectionnés.</p>
-            <p class="text-xs mt-1">Essayez d'élargir la période ou de supprimer les filtres.</p>
         </div>
 
         <div id="chart-loading" class="py-16 text-center text-gray-400 hidden">
@@ -178,9 +177,7 @@
                 </thead>
                 <tbody id="kpi-table-body" class="divide-y divide-gray-50">
                     <tr>
-                        <td colspan="7" class="px-4 py-10 text-center text-gray-400 text-xs italic">
-                            Cliquez sur « Actualiser » pour charger les données.
-                        </td>
+                        <td colspan="7" class="px-4 py-10 text-center text-gray-400 text-xs italic"></td>
                     </tr>
                 </tbody>
             </table>

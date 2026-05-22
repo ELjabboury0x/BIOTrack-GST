@@ -46,11 +46,18 @@ function setupEventListeners() {
     // Smooth scroll for internal links
     document.querySelectorAll('a[href^="#"]').forEach(link => {
         link.addEventListener('click', function(e) {
-            e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                target.scrollIntoView({ behavior: 'smooth' });
+            const href = (this.getAttribute('href') || '').trim();
+            if (!href.startsWith('#') || href === '#') {
+                return;
             }
+
+            const target = document.getElementById(href.slice(1)) || document.querySelector(href);
+            if (!target) {
+                return;
+            }
+
+            e.preventDefault();
+            target.scrollIntoView({ behavior: 'smooth' });
         });
     });
 }
@@ -379,4 +386,7 @@ const cookieUtils = {
     }
 };
 
-export { tableUtils, formUtils, gridUtils, cookieUtils };
+window.tableUtils = tableUtils;
+window.formUtils = formUtils;
+window.gridUtils = gridUtils;
+window.cookieUtils = cookieUtils;

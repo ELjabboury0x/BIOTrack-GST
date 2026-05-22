@@ -6,6 +6,17 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class LoginRequest extends FormRequest
 {
+    protected function prepareForValidation(): void
+    {
+        $login = (string) $this->input('login', '');
+        $login = str_replace(["\u{00A0}", "\u{2007}", "\u{202F}"], ' ', $login);
+        $login = preg_replace('/^\s+|\s+$/u', '', $login);
+
+        $this->merge([
+            'login' => (string) ($login ?? ''),
+        ]);
+    }
+
     public function authorize(): bool
     {
         return true;

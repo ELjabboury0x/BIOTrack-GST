@@ -35,20 +35,30 @@
         @method('PUT')
     @endif
 
+    @php
+        $statusLabel = match ((string) $report->status) {
+            'draft' => 'Brouillon',
+            'submitted' => 'Soumis',
+            'validated' => 'Validé',
+            'closed' => 'Clôturé',
+            default => (string) ($report->status ?: '-'),
+        };
+    @endphp
+
     <div class="bg-white rounded-xl shadow-md p-6 grid grid-cols-1 md:grid-cols-5 gap-4">
         <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">N° rapport</label>
             <input type="text" value="{{ $report->report_number ?? 'Auto à la création' }}" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50" readonly>
         </div>
         <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Statut workflow</label>
-            <input type="text" value="{{ $report->status }}" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50" readonly>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Statut du rapport</label>
+            <input type="text" value="{{ $statusLabel }}" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50" readonly>
         </div>
         <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">Type d'intervention</label>
             <select name="intervention_type" class="w-full px-4 py-2 border border-gray-300 rounded-lg" required>
                 <option value="preventive" {{ old('intervention_type', $report->intervention_type) === 'preventive' ? 'selected' : '' }}>Préventive</option>
-                <option value="curative" {{ old('intervention_type', $report->intervention_type) === 'curative' ? 'selected' : '' }}>Curative</option>
+                <option value="curative" {{ old('intervention_type', $report->intervention_type) === 'curative' ? 'selected' : '' }}>Corrective</option>
                 <option value="diagnostic" {{ old('intervention_type', $report->intervention_type) === 'diagnostic' ? 'selected' : '' }}>Diagnostic</option>
             </select>
         </div>
@@ -60,7 +70,7 @@
             </select>
         </div>
         <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Date intervention</label>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Date d'intervention</label>
             <input type="date" name="intervention_date" value="{{ old('intervention_date', optional($report->intervention_date)->toDateString()) }}" class="w-full px-4 py-2 border border-gray-300 rounded-lg" required>
         </div>
     </div>
@@ -168,6 +178,15 @@
                 return (string) ($user->role ?? '') === 'major';
             });
         @endphp
+        @php
+            $techSigUrl = $report->exists && $report->technician_signature_path
+                ? url('/dashboard/rapports/interventions-internes/' . $report->id . '/signature/technician')
+                : null;
+            $engSigUrl = $report->exists && $report->engineer_signature_path
+                ? url('/dashboard/rapports/interventions-internes/' . $report->id . '/signature/engineer')
+                : null;
+        @endphp
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Intervenant</label>
@@ -179,10 +198,13 @@
                         </option>
                     @endforeach
                 </select>
-                <input type="file" name="technician_signature" accept="image/*" class="mt-2 block w-full text-sm">
-                @if($report->technician_signature_path)
-                    <img src="{{ asset('storage/' . $report->technician_signature_path) }}" class="mt-2 h-16 border rounded" alt="signature technicien">
-                @endif
+                <input id="technician-signature-input" type="file" name="technician_signature" accept="image/*" class="mt-2 block w-full text-sm">
+                <img
+                    id="technician-signature-preview"
+                    src="{{ $techSigUrl ?? '' }}"
+                    class="mt-2 h-16 border rounded {{ $techSigUrl ? '' : 'hidden' }}"
+                    alt=""
+                >
             </div>
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Major de Service</label>
@@ -194,15 +216,18 @@
                         </option>
                     @endforeach
                 </select>
-                <input type="file" name="engineer_signature" accept="image/*" class="mt-2 block w-full text-sm">
-                @if($report->engineer_signature_path)
-                    <img src="{{ asset('storage/' . $report->engineer_signature_path) }}" class="mt-2 h-16 border rounded" alt="signature ingénieur">
-                @endif
+                <input id="engineer-signature-input" type="file" name="engineer_signature" accept="image/*" class="mt-2 block w-full text-sm">
+                <img
+                    id="engineer-signature-preview"
+                    src="{{ $engSigUrl ?? '' }}"
+                    class="mt-2 h-16 border rounded {{ $engSigUrl ? '' : 'hidden' }}"
+                    alt=""
+                >
             </div>
         </div>
 
         <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Photos intervention</label>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Photos de l'intervention</label>
             <input type="file" name="photos[]" accept="image/*" multiple class="block w-full text-sm">
             @if(is_array($report->photo_paths) && count($report->photo_paths) > 0)
                 <div class="mt-3 flex flex-wrap gap-2">
@@ -310,4 +335,39 @@
         @endif
     </div>
 @endif
+@endsection
+
+@section('scripts')
+<script>
+    function setupSignaturePreview(inputId, previewId) {
+        var input = document.getElementById(inputId);
+        var preview = document.getElementById(previewId);
+
+        if (!input || !preview) {
+            return;
+        }
+
+        input.addEventListener('change', function () {
+            var file = input.files && input.files[0] ? input.files[0] : null;
+            if (!file) {
+                preview.src = '';
+                preview.classList.add('hidden');
+                return;
+            }
+
+            var objectUrl = URL.createObjectURL(file);
+            preview.src = objectUrl;
+            preview.classList.remove('hidden');
+            preview.onerror = function () {
+                preview.src = '';
+                preview.classList.add('hidden');
+            };
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        setupSignaturePreview('technician-signature-input', 'technician-signature-preview');
+        setupSignaturePreview('engineer-signature-input', 'engineer-signature-preview');
+    });
+</script>
 @endsection

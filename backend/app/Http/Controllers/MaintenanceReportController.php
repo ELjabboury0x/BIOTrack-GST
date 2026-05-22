@@ -36,6 +36,7 @@ class MaintenanceReportController extends Controller
         $correctiveCompany = trim((string) $request->query('corrective_company', ''));
         $correctiveService = trim((string) $request->query('corrective_service', ''));
         $correctiveDate = trim((string) $request->query('corrective_date', ''));
+        $correctivePdfName = trim((string) $request->query('corrective_pdf_name', ''));
 
         $query = MaintenanceReport::query()
             ->select([
@@ -105,7 +106,7 @@ class MaintenanceReportController extends Controller
                 'type' => match ($report->intervention_type) {
                     MaintenanceReport::TYPE_PREVENTIVE => 'Préventive interne',
                     MaintenanceReport::TYPE_DIAGNOSTIC => 'Diagnostic interne',
-                    default => 'Curative interne',
+                    default => 'Corrective interne',
                 },
                 'date_intervention' => optional($report->intervention_date)->toDateString(),
                 'equipement' => trim(($report->equipment?->inventory_number_current ?? '-') . ' - ' . ($report->equipment?->designation ?? '-')),
@@ -172,6 +173,7 @@ class MaintenanceReportController extends Controller
                 ])
                 ->map(function ($row) {
                     return [
+                        'id' => $row->id,
                         'societe' => $row->company_name ?: '-',
                         'equipement' => $row->equipment_designation ?: '-',
                         'marque' => $row->brand_name ?: '-',
@@ -185,6 +187,8 @@ class MaintenanceReportController extends Controller
                         'source_file' => $row->source_file ?: '-',
                         'source_sheet' => $row->source_sheet ?: '-',
                         'source_row' => $row->source_row ?: '-',
+                        'activity_completed' => null,
+                        'pdfs' => [],
                     ];
                 })
                 ->values();
@@ -255,13 +259,23 @@ class MaintenanceReportController extends Controller
                             'document_label' => $documentLabels[$documentKind] ?? ucfirst(str_replace('_', ' ', $documentKind)),
                             'file_name' => (string) ($originalNamesByPath[$path] ?? basename($path)),
                             'stored_path' => $path,
-                            'file_url' => Storage::disk('public')->url($path),
+                            'file_url' => route('maintenance-reports.corrective-pdf.view', ['stored_path' => $path]),
                             'last_modified_ts' => $lastModifiedTs,
                             'last_modified' => $lastModifiedTs > 0 ? Carbon::createFromTimestamp($lastModifiedTs)->format('d/m/Y H:i') : '-',
                         ];
                     })
                     ->sortByDesc('last_modified_ts')
                     ->values();
+
+                if ($correctivePdfName !== '') {
+                    $needle = mb_strtolower($correctivePdfName);
+
+                    $correctivePdfDocuments = $correctivePdfDocuments
+                        ->filter(function (array $document) use ($needle) {
+                            return str_contains(mb_strtolower((string) ($document['file_name'] ?? '')), $needle);
+                        })
+                        ->values();
+                }
             }
         }
 
@@ -279,6 +293,7 @@ class MaintenanceReportController extends Controller
             'correctiveCompany' => $correctiveCompany,
             'correctiveService' => $correctiveService,
             'correctiveDate' => $correctiveDate,
+            'correctivePdfName' => $correctivePdfName,
             'correctiveQuality' => $correctiveQuality,
             'correctivePdfDocuments' => $correctivePdfDocuments,
         ]);
@@ -377,7 +392,7 @@ class MaintenanceReportController extends Controller
             'Détails panne',
             'Observations',
             'Services',
-            'Date intervention',
+            'Date d\'intervention',
             'Fichier source',
             'Feuille source',
             'Ligne source',
@@ -515,6 +530,46 @@ class MaintenanceReportController extends Controller
         $maintenanceReport->save();
 
         return back()->with('success', 'Rapport mis à jour.');
+    }
+
+    public function signatureFile(MaintenanceReport $maintenanceReport, string $role)
+    {
+        $query = MaintenanceReport::query()->select(['id', 'technician_signature_path', 'engineer_signature_path']);
+        ServiceAccess::applyReportScope($query, request()->user());
+
+        if (!(clone $query)->where('id', (int) $maintenanceReport->id)->exists()) {
+            abort(403);
+        }
+
+        $rawPath = $role === 'engineer'
+            ? (string) ($maintenanceReport->engineer_signature_path ?? '')
+            : (string) ($maintenanceReport->technician_signature_path ?? '');
+
+        $rawPath = ltrim($rawPath, '/');
+        $candidates = array_values(array_filter(array_unique([
+            $rawPath,
+            str_starts_with($rawPath, 'public/') ? substr($rawPath, strlen('public/')) : $rawPath,
+            str_starts_with($rawPath, 'storage/') ? substr($rawPath, strlen('storage/')) : $rawPath,
+            str_starts_with($rawPath, 'app/public/') ? substr($rawPath, strlen('app/public/')) : $rawPath,
+        ]), fn ($value) => $value !== ''));
+
+        $path = null;
+        foreach ($candidates as $candidate) {
+            if (Storage::disk('public')->exists($candidate)) {
+                $path = $candidate;
+                break;
+            }
+        }
+
+        if (!$path) {
+            return response()->noContent(204);
+        }
+
+        $fullPath = Storage::disk('public')->path($path);
+
+        return response()->file($fullPath, [
+            'Content-Disposition' => 'inline; filename="' . basename($fullPath) . '"',
+        ]);
     }
 
     public function submit(MaintenanceReport $maintenanceReport)
@@ -782,6 +837,39 @@ class MaintenanceReportController extends Controller
             ->with('success', 'PDF supprimé avec succès: ' . $fileName . '.');
     }
 
+    public function viewCorrectivePdf(Request $request)
+    {
+        $validated = $request->validate([
+            'stored_path' => ['required', 'string'],
+        ]);
+
+        $storedPath = trim((string) $validated['stored_path']);
+        $baseDirectory = 'maintenance-reports/corrective-pdf/';
+
+        if (!str_starts_with($storedPath, $baseDirectory)) {
+            abort(404);
+        }
+
+        if (strtolower((string) pathinfo($storedPath, PATHINFO_EXTENSION)) !== 'pdf') {
+            abort(404);
+        }
+
+        if (!Storage::disk('public')->exists($storedPath)) {
+            abort(404);
+        }
+
+        $fullPath = Storage::disk('public')->path($storedPath);
+
+        if (!is_file($fullPath)) {
+            abort(404);
+        }
+
+        return response()->file($fullPath, [
+            'Content-Disposition' => 'inline; filename="' . basename($fullPath) . '"',
+            'Content-Type' => 'application/pdf',
+        ]);
+    }
+
     private function validatePayload(Request $request): array
     {
         return $request->validate([
@@ -875,7 +963,7 @@ class MaintenanceReportController extends Controller
                     'type' => match ($report->intervention_type) {
                         MaintenanceReport::TYPE_PREVENTIVE => 'Préventive interne',
                         MaintenanceReport::TYPE_DIAGNOSTIC => 'Diagnostic interne',
-                        default => 'Curative interne',
+                        default => 'Corrective interne',
                     },
                     'service' => $report->service?->name ?: '-',
                     'equipement' => trim(((string) ($report->equipment?->inventory_number_current ?: '-')) . ' - ' . ((string) ($report->equipment?->designation ?: '-'))),

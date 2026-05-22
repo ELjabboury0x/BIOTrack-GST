@@ -149,7 +149,7 @@ class DashboardNotificationController extends Controller
                     'reported_by_name' => $planning->contact_person ?: '-',
                     'status' => $status,
                     'attachment_image_url' => null,
-                    'open_url' => route('planning.index', [
+                    'open_url' => route('maintenance-preventive', [
                         'company_id' => (int) ($planning->company_id ?? 0),
                         'date_from' => optional($planning->planned_date)->format('Y-m-d'),
                         'date_to' => optional($planning->planned_date)->format('Y-m-d'),

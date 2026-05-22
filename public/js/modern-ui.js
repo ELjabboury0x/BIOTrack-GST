@@ -7,20 +7,76 @@
     'use strict';
 
     /* ─── PAGE LOADER ─── */
-    window.addEventListener('load', function () {
-        const loader = document.getElementById('gst-page-loader');
+    var loaderDismissed = false;
+
+    var isAlpineLayoutReady = function () {
+        return !!(document.body && document.body._x_dataStack && document.body._x_dataStack.length > 0);
+    };
+
+    var shouldWaitForAlpineLayout = function () {
+        return !!(document.body && document.body.hasAttribute('x-data'));
+    };
+
+    var dismissPageLoader = function () {
+        if (loaderDismissed) {
+            return;
+        }
+
+        loaderDismissed = true;
+
+        var loader = document.getElementById('gst-page-loader');
         if (loader) {
-            setTimeout(function () {
-                loader.classList.add('loaded');
-            }, 300);
+            loader.classList.add('loaded');
         }
 
         // Add entrance class to main content
-        const main = document.querySelector('main');
-        if (main) {
+        var main = document.querySelector('main');
+        var disableLoader = document.body && document.body.getAttribute('data-disable-page-loader') === '1';
+        if (!disableLoader && main && !main.classList.contains('gst-page-enter')) {
             main.classList.add('gst-page-enter');
         }
+    };
+
+    var tryDismissPageLoader = function (force) {
+        if (loaderDismissed) {
+            return;
+        }
+
+        if (force) {
+            dismissPageLoader();
+            return;
+        }
+
+        if (shouldWaitForAlpineLayout() && !isAlpineLayoutReady()) {
+            return;
+        }
+
+        dismissPageLoader();
+    };
+
+    // Dismiss once DOM is ready AND Alpine has initialized dashboard layout state.
+    if (document.readyState === 'interactive' || document.readyState === 'complete') {
+        tryDismissPageLoader(false);
+    } else {
+        document.addEventListener('DOMContentLoaded', function () {
+            tryDismissPageLoader(false);
+        }, { once: true });
+    }
+
+    document.addEventListener('alpine:initialized', function () {
+        tryDismissPageLoader(false);
+    }, { once: true });
+
+    // Keep load/pageshow and timeout as safety nets.
+    window.addEventListener('load', function () {
+        tryDismissPageLoader(true);
+    }, { once: true });
+    window.addEventListener('pageshow', function () {
+        tryDismissPageLoader(true);
     });
+    setTimeout(function () {
+        tryDismissPageLoader(true);
+    }, 1800);
 
     /* ─── DARK MODE ─── */
     window.GSTDarkMode = {
@@ -322,11 +378,18 @@
     /* ─── SMOOTH SCROLL ─── */
     document.querySelectorAll('a[href^="#"]').forEach(function (a) {
         a.addEventListener('click', function (e) {
-            var target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                e.preventDefault();
-                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            var href = (this.getAttribute('href') || '').trim();
+            if (!href.startsWith('#') || href === '#') {
+                return;
             }
+
+            var target = document.getElementById(href.slice(1)) || document.querySelector(href);
+            if (!target) {
+                return;
+            }
+
+            e.preventDefault();
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
     });
 

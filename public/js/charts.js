@@ -420,4 +420,7 @@ document.addEventListener('DOMContentLoaded', function() {
     dashboardCharts.initializeAll();
 });
 
-export { ChartManager, chartDataBuilders, dashboardCharts, realtimeCharts };
+window.ChartManager = ChartManager;
+window.chartDataBuilders = chartDataBuilders;
+window.dashboardCharts = dashboardCharts;
+window.realtimeCharts = realtimeCharts;

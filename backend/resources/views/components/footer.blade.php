@@ -35,11 +35,17 @@
                     </li>
                     <li class="flex items-center gap-3">
                         <i class="fas fa-envelope w-5"></i>
-                        <a href="mailto:info@gst.ma" class="hover:text-white transition-colors duration-300">info@gst.ma</a>
+                        <div class="flex flex-col">
+                            <a href="mailto:mouhssine.eljabboury@gmail.com" class="hover:text-white transition-colors duration-300 text-sm">mouhssine.eljabboury@gmail.com</a>
+                            <a href="mailto:tahatahaakif@gmail.com" class="hover:text-white transition-colors duration-300 text-sm">tahatahaakif@gmail.com</a>
+                        </div>
                     </li>
                     <li class="flex items-center gap-3">
-                        <i class="fas fa-phone w-5"></i>
-                        <a href="tel:+212" class="hover:text-white transition-colors duration-300">+212 XXX XXXXXX</a>
+                        <i class="fab fa-linkedin w-5"></i>
+                        <div class="flex flex-col">
+                            <a href="https://www.linkedin.com/in/el-jabboury-mouhssine-93ab58234/" target="_blank" class="hover:text-white transition-colors duration-300 text-sm">Mouhssine El Jabboury</a>
+                            <a href="https://www.linkedin.com/in/taha-akif-3b7248399/" target="_blank" class="hover:text-white transition-colors duration-300 text-sm">Taha Akif</a>
+                        </div>
                     </li>
                 </ul>
             </div>
@@ -48,17 +54,17 @@
         <!-- Social Media -->
         <div class="border-t border-blue-400 pt-8 mb-8">
             <div class="flex justify-center gap-6 mb-8">
-                <a href="#" class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-300 group">
-                    <i class="fab fa-facebook text-white group-hover:scale-110 transition-transform duration-300"></i>
+                <a href="https://www.linkedin.com/in/el-jabboury-mouhssine-93ab58234/" target="_blank" class="w-14 h-14 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-all duration-300 group shadow-lg" title="LinkedIn - Mouhssine">
+                    <i class="fab fa-linkedin text-blue-600 text-2xl group-hover:scale-110 transition-transform duration-300"></i>
                 </a>
-                <a href="#" class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-300 group">
-                    <i class="fab fa-twitter text-white group-hover:scale-110 transition-transform duration-300"></i>
+                <a href="mailto:mouhssine.eljabboury@gmail.com" class="w-14 h-14 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-all duration-300 group shadow-lg" title="Gmail">
+                    <i class="fas fa-envelope text-red-500 text-2xl group-hover:scale-110 transition-transform duration-300"></i>
                 </a>
-                <a href="#" class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-300 group">
-                    <i class="fab fa-linkedin text-white group-hover:scale-110 transition-transform duration-300"></i>
+                <a href="https://wa.me/212674577463" target="_blank" class="w-14 h-14 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-all duration-300 group shadow-lg" title="WhatsApp">
+                    <i class="fab fa-whatsapp text-green-500 text-2xl group-hover:scale-110 transition-transform duration-300"></i>
                 </a>
-                <a href="#" class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-300 group">
-                    <i class="fab fa-github text-white group-hover:scale-110 transition-transform duration-300"></i>
+                <a href="https://wa.me/212664587320" target="_blank" class="w-14 h-14 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-all duration-300 group shadow-lg" title="WhatsApp">
+                    <i class="fab fa-whatsapp text-green-500 text-2xl group-hover:scale-110 transition-transform duration-300"></i>
                 </a>
             </div>
         </div>

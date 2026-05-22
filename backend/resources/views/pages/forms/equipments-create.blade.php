@@ -48,6 +48,11 @@
         </div>
 
         <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Société (fournisseur / société externe)</label>
+            <input name="company_name" value="{{ old('company_name') }}" placeholder="Ex: ACME MED" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+        </div>
+
+        <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">Unité</label>
             <input name="unit_name" value="{{ old('unit_name') }}" placeholder="Ex: Réanimation" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
         </div>

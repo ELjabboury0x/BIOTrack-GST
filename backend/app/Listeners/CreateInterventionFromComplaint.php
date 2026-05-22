@@ -63,8 +63,13 @@ class CreateInterventionFromComplaint
                 'service_name' => $complaint->service?->name,
                 'failure_datetime' => $complaint->created_at,
                 'status' => 'ouvert',
-                'intervention_status' => 'ouvert',
             ]);
+
+            if (Schema::hasColumn('external_interventions', 'intervention_status')) {
+                $externalIntervention->update([
+                    'intervention_status' => 'ouvert',
+                ]);
+            }
 
             if (Schema::hasTable('external_intervention_logs')) {
                 ExternalInterventionLog::query()->create([

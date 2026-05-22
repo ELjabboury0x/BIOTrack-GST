@@ -130,7 +130,7 @@
 
         <!-- Additional Info (reduced visual clutter) -->
         <div class="mt-6 text-center text-gray-400 text-xs">
-            <span>GST GMAO v2.0</span>
+            <span>BioTrack GST</span>
         </div>
     </div>
 </div>
