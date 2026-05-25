@@ -1,4 +1,4 @@
-# 📘 GST GMAO — Index des Ressources (État Actuel)
+# 📘 BioTrackGST — Systéme Intelligent de Gestion de Maintenance Assistée par Ordinateur et de Réclamations Hospitaliéres avec Notification en Temps Réel pour GST Tanger
 
 > **Version 3.1** | **Mise à jour : 2026-05-22**
 
@@ -19,6 +19,7 @@ Pour la cartographie complète et maintenue du projet, utiliser en priorité :
 - [SETUP_GUIDE.md](SETUP_GUIDE.md) — Installation complète
 - [PROJECT_SUMMARY.md](PROJECT_SUMMARY.md) — Résumé fonctionnel et technique
 - [COMPLETION_SUMMARY.md](COMPLETION_SUMMARY.md) — État d’achèvement consolidé
+- [PROJECT_TIMELINE_4_MONTHS.md](PROJECT_TIMELINE_4_MONTHS.md) — Chronologie d’évolution sur 4 mois
 - [DOCUMENTATION.md](DOCUMENTATION.md) — Documentation technique détaillée
 - [DASHBOARD_GUIDE.md](DASHBOARD_GUIDE.md) — Navigation modules dashboard
 - [API_INTEGRATION.md](API_INTEGRATION.md) — Endpoints et intégration

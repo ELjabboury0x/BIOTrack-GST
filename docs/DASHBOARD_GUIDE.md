@@ -1,4 +1,4 @@
-# GMAO Dashboard - Guide Technique (État Actuel)
+# BioTrackGST Dashboard - Guide Technique (État Actuel)
 
 ## Version
 - Date: 2026-05-22

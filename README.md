@@ -1,4 +1,4 @@
-# 🏥 GST GMAO — Système de Gestion de Maintenance Assistée par Ordinateur
+# 🏥 BioTrackGST — Systéme Intelligent de Gestion de Maintenance Assistée par Ordinateur et de Réclamations Hospitaliéres avec Notification en Temps Réel pour GST Tanger
 
 > **Projet de Fin d'Études** | GST Tanger | 2026  
 > **Version 3.3** — Mise à jour 2026-05-22
@@ -7,7 +7,7 @@
 
 ## 📋 Description
 
-Application web complète de **Gestion de Maintenance Assistée par Ordinateur (GMAO)** développée pour **GST Tanger** (**Groupement Sanitaire Territorial**), établissement hospitalier public doté d'une autonomie financière et administrative. Le système couvre la gestion des équipements biomédicaux, interventions, réclamations, rapports de maintenance, marchés, planification et bien plus.
+**BioTrackGST** est une application web complète de **Gestion de Maintenance Assistée par Ordinateur (GMAO)** et de **réclamations hospitalières** développée pour **GST Tanger** (**Groupement Sanitaire Territorial**), établissement hospitalier public doté d'une autonomie financière et administrative. Le système couvre la gestion des équipements biomédicaux, interventions, réclamations, rapports de maintenance, marchés, planification et bien plus.
 
 ### État actuel (2026-05-22)
 
@@ -180,4 +180,4 @@ PFE/
 
 ## 📄 Licence
 
-Projet académique — PFE 2026 | GST Tanger
+Projet académique — PFE 2026 | BioTrackGST | GST Tanger

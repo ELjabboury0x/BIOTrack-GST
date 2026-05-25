@@ -1,4 +1,4 @@
-# ⚡ GST GMAO — Démarrage Rapide
+# ⚡ BioTrackGST — Démarrage Rapide
 
 > **Version 3.1** | 2026-05-22
 

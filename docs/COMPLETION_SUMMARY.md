@@ -1,4 +1,4 @@
-# ✅ GST GMAO — Résumé d'Achèvement
+# ✅ BioTrackGST — Systéme Intelligent de Gestion de Maintenance Assistée par Ordinateur et de Réclamations Hospitaliéres avec Notification en Temps Réel pour GST Tanger
 
 > **Version 3.3** | 2026-05-22  
 > **Statut global** : ✅ Complet — Production-ready
@@ -23,7 +23,7 @@
 
 ## 📋 Résumé Exécutif
 
-Le système GST GMAO v3.0 est une application Laravel complète pour la gestion de maintenance assistée par ordinateur, avec interface utilisateur moderne, système de rôles avancé, notifications temps réel et gestion complète du cycle de maintenance biomédicale.
+Le système BioTrackGST v3.0 est une application Laravel complète pour la gestion de maintenance assistée par ordinateur et de réclamations hospitalières, avec interface utilisateur moderne, système de rôles avancé, notifications temps réel et gestion complète du cycle de maintenance biomédicale.
 
 ---
 
