@@ -1,7 +1,7 @@
 # 🏥 GST GMAO — Système de Gestion de Maintenance Assistée par Ordinateur
 
 > **Projet de Fin d'Études** | GST Tanger | 2026  
-> Mise à jour : 2026-05-22
+> Mise à jour : 2026-05-25
 
 ---
 
@@ -9,7 +9,7 @@
 
 Application web complète de **Gestion de Maintenance Assistée par Ordinateur (GMAO)** développée pour **GST Tanger** (**Groupement Sanitaire Territorial**), établissement hospitalier public doté d'une autonomie financière et administrative. Le système couvre la gestion des équipements biomédicaux, interventions, réclamations, rapports de maintenance, marchés, planification et bien plus.
 
-### État actuel (2026-05-22)
+### État actuel (2026-05-25)
 
 - **Statut** : En service interne, maintenance évolutive active
 - **Backend** : Laravel 9 + PHP 8.x
@@ -17,7 +17,7 @@ Application web complète de **Gestion de Maintenance Assistée par Ordinateur (
 - **Métriques codebase** : 31 contrôleurs, 13 middlewares, 73 migrations, 11 seeders
 - **Exécution recommandée** : VS Code Tasks `Start Full Stack` / `Stop Full Stack` (+ `Start Tunnel` pour partage externe)
 
-### Dernières mises à jour (2026-05-22)
+### Dernières mises à jour (2026-05-25)
 
 - **Rôle major durci en lecture seule** : blocage global des actions d'écriture et des écrans d'action (`create` / `edit`)
 - **UI major alignée** : suppression des boutons/actions non autorisés (cloche réclamations, actions SAV, CTA de création)

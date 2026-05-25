@@ -1,9 +1,9 @@
 # ✅ GST GMAO — Résumé d'Achèvement
 
-> Mise à jour : 2026-05-22  
+> Mise à jour : 2026-05-25  
 > **Statut global** : ✅ Complet — Production-ready
 
-## 🔄 Mise à jour d'état (2026-05-22)
+## 🔄 Mise à jour d'état (2026-05-25)
 
 - Le périmètre fonctionnel reste complet et opérationnel
 - Lancement/arrêt validés via les tâches VS Code (`Start Full Stack`, `Stop Full Stack`)

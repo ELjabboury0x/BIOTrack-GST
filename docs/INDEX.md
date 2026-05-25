@@ -1,6 +1,6 @@
-# 📘 BioTrackGST — Systéme Intelligent de Gestion de Maintenance Assistée par Ordinateur et de Réclamations Hospitaliéres avec Notification en Temps Réel pour GST Tanger
+# 📘 GST GMAO — Index des Ressources (État Actuel)
 
-> **Version 3.1** | **Mise à jour : 2026-05-22**
+> **Version 3.1** | **Mise à jour : 2026-05-25**
 
 ---
 
@@ -45,7 +45,7 @@ Tâches utiles :
 
 ---
 
-## 📌 Snapshot Technique (2026-05-22)
+## 📌 Snapshot Technique (2026-05-25)
 
 - **31 contrôleurs** (`app/Http/Controllers`)
 - **13 middlewares** (`app/Http/Middleware`)

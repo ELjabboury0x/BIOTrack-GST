@@ -1,12 +1,12 @@
-# 🎨 BioTrackGST Dashboard - Guide Visuel & Présentation
+# 🎨 GMAO Dashboard - Guide Visuel & Présentation
 
-_Mise à jour : 2026-05-22_
+_Mise à jour : 2026-05-25_
 
 ## 📐 Vue d'Ensemble de l'Interface
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                  BioTrackGST Dashboard - GST Tanger              │
+│                    GMAO Dashboard - GST Tanger                  │
 ├──────────────┬───────────────────────────────────────────────────┤
 │              │                                                    │
 │  SIDEBAR     │              CONTENU PRINCIPAL                    │
@@ -45,7 +45,7 @@ _Mise à jour : 2026-05-22_
 
 ```
 ┌─────────────────┐
-│  📦 BioTrackGST │  ← Logo + Titre "BioTrackGST"
+│  📦 GST GMAO    │  ← Logo + Titre "GST GMAO"
 │  Maintenance    │     Sous-titre "Maintenance"
 ├─────────────────┤
 │ 🏠 Tableau de   │  ← Élément actif (surligné en bleu #3b82f6)
@@ -68,7 +68,7 @@ _Mise à jour : 2026-05-22_
 │ ⚙️ Paramètres   │
 ├─────────────────┤
 │ © GST Tanger    │  ← Pied de page
-│ BioTrackGST     │
+│ GMAO System v1  │
 └─────────────────┘
 ```
 

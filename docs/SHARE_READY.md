@@ -1,6 +1,6 @@
 # Share Readiness Guide
 
-_Mise à jour : 2026-05-22_
+_Mise à jour : 2026-05-25_
 
 ## Architecture Snapshot
 

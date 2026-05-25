@@ -1,9 +1,9 @@
 # 📊 GST GMAO — Résumé du Projet
 
-> Mise à jour : 2026-05-22  
+> Mise à jour : 2026-05-25  
 > **Statut** : ✅ Production-ready
 
-## 🔄 État actuel consolidé (2026-05-22)
+## 🔄 État actuel consolidé (2026-05-25)
 
 - Architecture confirmée : Laravel + Blade + MySQL + WebSocket Node.js
 - Démarrage normalisé via scripts `scripts/start-full-stack.ps1` et VS Code Tasks

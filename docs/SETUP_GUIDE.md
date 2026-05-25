@@ -1,6 +1,6 @@
-# 🔧 BioTrackGST — Systéme Intelligent de Gestion de Maintenance Assistée par Ordinateur et de Réclamations Hospitaliéres avec Notification en Temps Réel pour GST Tanger
+# 🔧 GST GMAO — Guide d'Installation
 
-> **Version 3.1** | 2026-05-22
+> **Version 3.1** | 2026-05-25
 
 ---
 
@@ -70,7 +70,7 @@ php artisan key:generate
 
 Éditer `.env` avec vos paramètres :
 ```env
-APP_NAME="BioTrackGST"
+APP_NAME="GST GMAO"
 APP_URL=http://localhost
 
 DB_CONNECTION=mysql

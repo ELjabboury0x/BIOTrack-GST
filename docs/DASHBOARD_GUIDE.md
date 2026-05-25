@@ -1,7 +1,7 @@
-# BioTrackGST Dashboard - Guide Technique (État Actuel)
+# GMAO Dashboard - Guide Technique (État Actuel)
 
 ## Version
-- Date: 2026-05-22
+- Date: 2026-05-25
 - Statut: Backend connecté + KPI temps réel + vue major synchronisée
 
 ## Fonctionnalités actives
