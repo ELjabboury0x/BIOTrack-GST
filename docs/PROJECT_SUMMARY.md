@@ -1,6 +1,6 @@
-# 📊 BioTrackGST — Systéme Intelligent de Gestion de Maintenance Assistée par Ordinateur et de Réclamations Hospitaliéres avec Notification en Temps Réel pour GST Tanger
+# 📊 GST GMAO — Résumé du Projet
 
-> **Version 3.3** | Mise à jour : 2026-05-22  
+> Mise à jour : 2026-05-22  
 > **Statut** : ✅ Production-ready
 
 ## 🔄 État actuel consolidé (2026-05-22)
@@ -45,7 +45,7 @@
 
 ## 🎯 Vue d'ensemble
 
-Le système **BioTrackGST** est une application web Laravel complète dédiée à la gestion de maintenance assistée par ordinateur et de réclamations hospitalières pour le **Groupement Sanitaire Territorial (GST)**, établissement hospitalier public doté d'une autonomie financière et administrative. L'application gère l'intégralité du cycle de vie de la maintenance biomédicale hospitalière.
+Le système **GST GMAO** est une application web Laravel complète dédiée à la gestion de maintenance assistée par ordinateur pour le **Groupement Sanitaire Territorial (GST)**, établissement hospitalier public doté d'une autonomie financière et administrative. L'application gère l'intégralité du cycle de vie de la maintenance biomédicale hospitalière.
 
 ---
 
