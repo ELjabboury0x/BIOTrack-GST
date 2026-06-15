@@ -4,7 +4,7 @@
     'name' => 'GMAO GST Tanger',
     'env' => 'local',
     'debug' => true,
-    'key' => 'base64:fHvJX21oZS0Be6i5bzY1AtS9RUSBkP8fnSD1jluu+mg=',
+    'key' => 'base64:nUjN2JvoRvIWS8LTiBc5ZuHgAo4/y+qpJSiu7JObYY4=',
     'cipher' => 'AES-256-CBC',
     'url' => 'http://localhost',
     'timezone' => 'UTC',
@@ -137,7 +137,7 @@
       'file' => 
       array (
         'driver' => 'file',
-        'path' => 'C:\\xampp\\htdocs\\PFE\\PFE\\PFE\\backend\\storage\\framework/cache/data',
+        'path' => 'C:\\xampp0\\htdocs\\PFE\\PFE\\PFE\\backend\\storage\\framework/cache/data',
       ),
       'memcached' => 
       array (
@@ -278,7 +278,7 @@
   'dompdf' => 
   array (
     'show_warnings' => false,
-    'public_path' => 'C:\\xampp\\htdocs\\PFE\\PFE\\PFE\\public',
+    'public_path' => 'C:\\xampp0\\htdocs\\PFE\\PFE\\PFE\\public',
     'convert_entities' => true,
     'options' => 
     array (
@@ -289,14 +289,14 @@
       'dpi' => 200,
       'defaultPaperSize' => 'a4',
       'defaultMediaType' => 'print',
-      'tempDir' => 'C:\\xampp\\htdocs\\PFE\\PFE\\PFE\\backend\\storage\\app/dompdf-temp',
-      'fontDir' => 'C:\\xampp\\htdocs\\PFE\\PFE\\PFE\\backend\\storage\\fonts',
-      'fontCache' => 'C:\\xampp\\htdocs\\PFE\\PFE\\PFE\\backend\\storage\\fonts',
+      'tempDir' => 'C:\\xampp0\\htdocs\\PFE\\PFE\\PFE\\backend\\storage\\app/dompdf-temp',
+      'fontDir' => 'C:\\xampp0\\htdocs\\PFE\\PFE\\PFE\\backend\\storage\\fonts',
+      'fontCache' => 'C:\\xampp0\\htdocs\\PFE\\PFE\\PFE\\backend\\storage\\fonts',
       'chroot' => 
       array (
-        0 => 'C:\\xampp\\htdocs\\PFE\\PFE\\PFE\\backend',
-        1 => 'C:\\xampp\\htdocs\\PFE\\PFE\\PFE\\public',
-        2 => 'C:\\xampp\\htdocs\\PFE\\PFE\\PFE\\backend\\storage',
+        0 => 'C:\\xampp0\\htdocs\\PFE\\PFE\\PFE\\backend',
+        1 => 'C:\\xampp0\\htdocs\\PFE\\PFE\\PFE\\public',
+        2 => 'C:\\xampp0\\htdocs\\PFE\\PFE\\PFE\\backend\\storage',
       ),
     ),
   ),
@@ -308,14 +308,14 @@
       'local' => 
       array (
         'driver' => 'local',
-        'root' => 'C:\\xampp\\htdocs\\PFE\\PFE\\PFE\\backend\\storage\\app',
+        'root' => 'C:\\xampp0\\htdocs\\PFE\\PFE\\PFE\\backend\\storage\\app',
         'url' => 'http://localhost/storage',
         'visibility' => 'private',
       ),
       'public' => 
       array (
         'driver' => 'local',
-        'root' => 'C:\\xampp\\htdocs\\PFE\\PFE\\PFE\\backend\\storage\\app/public',
+        'root' => 'C:\\xampp0\\htdocs\\PFE\\PFE\\PFE\\backend\\storage\\app/public',
         'url' => 'http://localhost/storage',
         'visibility' => 'public',
       ),
@@ -419,13 +419,13 @@
       'single' => 
       array (
         'driver' => 'single',
-        'path' => 'C:\\xampp\\htdocs\\PFE\\PFE\\PFE\\backend\\storage\\logs/laravel.log',
+        'path' => 'C:\\xampp0\\htdocs\\PFE\\PFE\\PFE\\backend\\storage\\logs/laravel.log',
         'level' => 'debug',
       ),
       'daily' => 
       array (
         'driver' => 'daily',
-        'path' => 'C:\\xampp\\htdocs\\PFE\\PFE\\PFE\\backend\\storage\\logs/laravel.log',
+        'path' => 'C:\\xampp0\\htdocs\\PFE\\PFE\\PFE\\backend\\storage\\logs/laravel.log',
         'level' => 'debug',
         'days' => 14,
       ),
@@ -478,7 +478,7 @@
       ),
       'emergency' => 
       array (
-        'path' => 'C:\\xampp\\htdocs\\PFE\\PFE\\PFE\\backend\\storage\\logs/laravel.log',
+        'path' => 'C:\\xampp0\\htdocs\\PFE\\PFE\\PFE\\backend\\storage\\logs/laravel.log',
       ),
     ),
   ),
@@ -523,7 +523,7 @@
       'theme' => 'default',
       'paths' => 
       array (
-        0 => 'C:\\xampp\\htdocs\\PFE\\PFE\\PFE\\backend\\resources\\views/vendor/mail',
+        0 => 'C:\\xampp0\\htdocs\\PFE\\PFE\\PFE\\backend\\resources\\views/vendor/mail',
       ),
     ),
   ),
@@ -575,7 +575,7 @@
     'lifetime' => '120',
     'expire_on_close' => false,
     'encrypt' => false,
-    'files' => 'C:\\xampp\\htdocs\\PFE\\PFE\\PFE\\backend\\storage\\framework/sessions',
+    'files' => 'C:\\xampp0\\htdocs\\PFE\\PFE\\PFE\\backend\\storage\\framework/sessions',
     'connection' => 'session',
     'table' => 'sessions',
     'store' => 'redis',
@@ -595,9 +595,9 @@
   array (
     'paths' => 
     array (
-      0 => 'C:\\xampp\\htdocs\\PFE\\PFE\\PFE\\backend\\resources\\views',
+      0 => 'C:\\xampp0\\htdocs\\PFE\\PFE\\PFE\\backend\\resources\\views',
     ),
-    'compiled' => 'C:\\xampp\\htdocs\\PFE\\PFE\\PFE\\backend\\storage\\framework\\views',
+    'compiled' => 'C:\\xampp0\\htdocs\\PFE\\PFE\\PFE\\backend\\storage\\framework\\views',
   ),
   'webpush' => 
   array (
@@ -622,7 +622,7 @@
       'enabled' => true,
       'open' => NULL,
       'driver' => 'file',
-      'path' => 'C:\\xampp\\htdocs\\PFE\\PFE\\PFE\\backend\\storage\\debugbar',
+      'path' => 'C:\\xampp0\\htdocs\\PFE\\PFE\\PFE\\backend\\storage\\debugbar',
       'connection' => NULL,
       'provider' => '',
       'hostname' => '127.0.0.1',
@@ -887,7 +887,7 @@
     ),
     'temporary_files' => 
     array (
-      'local_path' => 'C:\\xampp\\htdocs\\PFE\\PFE\\PFE\\backend\\storage\\framework/cache/laravel-excel',
+      'local_path' => 'C:\\xampp0\\htdocs\\PFE\\PFE\\PFE\\backend\\storage\\framework/cache/laravel-excel',
       'local_permissions' => 
       array (
       ),
@@ -969,7 +969,7 @@
     array (
     ),
     'enable_runnable_solutions' => NULL,
-    'remote_sites_path' => 'C:\\xampp\\htdocs\\PFE\\PFE\\PFE\\backend',
+    'remote_sites_path' => 'C:\\xampp0\\htdocs\\PFE\\PFE\\PFE\\backend',
     'local_sites_path' => '',
     'housekeeping_endpoint_prefix' => '_ignition',
     'settings_file_path' => '',

@@ -6,6 +6,64 @@
 (function () {
     'use strict';
 
+    /* ─── STORAGE ERROR PROTECTION ─── */
+    // Global storage wrapper to prevent FILE_ERROR_NO_SPACE crashes
+    window.SafeStorage = {
+        getItem: function(key) {
+            try {
+                return localStorage.getItem(key);
+            } catch(e) {
+                if (e.message && e.message.includes('NO_SPACE')) {
+                    console.warn('LocalStorage quota exceeded, clearing cache');
+                    try {
+                        localStorage.clear();
+                    } catch(e2) {
+                        console.error('Failed to clear localStorage:', e2);
+                    }
+                }
+                return null;
+            }
+        },
+        setItem: function(key, value) {
+            try {
+                localStorage.setItem(key, value);
+                return true;
+            } catch(e) {
+                if (e.message && e.message.includes('NO_SPACE')) {
+                    console.warn('LocalStorage quota exceeded for key:', key);
+                    // Don't fail silently - try to clear old data
+                    try {
+                        // Remove least important items
+                        var keysToRemove = [];
+                        for (var i = 0; i < localStorage.length; i++) {
+                            var k = localStorage.key(i);
+                            if (k && (k.includes('cache') || k.includes('temp') || k.includes('old'))) {
+                                keysToRemove.push(k);
+                            }
+                        }
+                        keysToRemove.forEach(function(k) { 
+                            try { localStorage.removeItem(k); } catch(e) {} 
+                        });
+                        // Try again
+                        localStorage.setItem(key, value);
+                        return true;
+                    } catch(e2) {
+                        console.warn('Could not store in localStorage:', e2.message);
+                        return false;
+                    }
+                }
+                return false;
+            }
+        },
+        removeItem: function(key) {
+            try {
+                localStorage.removeItem(key);
+            } catch(e) {
+                console.warn('Could not remove from localStorage:', e);
+            }
+        }
+    };
+
     /* ─── PAGE LOADER ─── */
     var loaderDismissed = false;
 
@@ -83,24 +141,32 @@
         key: 'gst-theme',
 
         init: function () {
-            var saved = localStorage.getItem(this.key);
-            if (saved === 'dark') {
-                document.documentElement.setAttribute('data-theme', 'dark');
+            try {
+                var saved = window.SafeStorage.getItem(this.key);
+                if (saved === 'dark') {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                }
+            } catch(e) {
+                console.warn('Dark mode init error:', e);
             }
         },
 
         toggle: function () {
-            var current = document.documentElement.getAttribute('data-theme');
-            var next = current === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', next);
-            localStorage.setItem(this.key, next);
+            try {
+                var current = document.documentElement.getAttribute('data-theme');
+                var next = current === 'dark' ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-theme', next);
+                window.SafeStorage.setItem(this.key, next);
 
-            // Animate the toggle
-            var toggles = document.querySelectorAll('.gst-dark-toggle');
-            toggles.forEach(function (t) {
-                t.classList.add('gst-toggle-anim');
-                setTimeout(function () { t.classList.remove('gst-toggle-anim'); }, 300);
-            });
+                // Animate the toggle
+                var toggles = document.querySelectorAll('.gst-dark-toggle');
+                toggles.forEach(function (t) {
+                    t.classList.add('gst-toggle-anim');
+                    setTimeout(function () { t.classList.remove('gst-toggle-anim'); }, 300);
+                });
+            } catch(e) {
+                console.warn('Dark mode toggle error:', e);
+            }
         },
 
         isDark: function () {
@@ -109,7 +175,11 @@
     };
 
     // Initialize dark mode immediately
-    GSTDarkMode.init();
+    try {
+        GSTDarkMode.init();
+    } catch(e) {
+        console.warn('Failed to initialize dark mode:', e);
+    }
 
     /* ─── TOAST NOTIFICATION SYSTEM ─── */
     window.GSTToast = {

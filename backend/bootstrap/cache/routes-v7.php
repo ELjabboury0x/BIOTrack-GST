@@ -901,6 +901,22 @@ app('router')->setCompiledRoutes(
           5 => false,
           6 => NULL,
         ),
+        1 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'technicians.store',
+          ),
+          1 => NULL,
+          2 => 
+          array (
+            'POST' => 0,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
       ),
       '/dashboard/techniciens/create' => 
       array (
@@ -1120,7 +1136,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::setQdvgEAD9W5KCc',
+            '_route' => 'generated::pq3Xh1p6hslWASal',
           ),
           1 => NULL,
           2 => 
@@ -1713,7 +1729,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::rAYlCFpNE7S0lTSK',
+            '_route' => 'generated::dVdZAnYpmExNP11C',
           ),
           1 => NULL,
           2 => 
@@ -6644,7 +6660,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'missing' => 'O:47:"Laravel\\SerializableClosure\\SerializableClosure":1:{s:12:"serializable";O:46:"Laravel\\SerializableClosure\\Serializers\\Signed":2:{s:12:"serializable";s:321:"O:46:"Laravel\\SerializableClosure\\Serializers\\Native":5:{s:3:"use";a:0:{}s:8:"function";s:102:"fn () => \\redirect()->route(\'reclamations.index\')->with(\'error\', \'Cette réclamation n\\\'existe plus.\')";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"0000000000000a100000000000000000";}";s:4:"hash";s:44:"kuVRnMpkFkufeLxRjpgyxbhgZ9Lm9shnh0y9FutQ7yA=";}}',
+        'missing' => 'O:47:"Laravel\\SerializableClosure\\SerializableClosure":1:{s:12:"serializable";O:46:"Laravel\\SerializableClosure\\Serializers\\Signed":2:{s:12:"serializable";s:321:"O:46:"Laravel\\SerializableClosure\\Serializers\\Native":5:{s:3:"use";a:0:{}s:8:"function";s:102:"fn () => \\redirect()->route(\'reclamations.index\')->with(\'error\', \'Cette réclamation n\\\'existe plus.\')";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"00000000000004470000000000000000";}";s:4:"hash";s:44:"wRfCkCOTQe0DNXnt7TemIaoj51gn9k/54wXsLWLuaxM=";}}',
         'as' => 'reclamations.status.update',
       ),
       'fallback' => false,
@@ -6734,7 +6750,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'missing' => 'O:47:"Laravel\\SerializableClosure\\SerializableClosure":1:{s:12:"serializable";O:46:"Laravel\\SerializableClosure\\Serializers\\Signed":2:{s:12:"serializable";s:355:"O:46:"Laravel\\SerializableClosure\\Serializers\\Native":5:{s:3:"use";a:0:{}s:8:"function";s:136:"fn () => \\redirect()->route(\'reclamations.index\')->with(\'error\', \'Ancienne réclamation introuvable (peut-être supprimée/archivée).\')";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"0000000000000a130000000000000000";}";s:4:"hash";s:44:"7JAf/wycl9wzeSp2jkjrt0XXFT1/9GaQ7xK8kwGk/7A=";}}',
+        'missing' => 'O:47:"Laravel\\SerializableClosure\\SerializableClosure":1:{s:12:"serializable";O:46:"Laravel\\SerializableClosure\\Serializers\\Signed":2:{s:12:"serializable";s:355:"O:46:"Laravel\\SerializableClosure\\Serializers\\Native":5:{s:3:"use";a:0:{}s:8:"function";s:136:"fn () => \\redirect()->route(\'reclamations.index\')->with(\'error\', \'Ancienne réclamation introuvable (peut-être supprimée/archivée).\')";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"000000000000044a0000000000000000";}";s:4:"hash";s:44:"zyMBCATKKNsDDb55HiP8j2hCHmrjqZZfsAK6+NLW6c8=";}}',
         'as' => 'dashboard.notifications.complaints.show',
       ),
       'fallback' => false,
@@ -6824,7 +6840,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'missing' => 'O:47:"Laravel\\SerializableClosure\\SerializableClosure":1:{s:12:"serializable";O:46:"Laravel\\SerializableClosure\\Serializers\\Signed":2:{s:12:"serializable";s:346:"O:46:"Laravel\\SerializableClosure\\Serializers\\Native":5:{s:3:"use";a:0:{}s:8:"function";s:127:"fn () => \\redirect()->route(\'reclamations.index\')->with(\'error\', \'Pièce jointe introuvable pour cette ancienne réclamation.\')";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"0000000000000a150000000000000000";}";s:4:"hash";s:44:"kBisfB230avSwdwkyF17paKgKwdg7bEwQODj+dWhDkM=";}}',
+        'missing' => 'O:47:"Laravel\\SerializableClosure\\SerializableClosure":1:{s:12:"serializable";O:46:"Laravel\\SerializableClosure\\Serializers\\Signed":2:{s:12:"serializable";s:346:"O:46:"Laravel\\SerializableClosure\\Serializers\\Native":5:{s:3:"use";a:0:{}s:8:"function";s:127:"fn () => \\redirect()->route(\'reclamations.index\')->with(\'error\', \'Pièce jointe introuvable pour cette ancienne réclamation.\')";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"000000000000044c0000000000000000";}";s:4:"hash";s:44:"OzQqXm/d16RrZB7Mq9zlA9eBvWlo3T6AL1TSNVk0T6k=";}}',
         'as' => 'dashboard.notifications.complaints.attachment',
       ),
       'fallback' => false,
@@ -6870,7 +6886,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'missing' => 'O:47:"Laravel\\SerializableClosure\\SerializableClosure":1:{s:12:"serializable";O:46:"Laravel\\SerializableClosure\\Serializers\\Signed":2:{s:12:"serializable";s:344:"O:46:"Laravel\\SerializableClosure\\Serializers\\Native":5:{s:3:"use";a:0:{}s:8:"function";s:125:"fn () => \\redirect()->route(\'reclamations.index\')->with(\'error\', \'Impossible de clôturer: la réclamation est introuvable.\')";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"0000000000000a180000000000000000";}";s:4:"hash";s:44:"0cnPrIJCDnbkPVXeXV5PRcUAZ3mnfhsTfFnkMFy1ISE=";}}',
+        'missing' => 'O:47:"Laravel\\SerializableClosure\\SerializableClosure":1:{s:12:"serializable";O:46:"Laravel\\SerializableClosure\\Serializers\\Signed":2:{s:12:"serializable";s:344:"O:46:"Laravel\\SerializableClosure\\Serializers\\Native":5:{s:3:"use";a:0:{}s:8:"function";s:125:"fn () => \\redirect()->route(\'reclamations.index\')->with(\'error\', \'Impossible de clôturer: la réclamation est introuvable.\')";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"000000000000044f0000000000000000";}";s:4:"hash";s:44:"i2bXLH4/cFSU02f/FrATxVBPtsZ32vn46LBcQFGL5xc=";}}',
         'as' => 'dashboard.notifications.complaints.close',
       ),
       'fallback' => false,
@@ -7002,6 +7018,48 @@ app('router')->setCompiledRoutes(
         array (
         ),
         'as' => 'technicians.create',
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'technicians.store' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'POST',
+      ),
+      'uri' => 'dashboard/techniciens',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+          2 => 'prevent-back-history',
+          3 => 'force-password-change',
+          4 => 'enforce-account-security',
+          5 => 'major-read-only',
+          6 => 'role:admin,manager,major,ingenieur,technicien,technician',
+        ),
+        'uses' => 'App\\Http\\Controllers\\TechnicianController@store',
+        'controller' => 'App\\Http\\Controllers\\TechnicianController@store',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+        'as' => 'technicians.store',
       ),
       'fallback' => false,
       'defaults' => 
@@ -7699,7 +7757,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::setQdvgEAD9W5KCc' => 
+    'generated::pq3Xh1p6hslWASal' => 
     array (
       'methods' => 
       array (
@@ -7731,7 +7789,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::setQdvgEAD9W5KCc',
+        'as' => 'generated::pq3Xh1p6hslWASal',
       ),
       'fallback' => false,
       'defaults' => 
@@ -9833,7 +9891,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::rAYlCFpNE7S0lTSK' => 
+    'generated::dVdZAnYpmExNP11C' => 
     array (
       'methods' => 
       array (
@@ -9850,13 +9908,13 @@ app('router')->setCompiledRoutes(
         ),
         'uses' => 'O:47:"Laravel\\SerializableClosure\\SerializableClosure":1:{s:12:"serializable";O:46:"Laravel\\SerializableClosure\\Serializers\\Signed":2:{s:12:"serializable";s:297:"O:46:"Laravel\\SerializableClosure\\Serializers\\Native":5:{s:3:"use";a:0:{}s:8:"function";s:79:"function (\\Illuminate\\Http\\Request $request) {
     return $request->user();
-}";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"00000000000009ce0000000000000000";}";s:4:"hash";s:44:"iqDfWSx6XpJDvOaPYKIbxjOlPZIiWTm1fWGGn8NlCMM=";}}',
+}";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"00000000000004050000000000000000";}";s:4:"hash";s:44:"e9ucjpO9AEuFQFx3UJLqL2utppVcxSO6pZHCKVH9CDU=";}}',
         'namespace' => NULL,
         'prefix' => 'api',
         'where' => 
         array (
         ),
-        'as' => 'generated::rAYlCFpNE7S0lTSK',
+        'as' => 'generated::dVdZAnYpmExNP11C',
       ),
       'fallback' => false,
       'defaults' => 

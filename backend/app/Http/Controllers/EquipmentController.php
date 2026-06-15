@@ -43,7 +43,7 @@ class EquipmentController extends Controller
         $selectedHospitalId = $request->integer('hospital_id');
         $selectedServiceId = $request->integer('service_id');
         $selectedCategoryId = 0;
-        $selectedCompanyId = $request->integer('company_id');
+        $selectedCompanyId = (int) $request->input('company_id', 0);
         $structureId = $request->integer('structure_id');
 
         if ($selectedServiceId <= 0 && $structureId > 0) {
@@ -724,6 +724,7 @@ class EquipmentController extends Controller
             'designation' => 'required|string|max:500',
             'duree_garantie' => 'nullable|string|max:255',
             'brand_name' => 'nullable|string|max:255',
+            'company_id' => 'nullable|integer|exists:companies,id',
             'company_name' => 'nullable|string|max:255',
             'model_name' => 'nullable|string|max:255',
             'market_label' => 'nullable|string|max:255',
@@ -744,8 +745,10 @@ class EquipmentController extends Controller
             }
         }
 
-        // Handle company_name -> company_id
-        if (!empty($validated['company_name'])) {
+        // Handle company_id or company_name -> company_id
+        if (!empty($validated['company_id'])) {
+            $updateData['company_id'] = $validated['company_id'];
+        } elseif (!empty($validated['company_name'])) {
             $company = \App\Models\Company::query()
                 ->where('name', 'LIKE', '%' . $validated['company_name'] . '%')
                 ->first();
@@ -917,7 +920,7 @@ class EquipmentController extends Controller
         $selectedHospitalId = $request->integer('hospital_id');
         $selectedServiceId = $request->integer('service_id');
         $selectedCategoryId = $request->integer('category_id');
-        $selectedCompanyId = $request->integer('company_id');
+        $selectedCompanyId = (int) $request->input('company_id', 0);
         $search = trim((string) $request->query('q', ''));
         $sortDirection = strtolower((string) $request->query('sort', 'desc')) === 'asc' ? 'asc' : 'desc';
         $selectedHospitalIds = $this->resolveCanonicalHospitalIds(
@@ -977,7 +980,7 @@ class EquipmentController extends Controller
         $selectedHospitalId = $request->integer('hospital_id');
         $selectedServiceId = $request->integer('service_id');
         $selectedCategoryId = $request->integer('category_id');
-        $selectedCompanyId = $request->integer('company_id');
+        $selectedCompanyId = (int) $request->input('company_id', 0); // Use input() to preserve negative values
         $search = trim((string) $request->query('q', ''));
         $sortDirection = strtolower((string) $request->query('sort', 'desc')) === 'asc' ? 'asc' : 'desc';
         $selectedHospitalIds = $this->resolveCanonicalHospitalIds(
@@ -1380,8 +1383,34 @@ class EquipmentController extends Controller
                 'market_id',
                 'operational_status',
                 'created_at',
-            ])
-            ->when($selectedHospitalId > 0, function ($innerQuery) use ($selectedHospitalId, $selectedHospitalIds) {
+            ]);
+
+        // Handle "Inconnue" (equipment without company) - must be first and exclusive
+        if ($selectedCompanyId < 0) {
+            return $query->whereNull('company_id')
+                ->when($search !== '', function ($innerQuery) use ($search) {
+                    $innerQuery->where(function ($searchQuery) use ($search) {
+                        $like = '%' . $search . '%';
+                        $searchQuery
+                            ->where('inventory_number_current', 'like', $like)
+                            ->orWhere('designation', 'like', $like)
+                            ->orWhere('serial_number', 'like', $like)
+                            ->orWhere('unit_name', 'like', $like)
+                            ->orWhere('service_name', 'like', $like)
+                            ->orWhere('sector_name', 'like', $like)
+                            ->orWhere('sector_description', 'like', $like)
+                            ->orWhere('exact_location', 'like', $like)
+                            ->orWhere('brand_name', 'like', $like)
+                            ->orWhere('model_name', 'like', $like)
+                            ->orWhere('market_label', 'like', $like)
+                            ->orWhere('lot_number', 'like', $like);
+                    });
+                })
+                ->orderBy('id', $sortDirection);
+        }
+
+        // Regular filters for non-"Inconnue" companies
+        $query->when($selectedHospitalId > 0, function ($innerQuery) use ($selectedHospitalId, $selectedHospitalIds) {
                 if ($selectedHospitalIds !== []) {
                     $innerQuery->whereIn('hospital_id', $selectedHospitalIds);
                     return;
@@ -1485,6 +1514,8 @@ class EquipmentController extends Controller
                 });
             })
             ->orderBy('id', $sortDirection);
+
+        return $query;
 
         ServiceAccess::applyEquipmentScope($query, $user);
 

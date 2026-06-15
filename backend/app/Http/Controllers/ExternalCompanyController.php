@@ -17,16 +17,7 @@ class ExternalCompanyController extends Controller
         $search = trim((string) $request->query('q', ''));
 
         $query = Company::query()
-            ->addSelect([
-                'linked_equipments_count' => Equipment::query()
-                    ->selectRaw('COUNT(DISTINCT equipments.id)')
-                    ->leftJoin('markets as linked_markets', 'linked_markets.id', '=', 'equipments.market_id')
-                    ->where(function ($subQuery) {
-                        $subQuery
-                            ->whereColumn('equipments.company_id', 'companies.id')
-                            ->orWhereColumn('linked_markets.company_id', 'companies.id');
-                    }),
-            ])
+            ->withCount('equipments')
             ->orderBy('name');
 
         if ($search !== '') {
@@ -34,6 +25,28 @@ class ExternalCompanyController extends Controller
         }
 
         $companies = $query->get();
+
+        // Rename the count field for consistency
+        $companies = $companies->map(function ($company) {
+            $company->linked_equipments_count = $company->equipments_count;
+            unset($company->equipments_count);
+            return $company;
+        });
+
+        // Add "Unknown" (Inconnue) entry for equipment without any company
+        $unknownCount = Equipment::query()
+            ->whereNull('company_id')
+            ->count();
+
+        if ($unknownCount > 0 && ($search === '' || str_contains('inconnue', strtolower($search)) || str_contains('unknown', strtolower($search)))) {
+            $unknownCompany = (object) [
+                'id' => null,
+                'name' => 'Inconnue',
+                'linked_equipments_count' => $unknownCount,
+                'created_at' => null,
+            ];
+            $companies = $companies->prepend($unknownCompany);
+        }
 
         return view('pages.external-companies.index', [
             'search' => $search,

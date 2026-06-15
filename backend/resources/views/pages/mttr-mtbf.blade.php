@@ -189,6 +189,36 @@
 
 @section('scripts')
 <script>
+// ── GLOBAL ERROR PROTECTION ──
+// Prevent white screen on unhandled promise rejections
+window.addEventListener('unhandledrejection', function(event) {
+    console.error('Unhandled Promise Rejection:', event.reason);
+    event.preventDefault();
+    
+    // Display error message instead of blank screen
+    const wrapper = document.getElementById('chart-wrapper');
+    if (wrapper && !wrapper.innerHTML.includes('error')) {
+        wrapper.innerHTML = '<div class="text-red-500 font-bold p-5 bg-red-50 rounded-xl">' +
+            'Une erreur système s\'est produite: ' + (event.reason?.message || 'Erreur inconnue') + 
+            '<br><small>Vérifiez que votre navigateur a assez d\'espace de stockage.</small></div>';
+    }
+});
+
+// Global error handler
+window.addEventListener('error', function(event) {
+    console.error('Global Error:', event.error);
+    if (event.error && event.error.message && event.error.message.includes('FILE_ERROR')) {
+        console.warn('Storage space error detected. Clearing old data...');
+        try {
+            // Try to clear some space
+            localStorage.removeItem('gst-theme-cache');
+            sessionStorage.clear();
+        } catch(e) {
+            console.error('Failed to clear storage:', e);
+        }
+    }
+});
+
 // ── Chart instance
 let kpiChart = null;
 let cachedData = [];
@@ -238,85 +268,132 @@ function resetFilters() {
 
 // ── Main data loader
 function loadData() {
-    const start       = document.getElementById('filter-start').value;
-    const end         = document.getElementById('filter-end').value;
-    const serviceId   = document.getElementById('filter-service').value;
-    const designation = document.getElementById('filter-designation').value;
-    const timeUnit    = document.getElementById('filter-time-unit').value;
+    try {
+        const start       = document.getElementById('filter-start').value;
+        const end         = document.getElementById('filter-end').value;
+        const serviceId   = document.getElementById('filter-service').value;
+        const designation = document.getElementById('filter-designation').value;
+        const timeUnit    = document.getElementById('filter-time-unit').value;
 
-    // UI state: loading
-    const icon = document.getElementById('btn-apply-icon');
-    icon.classList.add('fa-spin');
-    document.getElementById('chart-loading').classList.remove('hidden');
-    document.getElementById('chart-wrapper').style.opacity = '0.3';
-    document.getElementById('chart-empty').classList.add('hidden');
+        // UI state: loading
+        const icon = document.getElementById('btn-apply-icon');
+        icon.classList.add('fa-spin');
+        document.getElementById('chart-loading').classList.remove('hidden');
+        document.getElementById('chart-wrapper').style.opacity = '0.3';
+        document.getElementById('chart-empty').classList.add('hidden');
 
-    const params = new URLSearchParams({ start_date: start, end_date: end, time_unit: timeUnit });
-    if (serviceId)   params.append('service_id', serviceId);
-    if (designation) params.append('designation', designation);
+        const params = new URLSearchParams({ start_date: start, end_date: end, time_unit: timeUnit });
+        if (serviceId)   params.append('service_id', serviceId);
+        if (designation) params.append('designation', designation);
 
-    fetch('{{ route("mttr-mtbf.data") }}?' + params.toString(), {
-        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
-    })
-    .then(r => r.json())
-    .then(json => {
-        cachedData = json.data || [];
-        currentUnit = json.time_unit || 'hours';
-        
-        // Update unit labels in UI
-        const unitLabelShort = getUnitSuffix(currentUnit).trim();
-        document.querySelectorAll('.unit-label').forEach(el => el.textContent = unitLabelShort);
+        console.log('KPI Data Load - URL:', '{{ route("mttr-mtbf.data") }}');
+        console.log('KPI Data Load - Params:', params.toString());
 
-        renderKpiCards(json.summary || {});
-        renderChart(cachedData);
-        renderTable(cachedData);
-        document.getElementById('period-label').textContent =
-            'Période : ' + (json.period?.start || '') + ' → ' + (json.period?.end || '') +
-            '  (' + (json.observation_hours || 0).toLocaleString() + ' h)' +
-            (json.source === 'bilan_corrective_fallback' ? '  • Source: bilan corrective (durées indisponibles)' : '');
-    })
-    .catch(err => {
-        console.error("AJAX Error:", err);
-        const wrapper = document.getElementById('chart-wrapper');
-        wrapper.innerHTML = '<div class="text-red-500 font-bold p-10 bg-red-50 rounded-xl">Une erreur est survenue lors du chargement (vérifiez la console).<br>' + err.message + '</div>';
-    })
-    .finally(() => {
-        icon.classList.remove('fa-spin');
-        document.getElementById('chart-loading').classList.add('hidden');
-        document.getElementById('chart-wrapper').style.opacity = '1';
-    });
+        fetch('{{ route("mttr-mtbf.data") }}?' + params.toString(), {
+            headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+        })
+        .then(r => {
+            console.log('KPI Response Status:', r.status);
+            if (!r.ok) throw new Error(`HTTP ${r.status}: ${r.statusText}`);
+            return r.json();
+        })
+        .then(json => {
+            console.log('KPI Data Received:', json);
+            cachedData = json.data || [];
+            currentUnit = json.time_unit || 'hours';
+            
+            // Update unit labels in UI
+            const unitLabelShort = getUnitSuffix(currentUnit).trim();
+            document.querySelectorAll('.unit-label').forEach(el => el.textContent = unitLabelShort);
+
+            renderKpiCards(json.summary || {});
+            renderChart(cachedData);
+            renderTable(cachedData);
+            
+            try {
+                document.getElementById('period-label').textContent =
+                    'Période : ' + (json.period?.start || '') + ' → ' + (json.period?.end || '') +
+                    '  (' + (json.observation_hours || 0).toLocaleString() + ' h)' +
+                    (json.source === 'bilan_corrective_fallback' ? '  • Source: bilan corrective (durées indisponibles)' : '');
+            } catch(e) {
+                console.warn('Period label update failed:', e);
+            }
+        })
+        .catch(err => {
+            console.error("AJAX Error:", err);
+            const wrapper = document.getElementById('chart-wrapper');
+            if (wrapper) {
+                wrapper.innerHTML = '<div class="text-red-500 font-bold p-10 bg-red-50 rounded-xl">Une erreur est survenue lors du chargement (vérifiez la console).<br><strong>' + err.message + '</strong></div>';
+            }
+        })
+        .finally(() => {
+            try {
+                const icon = document.getElementById('btn-apply-icon');
+                if (icon) icon.classList.remove('fa-spin');
+                
+                const loading = document.getElementById('chart-loading');
+                if (loading) loading.classList.add('hidden');
+                
+                const wrapper = document.getElementById('chart-wrapper');
+                if (wrapper) wrapper.style.opacity = '1';
+            } catch(e) {
+                console.warn('Finally block cleanup error:', e);
+            }
+        });
+    } catch(err) {
+        console.error("LoadData Error:", err);
+        alert('Erreur: ' + err.message);
+    }
 }
 
 // ── KPI Cards
 function renderKpiCards(summary) {
-    const cards = document.getElementById('kpi-cards');
-    if (!summary || Object.keys(summary).length === 0) {
-        cards.classList.add('hidden');
-        return;
+    try {
+        const cards = document.getElementById('kpi-cards');
+        if (!summary || Object.keys(summary).length === 0) {
+            if (cards) cards.classList.add('hidden');
+            return;
+        }
+        if (cards) {
+            cards.classList.remove('hidden');
+        }
+        const dispoEl = document.getElementById('kpi-dispo');
+        const mttrEl = document.getElementById('kpi-mttr');
+        const mtbfEl = document.getElementById('kpi-mtbf');
+        const pannesEl = document.getElementById('kpi-pannes');
+        
+        if (dispoEl) dispoEl.textContent = fmtDispo(summary.avg_disponibilite);
+        if (mttrEl) mttrEl.textContent = fmtValue(summary.avg_mttr);
+        if (mtbfEl) mtbfEl.textContent = fmtValue(summary.avg_mtbf);
+        if (pannesEl) pannesEl.textContent = summary.total_pannes ?? '0';
+        
+        console.log('KPI Cards rendered successfully');
+    } catch(err) {
+        console.error('Error in renderKpiCards:', err);
     }
-    cards.classList.remove('hidden');
-    document.getElementById('kpi-dispo').textContent   = fmtDispo(summary.avg_disponibilite);
-    document.getElementById('kpi-mttr').textContent    = fmtValue(summary.avg_mttr);
-    document.getElementById('kpi-mtbf').textContent    = fmtValue(summary.avg_mtbf);
-    document.getElementById('kpi-pannes').textContent  = summary.total_pannes ?? '0';
 }
 
 // ── Chart (Chart.js combo: grouped bars + line)
 function renderChart(rows) {
-    const wrapper = document.getElementById('chart-wrapper');
-    const empty   = document.getElementById('chart-empty');
-
-    if (!rows || rows.length === 0) {
-        wrapper.style.display = 'none';
-        empty.classList.remove('hidden');
-        if (kpiChart) { kpiChart.destroy(); kpiChart = null; }
-        return;
-    }
-
-    wrapper.style.display = 'block';
-    empty.classList.add('hidden');
-
     try {
+        const wrapper = document.getElementById('chart-wrapper');
+        const empty   = document.getElementById('chart-empty');
+
+        if (!rows || rows.length === 0) {
+            if (wrapper) wrapper.style.display = 'none';
+            if (empty) empty.classList.remove('hidden');
+            if (kpiChart) { 
+                try { kpiChart.destroy(); } catch(e) { console.warn('Chart destroy error:', e); }
+                kpiChart = null; 
+            }
+            return;
+        }
+
+        if (wrapper) wrapper.style.display = 'block';
+        if (empty) empty.classList.add('hidden');
+
+        console.log('Rendering chart with', rows.length, 'rows');
+
         const labels   = rows.map(r => {
             const des = r.designation || 'Inconnu';
             return des.length > 25 ? des.substring(0, 25) + '…' : des;
@@ -325,169 +402,208 @@ function renderChart(rows) {
         const mtbfData = rows.map(r => (r.mtbf_hours === null || r.mtbf_hours === undefined) ? null : parseFloat(Number(r.mtbf_hours).toFixed(2)));
         const dispoData = rows.map(r => (r.disponibilite === null || r.disponibilite === undefined) ? null : parseFloat(Number(r.disponibilite).toFixed(2)));
 
+        console.log('Chart data prepared - MTTR values:', mttrData.length, ', MTBF values:', mtbfData.length);
+
         const config = {
-        type: 'bar',
-        data: {
-            labels,
-            datasets: [
-                {
-                    label: 'MTTR (h)',
-                    data: mttrData,
-                    backgroundColor: 'rgba(245, 158, 11, 0.75)',
-                    borderColor: '#f59e0b',
-                    borderWidth: 1,
-                    borderRadius: 4,
-                    yAxisID: 'y',
-                    order: 2,
-                },
-                {
-                    label: 'MTBF (h)',
-                    data: mtbfData,
-                    backgroundColor: 'rgba(59, 130, 246, 0.65)',
-                    borderColor: '#3b82f6',
-                    borderWidth: 1,
-                    borderRadius: 4,
-                    yAxisID: 'y',
-                    order: 2,
-                },
-                {
-                    label: 'Disponibilité %',
-                    data: dispoData,
-                    type: 'line',
-                    borderColor: '#10b981',
-                    backgroundColor: 'rgba(16, 185, 129, 0.08)',
-                    pointBackgroundColor: '#10b981',
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    pointRadius: 5,
-                    pointHoverRadius: 7,
-                    borderWidth: 2.5,
-                    tension: 0.3,
-                    fill: true,
-                    yAxisID: 'y1',
-                    order: 1,
-                },
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: { mode: 'index', intersect: false },
-            plugins: {
-                legend: {
-                    position: 'top',
-                    labels: {
-                        font: { size: 11 },
-                        padding: 16,
-                        usePointStyle: true,
-                    }
-                },
-                tooltip: {
-                    callbacks: {
-                        label(context) {
-                            const label = context.dataset.label || '';
-                            const val   = context.parsed.y;
-                            if (val === null || val === undefined || isNaN(val)) return ' ' + label + ' : N/D';
-                            if (label.includes('Disponibilité')) return ' Disponibilité : ' + val.toFixed(1) + '%';
-                            return ' ' + label + ' : ' + fmtValue(val);
+            type: 'bar',
+            data: {
+                labels,
+                datasets: [
+                    {
+                        label: 'MTTR (h)',
+                        data: mttrData,
+                        backgroundColor: 'rgba(245, 158, 11, 0.75)',
+                        borderColor: '#f59e0b',
+                        borderWidth: 1,
+                        borderRadius: 4,
+                        yAxisID: 'y',
+                        order: 2,
+                    },
+                    {
+                        label: 'MTBF (h)',
+                        data: mtbfData,
+                        backgroundColor: 'rgba(59, 130, 246, 0.65)',
+                        borderColor: '#3b82f6',
+                        borderWidth: 1,
+                        borderRadius: 4,
+                        yAxisID: 'y',
+                        order: 2,
+                    },
+                    {
+                        label: 'Disponibilité %',
+                        data: dispoData,
+                        type: 'line',
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.08)',
+                        pointBackgroundColor: '#10b981',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        borderWidth: 2.5,
+                        tension: 0.3,
+                        fill: true,
+                        yAxisID: 'y1',
+                        order: 1,
+                    },
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            font: { size: 11 },
+                            padding: 16,
+                            usePointStyle: true,
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label(context) {
+                                try {
+                                    const label = context.dataset.label || '';
+                                    const val   = context.parsed.y;
+                                    if (val === null || val === undefined || isNaN(val)) return ' ' + label + ' : N/D';
+                                    if (label.includes('Disponibilité')) return ' Disponibilité : ' + val.toFixed(1) + '%';
+                                    return ' ' + label + ' : ' + fmtValue(val);
+                                } catch(e) {
+                                    console.warn('Tooltip callback error:', e);
+                                    return 'N/D';
+                                }
+                            }
                         }
                     }
-                }
-            },
-            scales: {
-                x: {
-                    grid: { display: false },
-                    ticks: {
-                        font: { size: 10 },
-                        maxRotation: 40,
-                        minRotation: 20,
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: {
+                            font: { size: 10 },
+                            maxRotation: 40,
+                            minRotation: 20,
+                        }
+                    },
+                    y: {
+                        type: 'linear',
+                        position: 'left',
+                        title: {
+                            display: true,
+                            text: 'Durée (' + getUnitSuffix(currentUnit).trim() + ')',
+                            font: { size: 11, weight: '500' },
+                            color: '#6b7280'
+                        },
+                        ticks: {
+                            font: { size: 10 },
+                            callback: (v) => {
+                                try { return fmtValue(v); } catch(e) { return v; }
+                            }
+                        },
+                        grid: { color: 'rgba(0,0,0,0.05)' }
+                    },
+                    y1: {
+                        type: 'linear',
+                        position: 'right',
+                        min: 0,
+                        max: 100,
+                        title: {
+                            display: true,
+                            text: 'Disponibilité (%)',
+                            font: { size: 11, weight: '500' },
+                            color: '#10b981'
+                        },
+                        ticks: {
+                            font: { size: 10 },
+                            color: '#10b981',
+                            callback: (v) => v + '%'
+                        },
+                        grid: { drawOnChartArea: false }
                     }
-                },
-                y: {
-                    type: 'linear',
-                    position: 'left',
-                    title: {
-                        display: true,
-                        text: 'Durée (' + getUnitSuffix(currentUnit).trim() + ')',
-                        font: { size: 11, weight: '500' },
-                        color: '#6b7280'
-                    },
-                    ticks: {
-                        font: { size: 10 },
-                        callback: (v) => fmtValue(v)
-                    },
-                    grid: { color: 'rgba(0,0,0,0.05)' }
-                },
-                y1: {
-                    type: 'linear',
-                    position: 'right',
-                    min: 0,
-                    max: 100,
-                    title: {
-                        display: true,
-                        text: 'Disponibilité (%)',
-                        font: { size: 11, weight: '500' },
-                        color: '#10b981'
-                    },
-                    ticks: {
-                        font: { size: 10 },
-                        color: '#10b981',
-                        callback: (v) => v + '%'
-                    },
-                    grid: { drawOnChartArea: false }
                 }
             }
-        }
-    };
+        };
 
-        if (kpiChart) { kpiChart.destroy(); }
+        if (kpiChart) { 
+            try { kpiChart.destroy(); } catch(e) { console.warn('Chart destroy error:', e); }
+        }
+        
         const ctx = document.getElementById('kpi-chart');
         if (!ctx) throw new Error("Canvas kpi-chart not found");
+        
         kpiChart = new Chart(ctx, config);
+        console.log('Chart created successfully');
     } catch (err) {
         console.error("Erreur renderChart:", err);
-        wrapper.innerHTML = '<div class="text-red-500 font-bold p-5">Erreur rendu graphique: ' + err.message + '</div>';
+        const wrapper = document.getElementById('chart-wrapper');
+        if (wrapper) {
+            wrapper.innerHTML = '<div class="text-red-500 font-bold p-5 bg-red-50 rounded-xl">Erreur rendu graphique:<br><strong>' + err.message + '</strong><br><small>Consultez la console pour plus de détails.</small></div>';
+        }
     }
 }
 
 // ── Table
 function renderTable(rows) {
-    const tbody = document.getElementById('kpi-table-body');
+    try {
+        const tbody = document.getElementById('kpi-table-body');
+        if (!tbody) {
+            console.warn('Table body element not found');
+            return;
+        }
 
-    if (!rows || rows.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-10 text-center text-gray-400 text-xs italic">
-            Aucune donnée pour les critères sélectionnés.
-        </td></tr>`;
-        return;
-    }
+        if (!rows || rows.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-10 text-center text-gray-400 text-xs italic">
+                Aucune donnée pour les critères sélectionnés.
+            </td></tr>`;
+            console.log('Table: No data to display');
+            return;
+        }
 
-    tbody.innerHTML = rows.map((r, i) => {
-        const dColor   = dispoColor(r.disponibilite);
-        const dispoValue = (r.disponibilite === null || r.disponibilite === undefined || isNaN(r.disponibilite)) ? null : Number(r.disponibilite);
-        const dispoWidth = dispoValue === null ? 0 : Math.min(Math.max(dispoValue, 0), 100);
-        const dispoText = dispoValue === null ? 'N/D' : `${dispoValue.toFixed(1)}%`;
-        const rowClass = i % 2 === 0 ? 'bg-white' : 'bg-gray-50/50';
-        return `
-        <tr class="${rowClass} hover:bg-blue-50/40 transition-colors text-sm">
-            <td class="px-4 py-3 font-medium text-gray-800">${escHtml(r.designation)}</td>
-            <td class="px-4 py-3 text-center text-gray-600">${r.qty}</td>
-            <td class="px-4 py-3 text-center text-gray-600">${r.nb_pannes}</td>
-            <td class="px-4 py-3 text-center font-mono text-amber-700">${fmtValue(r.mttr_hours)}</td>
-            <td class="px-4 py-3 text-center font-mono text-blue-700">${fmtValue(r.mtbf_hours)}</td>
-            <td class="px-4 py-3 text-center font-mono text-gray-600">${fmtValue(r.downtime_hours)}</td>
-            <td class="px-4 py-3 text-center">
-                <div class="inline-flex items-center gap-1">
-                    <div class="w-20 h-2 rounded-full bg-gray-100 overflow-hidden">
-                        <div class="h-full rounded-full" style="width:${dispoWidth}%; background:${dColor.text}"></div>
+        console.log('Rendering table with', rows.length, 'rows');
+
+        tbody.innerHTML = rows.map((r, i) => {
+            try {
+                const dColor   = dispoColor(r.disponibilite);
+                const dispoValue = (r.disponibilite === null || r.disponibilite === undefined || isNaN(r.disponibilite)) ? null : Number(r.disponibilite);
+                const dispoWidth = dispoValue === null ? 0 : Math.min(Math.max(dispoValue, 0), 100);
+                const dispoText = dispoValue === null ? 'N/D' : `${dispoValue.toFixed(1)}%`;
+                const rowClass = i % 2 === 0 ? 'bg-white' : 'bg-gray-50/50';
+                return `
+            <tr class="${rowClass} hover:bg-blue-50/40 transition-colors text-sm">
+                <td class="px-4 py-3 font-medium text-gray-800">${escHtml(r.designation)}</td>
+                <td class="px-4 py-3 text-center text-gray-600">${r.qty}</td>
+                <td class="px-4 py-3 text-center text-gray-600">${r.nb_pannes}</td>
+                <td class="px-4 py-3 text-center font-mono text-amber-700">${fmtValue(r.mttr_hours)}</td>
+                <td class="px-4 py-3 text-center font-mono text-blue-700">${fmtValue(r.mtbf_hours)}</td>
+                <td class="px-4 py-3 text-center font-mono text-gray-600">${fmtValue(r.downtime_hours)}</td>
+                <td class="px-4 py-3 text-center">
+                    <div class="inline-flex items-center gap-1">
+                        <div class="w-20 h-2 rounded-full bg-gray-100 overflow-hidden">
+                            <div class="h-full rounded-full" style="width:${dispoWidth}%; background:${dColor.text}"></div>
+                        </div>
+                        <span class="font-semibold text-sm" style="color:${dColor.text}">${dispoText}</span>
                     </div>
-                    <span class="font-semibold text-sm" style="color:${dColor.text}">${dispoText}</span>
-                </div>
-            </td>
-            <td class="px-4 py-3 text-center">
-                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold" style="background:${dColor.bg}; color:${dColor.text}">${dColor.label}</span>
-            </td>
-        </tr>`;
-    }).join('');
+                </td>
+                <td class="px-4 py-3 text-center">
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold" style="background:${dColor.bg}; color:${dColor.text}">${dColor.label}</span>
+                </td>
+            </tr>`;
+            } catch(e) {
+                console.warn('Error rendering row', i, ':', e);
+                return `<tr><td colspan="7" class="px-4 py-3 text-red-500 text-xs">Erreur lors du rendu de la ligne ${i + 1}</td></tr>`;
+            }
+        }).join('');
+        
+        console.log('Table rendered successfully');
+    } catch(err) {
+        console.error('Error in renderTable:', err);
+        const tbody = document.getElementById('kpi-table-body');
+        if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-3 text-red-500"><strong>Erreur:</strong> ${err.message}</td></tr>`;
+        }
+    }
 }
 
 function escHtml(str) {
@@ -496,30 +612,65 @@ function escHtml(str) {
 
 // ── CSV export
 function exportCsv() {
-    if (!cachedData || cachedData.length === 0) return;
-    const csvNumber = (value) => (value === null || value === undefined || isNaN(value)) ? '' : Number(value).toFixed(2);
-    const unitLabel = getUnitSuffix(currentUnit).trim();
-    const headers = ['Désignation','Nb équips.','Nb pannes',`MTTR (${unitLabel})`,`MTBF (${unitLabel})`,`Arrêt total (${unitLabel})`,'Disponibilité %'];
-    const rows = cachedData.map(r => [
-        '"' + r.designation.replace(/"/g,'""') + '"',
-        r.qty,
-        r.nb_pannes,
-        csvNumber(r.mttr_hours),
-        csvNumber(r.mtbf_hours),
-        csvNumber(r.downtime_hours),
-        csvNumber(r.disponibilite)
-    ].join(','));
-    const csv = [headers.join(','), ...rows].join('\n');
-    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href     = url;
-    a.download = 'kpi_mttr_mtbf_' + new Date().toISOString().slice(0,10) + '.csv';
-    a.click();
-    URL.revokeObjectURL(url);
+    try {
+        if (!cachedData || cachedData.length === 0) {
+            alert('Aucune donnée à exporter');
+            return;
+        }
+        
+        console.log('Exporting CSV with', cachedData.length, 'rows');
+        
+        const csvNumber = (value) => (value === null || value === undefined || isNaN(value)) ? '' : Number(value).toFixed(2);
+        const unitLabel = getUnitSuffix(currentUnit).trim();
+        const headers = ['Désignation','Nb équips.','Nb pannes',`MTTR (${unitLabel})`,`MTBF (${unitLabel})`,`Arrêt total (${unitLabel})`,'Disponibilité %'];
+        
+        const rows = cachedData.map(r => [
+            '"' + (r.designation || '').replace(/"/g,'""') + '"',
+            r.qty || '',
+            r.nb_pannes || '',
+            csvNumber(r.mttr_hours),
+            csvNumber(r.mtbf_hours),
+            csvNumber(r.downtime_hours),
+            csvNumber(r.disponibilite)
+        ].join(','));
+        
+        const csv = [headers.join(','), ...rows].join('\n');
+        const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+        const url  = URL.createObjectURL(blob);
+        const a    = document.createElement('a');
+        a.href     = url;
+        a.download = 'kpi_mttr_mtbf_' + new Date().toISOString().slice(0,10) + '.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        console.log('CSV exported successfully');
+    } catch(err) {
+        console.error('Error in exportCsv:', err);
+        alert('Erreur lors de l\'export: ' + err.message);
+    }
 }
 
 // ── Auto-load on page ready
-document.addEventListener('DOMContentLoaded', () => loadData());
+document.addEventListener('DOMContentLoaded', () => {
+    try {
+        console.log('DOM Content Loaded - Starting KPI load');
+        loadData();
+    } catch(err) {
+        console.error('Error in DOMContentLoaded:', err);
+        const wrapper = document.getElementById('chart-wrapper');
+        if (wrapper) {
+            wrapper.innerHTML = '<div class="text-red-500 font-bold p-5 bg-red-50 rounded-xl">Erreur lors de l\'initialisation de la page.<br>' + err.message + '</div>';
+        }
+    }
+});
+</script>
+
+<!-- Storage Cleanup & Diagnostics -->
+<script src="{{ asset('js/storage-cleanup.js') }}"></script>
+<script>
+    // Diagnostics available in console
+    console.log('%cStorage Diagnostics Available', 'background: #0066cc; color: white; padding: 5px 10px; border-radius: 3px;');
+    console.log('Run in console: window.StorageDiags.fullDiagnostics() OR window.StorageCleanup.fullCleanup()');
 </script>
 @endsection

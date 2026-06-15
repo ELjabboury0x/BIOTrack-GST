@@ -392,11 +392,8 @@ class BiomedDataController extends Controller
     {
         $market->load([
             'company',
-            'equipments' => function ($equipmentsQuery) {
-                $equipmentsQuery->with(['interventions' => function ($interventionsQuery) {
-                    $interventionsQuery->latest('id');
-                }]);
-                $equipmentsQuery->orderBy('inventory_number_current');
+            'importLines' => function ($query) {
+                $query->orderBy('source_row_index')->orderBy('id');
             },
         ]);
 
@@ -407,14 +404,16 @@ class BiomedDataController extends Controller
             'company' => $market->company?->name ?: '-',
             'market_date' => optional($market->market_date)->format('Y-m-d') ?: '-',
             'source_file_name' => $market->source_file_name ?: '-',
-            'equipments' => $market->equipments->map(function (Equipment $equipment) {
+            'import_lines' => $market->importLines->map(function (MarketEquipmentImportLine $line) {
                 return [
-                    'id' => $equipment->id,
-                    'inventory_number' => $equipment->inventory_number_current ?: '-',
-                    'designation' => $equipment->designation ?: '-',
-                    'serial_number' => $equipment->serial_number ?: '-',
-                    'intervention_code' => $equipment->interventions->first()?->code ?: '-',
-                    'service_name' => $equipment->service_name ?: '-',
+                    'id' => $line->id,
+                    'source_row_index' => $line->source_row_index ?: '-',
+                    'market_object' => $line->market_object ?: '-',
+                    'article' => $line->article ?: '-',
+                    'designation' => $line->designation ?: '-',
+                    'quantity' => $line->quantity !== null ? $line->quantity : '-',
+                    'delivery_status' => $line->delivery_status ?: '-',
+                    'delivery_date' => optional($line->delivery_date)->format('Y-m-d') ?: '-',
                 ];
             })->values()->all(),
         ];

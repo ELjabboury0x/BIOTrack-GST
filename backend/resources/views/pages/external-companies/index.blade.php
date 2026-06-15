@@ -54,17 +54,41 @@
             <tbody>
                 @forelse(($companiesData ?? collect()) as $company)
                     <tr class="border-b border-gray-200">
-                        <td class="px-3 py-2">{{ $company->name }}</td>
-                        <td class="px-3 py-2">{{ (int) ($company->linked_equipments_count ?? 0) }}</td>
+                        <td class="px-3 py-2">
+                            @if($company->id === null)
+                                <a href="{{ route('equipements', ['company_id' => -1]) }}" class="text-blue-600 hover:text-blue-800 hover:underline">
+                                    {{ $company->name }}
+                                </a>
+                            @else
+                                <a href="{{ route('equipements', ['company_id' => $company->id]) }}" class="text-blue-600 hover:text-blue-800 hover:underline">
+                                    {{ $company->name }}
+                                </a>
+                            @endif
+                        </td>
+                        <td class="px-3 py-2">
+                            @if($company->id === null)
+                                <a href="{{ route('equipements', ['company_id' => -1]) }}" class="text-blue-600 hover:text-blue-800 hover:underline">
+                                    {{ (int) ($company->linked_equipments_count ?? 0) }}
+                                </a>
+                            @else
+                                <a href="{{ route('equipements', ['company_id' => $company->id]) }}" class="text-blue-600 hover:text-blue-800 hover:underline">
+                                    {{ (int) ($company->linked_equipments_count ?? 0) }}
+                                </a>
+                            @endif
+                        </td>
                         <td class="px-3 py-2">{{ optional($company->created_at)->format('Y-m-d H:i') ?: '-' }}</td>
                         <td class="px-3 py-2">
-                            <form method="POST" action="{{ route('external-companies.destroy', $company) }}">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-red-200 text-red-700 rounded-lg text-xs hover:bg-red-50">
-                                    <i class="fas fa-trash mr-1.5"></i>Supprimer
-                                </button>
-                            </form>
+                            @if($company->id !== null)
+                                <form method="POST" action="{{ route('external-companies.destroy', $company) }}">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-red-200 text-red-700 rounded-lg text-xs hover:bg-red-50">
+                                        <i class="fas fa-trash mr-1.5"></i>Supprimer
+                                    </button>
+                                </form>
+                            @else
+                                <span class="text-gray-400 text-xs">Système</span>
+                            @endif
                         </td>
                     </tr>
                 @empty
