@@ -1,7 +1,7 @@
 # 🏥 GST GMAO — Système de Gestion de Maintenance Assistée par Ordinateur
 
 > **Projet de Fin d'Études** | GST Tanger | 2026  
-> Mise à jour : 2026-05-25
+> Mise à jour : 2026-06-15
 
 ---
 
